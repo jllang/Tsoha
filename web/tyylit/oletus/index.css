@@ -1,0 +1,112 @@
+
+/*
+    Created on : 21.5.2014, 20:23:22
+    Author     : John Lång <jllang@cs.helsinki.fi>
+*/
+
+body {
+    margin:     0px;
+    padding:    0px;
+    background: #8CA949;
+    /*background: #cce771;  Old browsers */
+    background: -moz-linear-gradient(top,  #cce771 0%, #acc85e 47%, #8ca949 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#cce771), color-stop(47%,#acc85e), color-stop(100%,#8ca949)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #cce771 0%,#acc85e 47%,#8ca949 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #cce771 0%,#acc85e 47%,#8ca949 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #cce771 0%,#acc85e 47%,#8ca949 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #cce771 0%,#acc85e 47%,#8ca949 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cce771', endColorstr='#8ca949',GradientType=0 ); /* IE6-9 */
+    background-attachment: fixed;
+    color:      #0F0B1A;
+}
+
+a:link {
+    color:      #322454;
+}
+
+a:hover {
+    color:      #8CA949;
+}
+
+a:active {
+    color:      #D3FF6E;
+}
+
+a:visited {
+    color:      #261B40;
+}
+
+#ylaosa {
+    position:   fixed;
+    width:      100%;
+    height:     10em;
+    padding:    1em;
+    background: #6649a9; /* Old browsers */
+    background: -moz-linear-gradient(top, #6649a9 0%, #7a5ec8 53%, #8c71e7 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6649a9), color-stop(53%,#7a5ec8), color-stop(100%,#8c71e7)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #6649a9 0%,#7a5ec8 53%,#8c71e7 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #6649a9 0%,#7a5ec8 53%,#8c71e7 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #6649a9 0%,#7a5ec8 53%,#8c71e7 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #6649a9 0%,#7a5ec8 53%,#8c71e7 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6649a9', endColorstr='#8c71e7',GradientType=0 ); /* IE6-9 */
+    z-index:    1;
+    text-align: center;
+    /*box-shadow: 0px 8px 4px #888888;*/
+}
+
+#paaotsikko {
+    font-size: 3em;
+}
+
+#alaosa {
+    width:      100%;
+    position:   relative;
+    overflow-x: hidden;
+    top:        11em;
+    padding:    1em;
+    text-align: center;
+}
+
+.sisalto {
+    max-width:  800px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 8px 8px 4px #8CA949;
+}
+
+table {
+    width:      100%;
+    margin-left: auto;
+    margin-right: auto;
+    border:     0;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 0.5em;
+}
+
+th {
+    background: #8B70E5;
+    padding: 0.5em;
+}
+
+.parillinen {
+    background-color: #BCD767;
+    /*background-color: #5ECCB2;*/
+}
+
+.pariton {
+    background-color: #AECC5E;
+    /*background-color: #67D7B9;*/
+}
+
+td.avatar {
+    width:      256px;
+    height:     256px;
+}
+
+td.viesti {
+    text-align:     left;
+    vertical-align: top;
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Pikaohje foorumin käyttöönottajalle:
+Foorumin asennuksen yhteydessä tulee korvata merkkijonot "käyttäjätunnus"
+tietokannan käyttäjätunnuksella, "salasana" tietokannan salasanalla sekä korvata
+url-attribuutin arvo tietokantayhteyden muodostamiseen käytettävällä URL:llä.
+(Korvatut merkkijonot tulee aloittaa ja lopettaa merkillä ".). Lopuksi tämä
+tiedosto tulee nimetä "content.xml" (ilman lainausmerkkejä).-->
+<Context antiJARLocking="true" path="/Tsoha">
+    <Resource name="jdbc/tietokanta" auth="Container"
+        type="javax.sql.DataSource" removeAbandoned="true"
+        removeAbandonedTimeout="30" maxActive="100"
+        maxIdle="30" maxWait="10000" username="käyttäjätunnus"
+        password="salasana"
+        driverClassName="org.postgresql.Driver"
+        url="jdbc:postgresql://localhost/tietokanta" />
+</Context>
