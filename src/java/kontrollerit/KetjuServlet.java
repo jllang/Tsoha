@@ -2,6 +2,7 @@
 package kontrollerit;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -25,12 +26,16 @@ public final class KetjuServlet extends HttpServlet {
                     + (i % 2 == 0 ? "parillinen" : "pariton") + " sisalto\">");
             out.println("               <table>");
             out.println("                   <tr>");
-            out.println("                       <th>&lt;Kirjoittaja&gt;</th>");
+            out.println("                       <th>&lt;<a href=\"kayttaja\">"
+                    + "Nimimerkki</a>&gt;</th>");
+//            out.println("                       <th>&lt;Alue 1&gt;[, &lt;Alue "
+//                    + "2&gt;, &lt;Alue 3&gt;, ..., &lt;Alue n&gt;]</th>");
             out.println("                       <th></th>");
             out.println("                   </tr>");
             out.println("                   <tr>");
             out.println("                       <td class=\"avatar\">"
-                    + "<img src=\"data/paikanpitaja.png\" alt=\"Avatar\"></td>");
+                    + "<a href=\"kayttaja\"><img src=\"data/paikanpitaja.png\" "
+                    + "alt=\"Avatar\"></a></td>");
             out.println("                       <td class=\"viesti\">"
                     + lista.get(i) + "</td>");
             out.println("                   </tr>");

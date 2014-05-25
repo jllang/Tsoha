@@ -6,7 +6,7 @@ Tämän työn aiheena on web-pohjainen keskustelufoorumi.
 Linkit
 ------
 * [Dokumentaatio](https://github.com/jllang/Tsoha/tree/master/doc "Dokumentaatio")
-* [Esimerkkifoorumi](http://t-jllang.users.cs.helsinki.fi/tsoha/ "Esimerkkifoorumi")
-* [ConnectionTest](http://t-jllang.users.cs.helsinki.fi/connection-test/ "ConnectionTest")
+* [Esimerkkifoorumi](http://91.158.178.74:8080/tsoha/etusivu "Esimerkkifoorumi")
+* [ConnectionTest](http://91.158.178.74:8080/connection-test/ "ConnectionTest")
 
 =======

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author John Lång <jllang@cs.helsinki.fi>
  */
-@WebServlet(name = "IndexServlet", urlPatterns = {"/etusivu", "/esimketju"})
+@WebServlet(name = "IndexServlet", urlPatterns = {"/etusivu", "/esimketju", "/kayttaja"})
 public final class IndexServlet extends HttpServlet {
 
     private static final ArrayList<String> DEMOALUEET, DEMOKETJUT, DEMOVIESTIT;
@@ -68,15 +68,24 @@ public final class IndexServlet extends HttpServlet {
                 + "</a>");
         out.println("               <a href=\"kirjautuminen\">"
                 + "Rekisteröidy / kirjaudu</a>");
+        out.println("               <a href=\"kayttaja\">Oma sivu</a>");
         out.println("           </p>");
         out.println("       </div>");
         out.println("       <div id=\"alaosa\">");
-        if (pyydettySivu.equals("/esimketju")) {
-            out.println("           <h1>Esimerkkikeskustelu</h1>");
-            KetjuServlet.kasitteleKetju(out, DEMOVIESTIT);
-        } else {
-            out.println("           <h1>Etusivu</h1>");
-            ListausServlet.kasitteleListaus(out, DEMOKETJUT);
+        switch (pyydettySivu) {
+            case "/esimketju":
+                out.println("           <h1>&lt;Ketjun aihe&gt;</h1>");
+                out.println("           <h2>&lt;Alue 1&gt;[, &lt;Alue 2&gt;, "
+                        + "&lt;Alue 3&gt;, ... , &lt;Alue n&gt;]</h2>");
+                KetjuServlet.kasitteleKetju(out, DEMOVIESTIT);
+                break;
+            case "/kayttaja":
+                out.println("            <h1>&lt;Nimimerkki&gt;:n profiili</h1>");
+                ProfiiliServlet.demoKayttaja(out);
+                break;
+            default:
+                out.println("           <h1>Etusivu</h1>");
+                ListausServlet.kasitteleListaus(out, DEMOKETJUT);
         }
         out.println("       </div>");
         out.println("   </body>");
