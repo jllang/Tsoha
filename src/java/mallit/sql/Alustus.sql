@@ -27,6 +27,8 @@ create table alueet (
 create table ketjut (
     tunnus          integer         primary key,
     aihe            varchar(128)    not null,
+    siirretty       date,
+    moderoitu       date,
     lukittu         date,
     poistettu       date
 );

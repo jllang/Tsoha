@@ -9,7 +9,7 @@ package mallit.rajapinnat;
  * maalijoukon ilmentymään).
  * @author John Lång <jllang@cs.helsinki.fi>
  */
-@FunctionalInterface
+//@FunctionalInterface
 public interface Funktio<X, Y> {
 
     /**

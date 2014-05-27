@@ -6,19 +6,20 @@
 
 package mallit.yksilotyypit;
 
-import java.util.Date;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mallit.rajapinnat.Yksilotyyppi;
 import mallit.tyypit.Kayttajataso;
+import static mallit.yksilotyypit.Alue.luo;
 
 /**
  *
  * @author John Lång <jllang@cs.helsinki.fi>
  */
 public final class Jasen implements Yksilotyyppi {
-
-    private static final String     TAULUN_NIMI = "jasenet";
-    private static final String[]   AVAINATTRIBUUTIT = {"kayttajatunnus"};
-    private final String[]          avainarvot;
 
     private final String    kayttajatunnus;
     private final Date      rekisteroity;
@@ -33,7 +34,6 @@ public final class Jasen implements Yksilotyyppi {
             final Kayttajataso taso, final String nimimerkki,
             final String avatar, final String kuvaus) {
         this.kayttajatunnus     = kayttajatunnus;
-        this.avainarvot         = new String[]{"'" + kayttajatunnus + "'"};
         this.rekisteroity       = rekisteroity;
         this.salasanatiiviste   = salasanatiiviste;
         this.sahkopostiosoite   = sahkopostiosoite;
@@ -54,23 +54,41 @@ public final class Jasen implements Yksilotyyppi {
     public static Jasen luo(final String kayttajatunnus,
             final String salasanatiiviste,
             final String sahkopostiosoite) {
-        return luo(kayttajatunnus, new Date(), salasanatiiviste,
-                sahkopostiosoite, Kayttajataso.TAVALLINEN, null, null, null);
+        return luo(kayttajatunnus, new Date(System.currentTimeMillis()),
+                salasanatiiviste, sahkopostiosoite, Kayttajataso.TAVALLINEN,
+                null, null, null);
+    }
+    
+    public static Jasen luo(final ResultSet rs) {
+        final String kayttajatunnus, salasanatiiviste, sahkoposti, nimimerkki, avatar,
+                kuvaus;
+        final Date rekisteroity;
+        final Kayttajataso taso;
+        try {
+            kayttajatunnus      = rs.getString("tunnus");
+            rekisteroity        = rs.getDate("rekisteroity");
+            salasanatiiviste    = rs.getString("tiiviste");
+            sahkoposti          = rs.getString("sposti");
+            taso                = rs.getObject("taso", Kayttajataso.class);
+            nimimerkki          = rs.getString("nimimerkki");
+            avatar              = rs.getString("avatar");
+            kuvaus              = rs.getString("kuvaus");
+            return luo(kayttajatunnus, rekisteroity, salasanatiiviste, sahkoposti,
+                    taso, nimimerkki, avatar, kuvaus);
+        } catch (SQLException e) {
+            Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        }
     }
 
     @Override
-    public String taulunNimi() {
-        return TAULUN_NIMI;
+    public String annaLisayskysely() {
+        return "insert into jasenet values " + toString();
     }
 
     @Override
-    public String[] avainattribuutit() {
-        return AVAINATTRIBUUTIT;
-    }
-
-    @Override
-    public String[] avainarvot() {
-        return avainarvot;
+    public String annaHakukysely(String... avain) {
+        return "select * from jasenet where kayttajatunnus = '" + avain[0] + "'";
     }
 
     @Override

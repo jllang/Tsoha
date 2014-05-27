@@ -1,7 +1,8 @@
 
 package mallit.yksilotyypit;
 
-import java.util.Date;
+import java.sql.Date;
+import java.sql.ResultSet;
 import mallit.rajapinnat.Yksilotyyppi;
 
 /**
@@ -9,10 +10,6 @@ import mallit.rajapinnat.Yksilotyyppi;
  * @author John Lång <jllang@cs.helsinki.fi>
  */
 public final class Viesti implements Yksilotyyppi {
-
-    private static final String     TAULUN_NIMI = "viestit";
-    private static final String[]   AVAINATTRIBUUTIT = {"ketju", "kirjoitettu"};
-    private final String[]          avainarvot;
 
     private Ketju       ketju;
     private final Jasen kirjoittaja;
@@ -24,9 +21,7 @@ public final class Viesti implements Yksilotyyppi {
             final Date kirjoitettu, final Date muokattu, final Date moderoitu,
             final Date poistettu, final String sisalto) {
         this.ketju          = ketju;
-        final String ketjunTunnus = "" + ketju.annaTunnus();
         this.kirjoitettu    = kirjoitettu;
-        this.avainarvot     = new String[]{ketjunTunnus,kirjoitettu.toString()};
         this.kirjoittaja    = kirjoittaja;
         this.muokattu       = muokattu;
         this.moderoitu      = moderoitu;
@@ -43,28 +38,46 @@ public final class Viesti implements Yksilotyyppi {
 
     public static Viesti luo(final Ketju ketju, final Jasen kirjoittaja,
             final String sisalto) {
-        return luo(ketju, kirjoittaja, new Date(), null, null, null, sisalto);
+        return luo(ketju, kirjoittaja, new Date(System.currentTimeMillis()),
+                null, null, null, sisalto);
+    }
+    
+    public static Viesti luo(final ResultSet rs) {
+        final Ketju ketju;
+        final Jasen kirjoittaja;
+        final Date kirjoitettu, muokattu, moderoitu, poistettu;
+        final String sisalto;
+        
+        
+        return null;
     }
 
     @Override
-    public String taulunNimi() {
-        return TAULUN_NIMI;
+    public String annaLisayskysely() {
+        return "insert into viestit values " + toString();
     }
 
     @Override
-    public String[] avainattribuutit() {
-        return AVAINATTRIBUUTIT;
-    }
-
-    @Override
-    public String[] avainarvot() {
-        return avainarvot;
+    public String annaHakukysely(String... avain) {
+        return "select * from viestit where ketju_id = " + avain[0] + " and "
+                + "kirjoitettu = '" + avain[1] + "'";
     }
 
     @Override
     public String toString() {
         StringBuilder mjr = new StringBuilder();
         mjr.append('(');
+        mjr.append(ketju.annaTunnus());
+        mjr.append(", '");
+        mjr.append(kirjoitettu);
+        mjr.append("', '");
+        mjr.append(kirjoittaja);
+        mjr.append("', ");
+        mjr.append(muokattu == null ? "NULL, " : "'" + muokattu + "', ");
+        mjr.append(moderoitu == null ? "NULL, " : "'" + moderoitu + "', ");
+        mjr.append(poistettu == null ? "NULL, '" : "'" + poistettu + "', '");
+        mjr.append(sisalto);
+        mjr.append("'");
         mjr.append(')');
         return mjr.toString();
     }

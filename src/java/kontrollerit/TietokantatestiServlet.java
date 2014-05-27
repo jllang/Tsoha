@@ -18,7 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import mallit.Tietokanta;
+import mallit.TietokantaDAO;
 
 /**
  *
@@ -30,7 +30,7 @@ public final class TietokantatestiServlet extends HttpServlet {
 
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-        Connection yhteys = Tietokanta.annaYhteys(); //Haetaan tietokantaluokalta yhteysolio
+        Connection yhteys = TietokantaDAO.annaYhteys(); //Haetaan tietokantaluokalta yhteysolio
         PreparedStatement kysely = null;
         ResultSet tulokset = null;
         PrintWriter out = response.getWriter();

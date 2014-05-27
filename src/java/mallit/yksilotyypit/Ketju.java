@@ -1,7 +1,11 @@
 
 package mallit.yksilotyypit;
 
-import java.util.Date;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mallit.rajapinnat.Yksilotyyppi;
 
 /**
@@ -9,11 +13,7 @@ import mallit.rajapinnat.Yksilotyyppi;
  * @author John Lång <jllang@cs.helsinki.fi>
  */
 public final class Ketju implements Yksilotyyppi {
-
-    private static final String     TAULUN_NIMI = "ketjut";
-    private static final String[]   AVAINATTRIBUUTIT = {"tunnus"};
-    private final String[]          avainarvot;
-
+    
     private final int   tunnus;
     private String      aihe;
     private Date        siirretty, moderoitu, lukittu, poistettu;
@@ -21,7 +21,6 @@ public final class Ketju implements Yksilotyyppi {
     private Ketju(final int tunnus, final String aihe, final Date siirretty,
             final Date moderoitu, final Date lukittu, final Date poistettu) {
         this.tunnus     = tunnus;
-        this.avainarvot = new String[]{"" + tunnus};
         this.aihe       = aihe;
         this.siirretty  = siirretty;
         this.moderoitu  = moderoitu;
@@ -36,24 +35,38 @@ public final class Ketju implements Yksilotyyppi {
     }
 
     public static Ketju luo(final int tunnus, final String aihe) {
-        return luo(tunnus, aihe, new Date(), null, null, null);
+        return luo(tunnus, aihe, new Date(System.currentTimeMillis()), null,
+                null, null);
+    }
+    
+    public static Ketju luo(final ResultSet rs) {
+        final int       tunnus;
+        final String    aihe;
+        final Date      siirretty, moderoitu, lukittu, poistettu;
+        try {
+            tunnus      = rs.getInt("tunnus");
+            aihe        = rs.getString("aihe");
+            siirretty   = rs.getDate("siirretty");
+            moderoitu   = rs.getDate("moderoitu");
+            lukittu     = rs.getDate("lukittu");
+            poistettu   = rs.getDate("poistettu");
+            return luo(tunnus, aihe, siirretty, moderoitu, lukittu, poistettu);
+        } catch (SQLException e) {
+            Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        }
     }
 
     @Override
-    public String taulunNimi() {
-        return "ketjut";
+    public String annaLisayskysely() {
+        return "insert into ketjut values " + toString();
     }
 
     @Override
-    public String[] avainattribuutit() {
-        return AVAINATTRIBUUTIT;
+    public String annaHakukysely(String... avain) {
+        return "select * from ketjtut where tunnus = " + avain[0];
     }
-
-    @Override
-    public String[] avainarvot() {
-        return avainarvot;
-    }
-
+    
     @Override
     public String toString() {
         StringBuilder mjr = new StringBuilder();

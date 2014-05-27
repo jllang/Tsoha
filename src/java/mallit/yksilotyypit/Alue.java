@@ -2,6 +2,10 @@
 package mallit.yksilotyypit;
 
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mallit.rajapinnat.Yksilotyyppi;
 
 /**
@@ -11,44 +15,49 @@ import mallit.rajapinnat.Yksilotyyppi;
  */
 public final class Alue implements Yksilotyyppi {
 
-    private static final String     TAULUN_NIMI = "alueet";
-    private static final String[]   AVAINATTRIBUUTIT = {"nimi"};
-    private final String[]          avainarvot;
-
     private String  nimi, kuvaus;
     private Date    lukittu, poistettu;
 
     private Alue(final String nimi, final String kuvaus, final Date lukittu,
             final Date poistettu) {
         this.nimi       = nimi;
-        this.avainarvot = new String[]{nimi};
         this.kuvaus     = kuvaus;
         this.lukittu    = lukittu;
         this.poistettu  = poistettu;
     }
 
-    public Alue luo(final String nimi, final String kuvaus, final Date lukittu,
+    public static Alue luo(final String nimi, final String kuvaus, final Date lukittu,
             final Date poistettu) {
         return new Alue(nimi, kuvaus, lukittu, poistettu);
     }
 
-    public Alue luo(final String nimi, final String kuvaus) {
+    public static Alue luo(final String nimi, final String kuvaus) {
         return luo(nimi, kuvaus, null, null);
     }
-
-    @Override
-    public String taulunNimi() {
-        return TAULUN_NIMI;
+    
+    public static Alue luo(final ResultSet rs) {
+        final String nimi, kuvaus;
+        final Date lukittu, poistettu;
+        try {
+            nimi        = rs.getString("nimi");
+            kuvaus      = rs.getString("kuvaus");
+            lukittu     = rs.getDate("lukittu");
+            poistettu   = rs.getDate("poistettu");
+            return luo(nimi, kuvaus, lukittu, poistettu);
+        } catch (SQLException e) {
+            Logger.getLogger(Alue.class.getName()).log(Level.SEVERE, null, e);
+            return null;
+        }
     }
 
     @Override
-    public String[] avainattribuutit() {
-        return AVAINATTRIBUUTIT;
+    public String annaLisayskysely() {
+        return "insert into alueet values " + toString(); 
     }
 
     @Override
-    public String[] avainarvot() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String annaHakukysely(String... avain) {
+        return "select * from alueet where nimi = '" + avain[0] + "'";
     }
 
     @Override

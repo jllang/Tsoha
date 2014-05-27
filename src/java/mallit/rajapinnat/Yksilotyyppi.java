@@ -1,7 +1,7 @@
 
 package mallit.rajapinnat;
 
-import java.sql.SQLException;
+import java.sql.ResultSet;
 
 /**
  * Yksilötyyppi mallintaa yhtä järjestelmän varsinaista tietokohdetta.
@@ -16,30 +16,21 @@ import java.sql.SQLException;
 public interface Yksilotyyppi {
 
     /**
-     * Palauttaa yksilötyyppiä vastaavan relaation nimen.
-     *
-     * @return
+     * Palauttaa SQL insert-kyselyn, jolla olion tila viedään
+     * tietokantaan.
+     * 
+     * @return Merkkijonomuotoinen SQL-kysely.
      */
-    String taulunNimi();
-
+    String annaLisayskysely();
+    
     /**
-     * Palauttaa yksilötyypin avaimen attribuuttien nimen.
-     *
-     * @return Attribuutin nimi merkkijonotaulukkona.
-     * @see Yksilotyyppi#avainarvot()
+     * Palauttaa SQL select-kyselyn, jolla haetaan annettua avainta
+     * vastaava monikko tietokannasta.
+     * 
+     * @param avain Relaation avain SQL-literaaleina.
+     * @return Merkkijonomuotoinen SQL-kysely.
      */
-    String[] avainattribuutit();
-
-    /**
-     * Palauttaa yksilötyypin avaimen (eli minimaalisen yliavaimen)
-     * attribuuttien arvot.
-     *
-     * @return Avaimen arvo merkkijonotaulukkona. Arvojen tulee olla kelvollisia
-     * SQL-tietotyyppien literaaleja. Lisäksi niiden tulee olla avainten nimiä
-     * vastaavassa järjestyksessä.
-     * @see Yksilotyyppi#avainattribuutit()
-     */
-    String[] avainarvot();
+    String annaHakukysely(final String... avain);
 
     /**
      * Palauttaa olion tilaa kuvaavan merkkijonomuotoisen monikon. <em>n</em>
@@ -52,4 +43,5 @@ public interface Yksilotyyppi {
      */
     @Override
     String toString();
+    
 }

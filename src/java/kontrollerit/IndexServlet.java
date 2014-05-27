@@ -61,16 +61,6 @@ public final class IndexServlet extends HttpServlet {
                 + " href=\"tyylit/oletus/index.css\">");
         out.println("   </head>");
         out.println("   <body>");
-        out.println("       <div id=\"ylaosa\">");
-        out.println("           <h1 id=\"paaotsikko\">Esimerkkifoorumi</h1>");
-        out.println("           <p>");
-        out.println("               <a href=\"etusivu\">Etusivu"
-                + "</a>");
-        out.println("               <a href=\"kirjautuminen\">"
-                + "Rekisteröidy / kirjaudu</a>");
-        out.println("               <a href=\"kayttaja\">Oma sivu</a>");
-        out.println("           </p>");
-        out.println("       </div>");
         out.println("       <div id=\"alaosa\">");
         switch (pyydettySivu) {
             case "/esimketju":
