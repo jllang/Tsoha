@@ -39,11 +39,11 @@ create table ketjujen_sijainnit (
 
 create table viestit (
     ketju_id        integer         references ketjut,
-    numero          integer,
+    kirjoitettu     date,
     kirjoittaja     varchar(64)     references jasenet not null,
-    kirjoitettu     date            not null,
     muokattu        date,
     moderoitu       date,
     poistettu       date,
-    primary key (ketju_id, numero)
+    sisalto         varchar(4096),
+    primary key (ketju_id, kirjoitettu)
 );
