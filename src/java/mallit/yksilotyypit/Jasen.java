@@ -6,36 +6,56 @@
 
 package mallit.yksilotyypit;
 
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mallit.rajapinnat.Yksilotyyppi;
+import java.util.regex.Pattern;
+import mallit.TietokantaDAO;
 import mallit.tyypit.Kayttajataso;
-import static mallit.yksilotyypit.Alue.luo;
 
 /**
  *
  * @author John Lång <jllang@cs.helsinki.fi>
  */
-public final class Jasen implements Yksilotyyppi {
+public final class Jasen extends Yksilotyyppi {
+
+//    public static final Jasen OLIOKUMPPANI;
+    private static final String     LISAYSPOHJA, HAKUPOHJA;
+    private static final Predicate<String> KELVOLLINEN_SP;
 
     private final String    kayttajatunnus;
     private final Date      rekisteroity;
-    private String          salasanatiiviste, sahkopostiosoite;
+    private String          salasanatiiviste, suola, sahkopostiosoite;
     private Kayttajataso    taso;
 
     // Vapaaehtoiaset kentät:
     private String          nimimerkki, avatar, kuvaus;
 
-    private Jasen(final String kayttajatunnus, final Date rekisteroity,
-            final String salasanatiiviste, final String sahkopostiosoite,
+    static {
+//        OLIOKUMPPANI = luo("Oliokumppani", null, null);
+        LISAYSPOHJA = "insert into jasenet values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        HAKUPOHJA   = "select * from jasenet where tunnus = ?";
+        KELVOLLINEN_SP = Pattern.compile(
+                "^([a-z0-9]|([a-z0-9][._-][a-z0-9]))+"
+                        + "@([a-z0-9]|([a-z0-9][._-][a-z0-9]))+\\.[a-z]{2,4}$",
+                Pattern.CASE_INSENSITIVE).asPredicate();
+    }
+
+    private Jasen(final boolean tuore, final String kayttajatunnus,
+            final Date rekisteroity, final String salasanatiiviste,
+            final String suola, final String sahkopostiosoite,
             final Kayttajataso taso, final String nimimerkki,
             final String avatar, final String kuvaus) {
+        super(tuore);
         this.kayttajatunnus     = kayttajatunnus;
         this.rekisteroity       = rekisteroity;
         this.salasanatiiviste   = salasanatiiviste;
+        this.suola              = suola;
         this.sahkopostiosoite   = sahkopostiosoite;
         this.taso               = taso;
         this.nimimerkki         = nimimerkki;
@@ -43,75 +63,149 @@ public final class Jasen implements Yksilotyyppi {
         this.kuvaus             = kuvaus;
     }
 
-    public static Jasen luo(final String kayttajatunnus, final Date rekisteroity,
-            final String salasanatiiviste, final String sahkopostiosoite,
-            final Kayttajataso taso, final String nimimerkki,
-            final String avatar, final String kuvaus) {
-        return new Jasen(kayttajatunnus, rekisteroity, salasanatiiviste,
-                sahkopostiosoite, taso, nimimerkki, avatar, kuvaus);
-    }
+//    private static Jasen luo(final boolean tallennettu, final String kayttajatunnus,
+//            final Date rekisteroity, final String salasanatiiviste,
+//            final String sahkopostiosoite, final Kayttajataso taso,
+//            final String nimimerkki, final String avatar, final String kuvaus) {
+//        return new Jasen(tallennettu, kayttajatunnus, rekisteroity,
+//                salasanatiiviste, sahkopostiosoite, taso, nimimerkki, avatar,
+//                kuvaus);
+//    }
 
     public static Jasen luo(final String kayttajatunnus,
-            final String salasanatiiviste,
+            final String salasanatiiviste, final String suola,
             final String sahkopostiosoite) {
-        return luo(kayttajatunnus, new Date(System.currentTimeMillis()),
-                salasanatiiviste, sahkopostiosoite, Kayttajataso.TAVALLINEN,
-                null, null, null);
+        if (kayttajatunnus == null || kayttajatunnus.length() == 0
+                || kayttajatunnus.length() > 64) {
+            throw new IllegalArgumentException("Käyttäjätunnuksen tulee olla "
+                    + "epätyhjä korkeintaan 64 merkin jono.");
+        }
+        if (sahkopostiosoite == null || sahkopostiosoite.length() == 0
+                || sahkopostiosoite.length() > 128
+                || !KELVOLLINEN_SP.test(sahkopostiosoite)) {
+            throw new IllegalArgumentException("Sähköpostiosoitteen tulee olla"
+                    + "epätyhjä --ja järkevä-- korkeintaan 128 merkin jono.");
+        }
+        return new Jasen(true, kayttajatunnus,
+                new Date(System.currentTimeMillis()), salasanatiiviste, suola,
+                sahkopostiosoite, Kayttajataso.TAVALLINEN, null, null, null);
     }
-    
+
+    /**
+     * Luo Jasen-olion annetusta ResultSet-oliosta, jonka kursori on asetettu
+     * halutun monikon kohdalle. <b>Huom.</b> Tämä metodi ei kutsu ResultSet:n
+     * metodia <tt>close()</tt>.
+     *
+     * @param rs Tietokantakyselyn palauttama ResultSet-olio.
+     * @return Uusi Jasen.
+     */
     public static Jasen luo(final ResultSet rs) {
-        final String kayttajatunnus, salasanatiiviste, sahkoposti, nimimerkki, avatar,
-                kuvaus;
+        final String kayttajatunnus, salasanatiiviste, suola, sahkoposti,
+                nimimerkki, avatar, kuvaus;
         final Date rekisteroity;
         final Kayttajataso taso;
         try {
-            kayttajatunnus      = rs.getString("tunnus");
-            rekisteroity        = rs.getDate("rekisteroity");
-            salasanatiiviste    = rs.getString("tiiviste");
-            sahkoposti          = rs.getString("sposti");
-            taso                = rs.getObject("taso", Kayttajataso.class);
-            nimimerkki          = rs.getString("nimimerkki");
-            avatar              = rs.getString("avatar");
-            kuvaus              = rs.getString("kuvaus");
-            return luo(kayttajatunnus, rekisteroity, salasanatiiviste, sahkoposti,
-                    taso, nimimerkki, avatar, kuvaus);
+            kayttajatunnus      = rs.getString(1);
+            rekisteroity        = rs.getDate(2);
+            salasanatiiviste    = rs.getString(3);
+            suola               = rs.getString(4);
+            sahkoposti          = rs.getString(5);
+            taso                = Kayttajataso.valueOf(rs.getString(6));
+            nimimerkki          = rs.getString(7);
+            avatar              = rs.getString(8);
+            kuvaus              = rs.getString(9);
+            return new Jasen(false, kayttajatunnus, rekisteroity,
+                    salasanatiiviste, suola, sahkoposti, taso, nimimerkki,
+                    avatar, kuvaus);
         } catch (SQLException e) {
             Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }
     }
 
-    @Override
-    public String annaLisayskysely() {
-        return "insert into jasenet values " + toString();
+//    public static Jasen hae(final String nimi) {
+//        final ResultSet vastaus = TietokantaDAO.hae(
+//                OLIOKUMPPANI.annaHakukysely(nimi));
+//        final Jasen jasen;
+//        try {
+//            vastaus.next();
+//            jasen = luo(vastaus);
+//            vastaus.close();
+//        } catch (SQLException e) {
+//            Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
+//            return null;
+//        }
+//        return jasen;
+//    }
+
+//    @Override
+//    public void tallenna() {
+//        if (this != OLIOKUMPPANI) {
+//            TietokantaDAO.paivita(annaLisayskysely());
+//        } else {
+//            System.err.println("Oliokumppani yritettiin viedä tietokantaan!");
+//        }
+//    }
+
+//    @Override
+    public static PreparedStatement hakukysely(final Connection yhteys,
+            final String avain) throws SQLException {
+        final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA);
+        kysely.setString(1, avain);
+        return kysely;
     }
 
     @Override
-    public String annaHakukysely(String... avain) {
-        return "select * from jasenet where kayttajatunnus = '" + avain[0] + "'";
+    public PreparedStatement lisayskysely(final Connection yhteys)
+            throws SQLException {
+        final PreparedStatement kysely = yhteys.prepareStatement(LISAYSPOHJA);
+        kysely.setString(1, kayttajatunnus);
+        kysely.setDate(  2, rekisteroity);
+        kysely.setString(3, salasanatiiviste);
+        kysely.setString(4, suola);
+        kysely.setString(5, sahkopostiosoite);
+        kysely.setString(6, taso.toString());
+        kysely.setString(7, nimimerkki);
+        kysely.setString(8, avatar);
+        kysely.setString(9, kuvaus);
+        return kysely;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder mjr = new StringBuilder();
-        mjr.append("('");
-        mjr.append(kayttajatunnus);
-        mjr.append("', '");
-        mjr.append(rekisteroity);
-        mjr.append("', '");
-        mjr.append(salasanatiiviste);
-        mjr.append("', '");
-        mjr.append(sahkopostiosoite);
-        mjr.append("', '");
-        mjr.append(taso);
-        mjr.append("', ");
-        mjr.append(nimimerkki == null ?
-                "NULL, " : "'" + nimimerkki + "', ");
-        mjr.append(avatar == null ?
-                "NULL, " : "'" + avatar + "', ");
-        mjr.append(kuvaus == null ?
-                "NULL)" : "'" + kuvaus + ")");
-        return mjr.toString();
+    public boolean onPorttikiellossa() throws SQLException {
+        // TODO: Fiksaa tämä käyttämään kysymysmerkkiä:
+        final ResultSet vastaus = TietokantaDAO.hae("select asetettu, kesto"
+                + " from porttikiellot where kohde = '" + kayttajatunnus + "'");
+        if (!vastaus.next()) {
+            vastaus.close();
+            return false;
+        }
+        final Date alkanut = vastaus.getDate("asetettu");
+        final Date paattyy = new Date(
+                alkanut.getTime() + 60000 * vastaus.getInt("kesto"));
+        final Date nykyhetki = new Date(System.currentTimeMillis());
+        vastaus.close();
+        boolean paattynyt = paattyy.compareTo(nykyhetki) <= 0;
+        if (paattynyt) {
+            poistaPorttikielto();
+        }
+        return paattynyt;
+    }
+
+//    public void asetaPorttikielto(final Date asetettu, final int kesto) {
+//        Tietokantatulkki.paivita("insert into porttikiellot values ('"
+//                + kayttajatunnus + "', '" + asetettu + "'" + kesto + ")");
+//    }
+
+    public void asetaPorttikielto(final int kesto) {
+//        asetaPorttikielto(new Date(System.currentTimeMillis()), kesto);
+        TietokantaDAO.paivita("insert into porttikiellot values ('"
+                + kayttajatunnus + "', '"
+                + new Date(System.currentTimeMillis()) + "', " + kesto + ")");
+    }
+
+    public void poistaPorttikielto() {
+        TietokantaDAO.paivita("delete from porttikiellot where kohde = '"
+                + kayttajatunnus + "'");
     }
 
     public String annaKayttajatunnus() {
@@ -128,6 +222,14 @@ public final class Jasen implements Yksilotyyppi {
 
     public void asetaSalasanatiiviste(final String salasanatiiviste) {
         this.salasanatiiviste = salasanatiiviste;
+    }
+
+    public String annaSuola() {
+        return suola;
+    }
+
+    public void asetaSuola(final String suola) {
+        this.suola = suola;
     }
 
     public String annaSahkopostiosoite() {

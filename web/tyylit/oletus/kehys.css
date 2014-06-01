@@ -58,59 +58,10 @@ a:visited {
     font-size: 3em;
 }
 
-#alaosa {
-    width:      100%;
-    position:   relative;
-    overflow-x: hidden;
-    top:        11em;
-    padding:    1em;
-    text-align: center;
-}
-
-img {
-    border: 1px solid #8CA949;
-}
-
-.sisalto {
-    max-width:  800px;
-    margin-left: auto;
-    margin-right: auto;
-    box-shadow: 8px 8px 4px #8CA949;
-}
-
-table {
-    width:      100%;
-    margin-left: auto;
-    margin-right: auto;
-    border:     0;
-    border-collapse: collapse;
-}
-
-td {
-    padding: 0.5em;
-}
-
-th {
-    background: #8B70E5;
-    padding: 0.5em;
-}
-
-.parillinen {
-    background-color: #BCD767;
-    /*background-color: #5ECCB2;*/
-}
-
-.pariton {
-    background-color: #AECC5E;
-    /*background-color: #67D7B9;*/
-}
-
-td.avatar {
-    width:      256px;
-    height:     256px;
-}
-
-td.viesti {
-    text-align:     left;
-    vertical-align: top;
+a.painike {
+    width:      auto;
+    padding:    0.5em;
+    margin:     0.25em;
+    background-color: #6649A9;
+    box-shadow: 6px 6px 3px #6649A9;
 }

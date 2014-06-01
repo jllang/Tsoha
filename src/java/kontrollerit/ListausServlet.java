@@ -17,16 +17,28 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "ListausServlet", urlPatterns = {"/listaus"})
 public final class ListausServlet extends HttpServlet {
 
+    private static final List<String> DEMOKETJUT;
+
+    static {
+        DEMOKETJUT = new ArrayList<>();
+        DEMOKETJUT.add("<a href=\"esimketju\">Esimerkkiketju</a>");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("&lt;Ketjun nimi&gt;");
+        DEMOKETJUT.add("...");
+    }
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
         resp.setContentType("text/html;charset=UTF-8");
         PrintWriter out = resp.getWriter();
-//        try {
-//            kasitteleListaus(out, lista);
-//        } finally {
-//            out.close();
-//        }
+        kasitteleListaus(out, DEMOKETJUT);
     }
 
     /**
@@ -37,7 +49,7 @@ public final class ListausServlet extends HttpServlet {
      * @param lista
      */
     public static void kasitteleListaus(final PrintWriter out, final List<String> lista) {
-        out.println("           <div class=\"sisalto\">");
+        out.println("<div class=\"sisalto\">");
         out.println("               <table>");
         out.println("                   <tr><th>Viimeisimmät keskustelut</th></tr>");
         for (int i = 0; i < lista.size(); i++) {

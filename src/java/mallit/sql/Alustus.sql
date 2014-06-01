@@ -1,13 +1,15 @@
 create type Kayttajataso as enum ('TAVALLINEN', 'MODERAATTORI', 'YLLAPITAJA');
 
 create table jasenet (
-    tunnus          varchar(64)     primary key,
+    tunnus          varchar(32)     primary key,
     rekisteroity    date            not null,
-    tiiviste        char(64)        not null,
-    sposti          varchar(128)    not null,
+--     numero          serial          unique not null,
+    tiiviste        char(128)       not null,
+    suola           char(128)       not null,
+    sposti          varchar(64)     not null,
     taso            Kayttajataso    not null,
-    nimimerkki      varchar(64),
-    avatar          varchar(192),
+    nimimerkki      varchar(32),
+    avatar          varchar(128),
     kuvaus          varchar(512)
 );
 
@@ -18,14 +20,15 @@ create table porttikiellot (
 );
 
 create table alueet (
-    nimi            varchar(128)    primary key,
+    tunnus          serial          primary key,
+    nimi            varchar(128)    unique not null,
     kuvaus          varchar(384),
     lukittu         date,
     poistettu       date
 );
 
 create table ketjut (
-    tunnus          integer         primary key,
+    tunnus          serial          primary key,
     aihe            varchar(128)    not null,
     siirretty       date,
     moderoitu       date,
@@ -34,18 +37,19 @@ create table ketjut (
 );
 
 create table ketjujen_sijainnit (
-    alue_id         varchar(128)    references alueet,
-    ketju_id        integer         references ketjut,
+    alue_id         serial          references alueet,
+    ketju_id        serial          references ketjut,
     primary key (alue_id, ketju_id)
 );
 
 create table viestit (
-    ketju_id        integer         references ketjut,
-    kirjoitettu     date,
+    ketju_id        serial          references ketjut,
+    numero          serial,
     kirjoittaja     varchar(64)     references jasenet not null,
+    kirjoitettu     date            not null,
     muokattu        date,
     moderoitu       date,
     poistettu       date,
     sisalto         varchar(4096),
-    primary key (ketju_id, kirjoitettu)
+    primary key (ketju_id, numero)
 );
