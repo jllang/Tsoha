@@ -54,28 +54,4 @@ public abstract class Yksilotyyppi {
     public abstract PreparedStatement lisayskysely(final Connection yhteys)
             throws SQLException;
 
-
-//    /**
-//     * Palauttaa <tt>PreparedStatement</tt>-olion, joka suorittaa SQL update
-//     * -kyselyn ja johon on lisätty yksilötyypin (muuttuneet) attribuutit ja
-//     * niiden arvot. Metodi ei sulje yhteyttä.
-//     *
-//     * @param yhteys
-//     * @return
-//     * @throws SQLException
-//     */
-//    public abstract PreparedStatement paivityskysely(final Connection yhteys)
-//            throws SQLException;
-//
-//    /**
-//     * Palauttaa <tt>PreparedStatement</tt>-olion, joka suorittaa SQL delete
-//     * -kyselyn. Metodi ei sulje yhteyttä.
-//     *
-//     * @param yhteys
-//     * @return
-//     * @throws SQLException
-//     */
-//    public abstract PreparedStatement poistokysely(final Connection yhteys)
-//            throws SQLException;
-
 }

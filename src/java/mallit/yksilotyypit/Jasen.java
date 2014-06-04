@@ -24,7 +24,6 @@ import mallit.tyypit.Kayttajataso;
  */
 public final class Jasen extends Yksilotyyppi {
 
-//    public static final Jasen OLIOKUMPPANI;
     private static final String     LISAYSPOHJA, HAKUPOHJA;
     private static final Predicate<String> KELVOLLINEN_SP;
 
@@ -33,11 +32,10 @@ public final class Jasen extends Yksilotyyppi {
     private String          salasanatiiviste, suola, sahkopostiosoite;
     private Kayttajataso    taso;
 
-    // Vapaaehtoiaset kentät:
+    // Vapaaehtoiset kentät:
     private String          nimimerkki, avatar, kuvaus;
 
     static {
-//        OLIOKUMPPANI = luo("Oliokumppani", null, null);
         LISAYSPOHJA = "insert into jasenet values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         HAKUPOHJA   = "select * from jasenet where tunnus = ?";
         KELVOLLINEN_SP = Pattern.compile(
@@ -62,15 +60,6 @@ public final class Jasen extends Yksilotyyppi {
         this.avatar             = avatar;
         this.kuvaus             = kuvaus;
     }
-
-//    private static Jasen luo(final boolean tallennettu, final String kayttajatunnus,
-//            final Date rekisteroity, final String salasanatiiviste,
-//            final String sahkopostiosoite, final Kayttajataso taso,
-//            final String nimimerkki, final String avatar, final String kuvaus) {
-//        return new Jasen(tallennettu, kayttajatunnus, rekisteroity,
-//                salasanatiiviste, sahkopostiosoite, taso, nimimerkki, avatar,
-//                kuvaus);
-//    }
 
     public static Jasen luo(final String kayttajatunnus,
             final String salasanatiiviste, final String suola,
@@ -123,31 +112,6 @@ public final class Jasen extends Yksilotyyppi {
         }
     }
 
-//    public static Jasen hae(final String nimi) {
-//        final ResultSet vastaus = TietokantaDAO.hae(
-//                OLIOKUMPPANI.annaHakukysely(nimi));
-//        final Jasen jasen;
-//        try {
-//            vastaus.next();
-//            jasen = luo(vastaus);
-//            vastaus.close();
-//        } catch (SQLException e) {
-//            Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
-//            return null;
-//        }
-//        return jasen;
-//    }
-
-//    @Override
-//    public void tallenna() {
-//        if (this != OLIOKUMPPANI) {
-//            TietokantaDAO.paivita(annaLisayskysely());
-//        } else {
-//            System.err.println("Oliokumppani yritettiin viedä tietokantaan!");
-//        }
-//    }
-
-//    @Override
     public static PreparedStatement hakukysely(final Connection yhteys,
             final String avain) throws SQLException {
         final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA);
@@ -190,11 +154,6 @@ public final class Jasen extends Yksilotyyppi {
         }
         return paattynyt;
     }
-
-//    public void asetaPorttikielto(final Date asetettu, final int kesto) {
-//        Tietokantatulkki.paivita("insert into porttikiellot values ('"
-//                + kayttajatunnus + "', '" + asetettu + "'" + kesto + ")");
-//    }
 
     public void asetaPorttikielto(final int kesto) {
 //        asetaPorttikielto(new Date(System.currentTimeMillis()), kesto);

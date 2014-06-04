@@ -15,7 +15,6 @@ import java.util.logging.Logger;
  */
 public final class Viesti extends Yksilotyyppi {
 
-//    public static final Viesti OLIOKUMPPANI;
     private static final String LISAYSPOHJA, HAKUPOHJA;
 
     private int             ketjunTunnus;
@@ -44,14 +43,6 @@ public final class Viesti extends Yksilotyyppi {
         this.poistettu      = poistettu;
         this.sisalto        = sisalto;
     }
-
-//    public static Viesti luo(final boolean tuore, final int ketjunTunnus,
-//            final String kirjoittaja, final Date kirjoitettu,
-//            final Date muokattu, final Date moderoitu, final Date poistettu,
-//            final String sisalto) {
-//        return new Viesti(tuore, ketjunTunnus, kirjoittaja, kirjoitettu, muokattu,
-//                moderoitu, poistettu, sisalto);
-//    }
 
     public static Viesti luo(final int ketjunTunnus, final String kirjoittaja,
             final String sisalto) {
@@ -88,31 +79,6 @@ public final class Viesti extends Yksilotyyppi {
         }
     }
 
-//    public static Viesti hae(final String nimi) {
-//        final ResultSet vastaus = TietokantaDAO.hae(
-//                OLIOKUMPPANI.annaHakukysely(nimi));
-//        final Viesti viesti;
-//        try {
-//            vastaus.next();
-//            viesti = luo(vastaus);
-//            vastaus.close();
-//        } catch (SQLException e) {
-//            Logger.getLogger(Viesti.class.getName()).log(Level.SEVERE, null, e);
-//            return null;
-//        }
-//        return viesti;
-//    }
-
-//    @Override
-//    public void tallenna() {
-//        if (this != OLIOKUMPPANI) {
-//            TietokantaDAO.paivita(annaLisayskysely());
-//        } else {
-//            System.err.println("Oliokumppani yritettiin viedä tietokantaan!");
-//        }
-//    }
-
-//    @Override
     public static PreparedStatement hakukysely(final Connection yhteys,
             final int ketjunTunnus, final int numero) throws SQLException {
         final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA);

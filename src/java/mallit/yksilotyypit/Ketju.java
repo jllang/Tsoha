@@ -18,7 +18,6 @@ import mallit.TietokantaDAO;
  */
 public final class Ketju extends Yksilotyyppi {
 
-//    public static final Ketju OLIOKUMPPANI;
     private static final String LISAYSPOHJA, HAKUPOHJA;
 
     private final int   tunnus;
@@ -42,12 +41,6 @@ public final class Ketju extends Yksilotyyppi {
         this.lukittu    = lukittu;
         this.poistettu  = poistettu;
     }
-
-//    private static Ketju luo(final int tunnus, final String aihe,
-//            final Date siirretty, final Date moderoitu, final Date lukittu,
-//            final Date poistettu) {
-//        return new Ketju(true, tunnus, aihe, siirretty, moderoitu, lukittu, poistettu);
-//    }
 
     public static Ketju luo(final String aihe) {
         return new Ketju(true, 0, aihe, new Date(System.currentTimeMillis()),
@@ -81,31 +74,6 @@ public final class Ketju extends Yksilotyyppi {
         }
     }
 
-//    public static Ketju hae(final String nimi) {
-//        final ResultSet vastaus = TietokantaDAO.hae(
-//                OLIOKUMPPANI.annaHakukysely(nimi));
-//        final Ketju ketju;
-//        try {
-//            vastaus.next();
-//            ketju = luo(vastaus);
-//            vastaus.close();
-//        } catch (SQLException e) {
-//            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
-//            return null;
-//        }
-//        return ketju;
-//    }
-
-//    @Override
-//    public void tallenna() {
-//        if (this != OLIOKUMPPANI) {
-//            TietokantaDAO.paivita(annaLisayskysely());
-//        } else {
-//            System.err.println("Oliokumppani yritettiin viedä tietokantaan!");
-//        }
-//    }
-
-//    @Override
     public static PreparedStatement hakukysely(final Connection yhteys,
             final int tunnus) throws SQLException {
         PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA);

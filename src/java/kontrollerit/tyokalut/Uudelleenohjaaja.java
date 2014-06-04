@@ -18,4 +18,10 @@ public final class Uudelleenohjaaja {
         pyynto.getRequestDispatcher(osoite).forward(pyynto, vastaus);
     }
 
+    public static void uudelleenohjaa(final HttpServletRequest pyynto,
+            final HttpServletResponse vastaus, final String osoite)
+            throws ServletException, IOException {
+        vastaus.sendRedirect(osoite);
+    }
+
 }

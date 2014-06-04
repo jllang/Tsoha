@@ -1,4 +1,6 @@
+<%@tag import="kontrollerit.IstuntoServlet"%>
 <%@tag import="mallit.yksilotyypit.Jasen"%>
+<%@tag import="mallit.tyypit.Kayttajataso"%>
 <%@tag description="Sivupohja dynaamisella sisällöllä." pageEncoding="UTF-8"
        trimDirectiveWhitespaces="true" %>
 <%@attribute name="otsikko" %>
@@ -21,9 +23,18 @@
                 <a class="painike" href="etusivu">Etusivu</a>
                 <%
                     // Tämä koodi sopisi ehkä paremmin kontrolleriin...
-                    Jasen jasen =
-                            (Jasen) request.getSession().getAttribute("jasen");
-                    switch (jasen.annaTaso()) {
+                    final Kayttajataso taso;
+                    final String kayttajatunnus;
+                    if (IstuntoServlet.aktiivinenIstunto(request)) {
+                        final Jasen jasen = (Jasen) request.getSession()
+                                .getAttribute("jasen");
+                        taso = jasen.annaTaso();
+                        kayttajatunnus = jasen.annaKayttajatunnus();
+                    } else {
+                        taso = Kayttajataso.VIERAILIJA;
+                        kayttajatunnus = "";
+                    }
+                    switch (taso) {
                             case YLLAPITAJA:
                                 out.println("<a class=\"painike\" "
                                         + "href=\"yllapito\">Ylläpito</a>");
@@ -31,7 +42,7 @@
                             case TAVALLINEN:
                                 out.println("<a class=\"painike\" "
                                         + "href=\"omasivu?jasen="
-                                        + jasen.annaKayttajatunnus()
+                                        + kayttajatunnus
                                         + "\">Oma sivu</a>");
                                 out.println("<a  class=\"painike\" "
                                         + "href=\"haku\">Haku</a>");

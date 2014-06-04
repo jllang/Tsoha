@@ -32,14 +32,27 @@ public final class IstuntoServlet extends HttpServlet {
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
+        kasittelePyynto(resp, req);
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest req,
+            final HttpServletResponse resp) throws ServletException,
+            IOException {
+        kasittelePyynto(resp, req);
+    }
+
+    private void kasittelePyynto(final HttpServletResponse resp, final HttpServletRequest req) throws ServletException, IOException {
         resp.setContentType("text/html;charset=UTF-8");
-        final String seuraavaSivu;
+//        final String seuraavaSivu;
         if (!aktiivinenIstunto(req)) {
-            seuraavaSivu = sisaankirjaus(req);
+//            seuraavaSivu = sisaankirjaus(req);
+            sisaankirjaus(req, resp);
         } else {
-            seuraavaSivu = uloskirjaus(req);
+//            seuraavaSivu = uloskirjaus(req);
+            uloskirjaus(req, resp);
         }
-        Uudelleenohjaaja.siirra(req, resp, seuraavaSivu);
+//        Uudelleenohjaaja.siirra(req, resp, seuraavaSivu);
     }
 
     /**
@@ -61,11 +74,8 @@ public final class IstuntoServlet extends HttpServlet {
      * @return                  Tosi joss käyttäjätunnus ja salasana täsmäävät.
      */
     @SuppressWarnings({"TooBroadCatch", "UseSpecificCatch"})
-    static boolean kelvollinen(final String kayttajatunnus,
-            final String salasana) {
+    static boolean kelvollinen(final Jasen jasen, final String salasana) {
         try {
-            final Jasen jasen =
-                    (Jasen) TietokantaDAO.tuo(Jasen.class, kayttajatunnus);
             return PasswordHash.validatePassword(salasana,
                     PasswordHash.PBKDF2_ITERATIONS + ":"
                     + jasen.annaSuola() + ":"
@@ -76,24 +86,42 @@ public final class IstuntoServlet extends HttpServlet {
         }
     }
 
-    private static String sisaankirjaus(final HttpServletRequest req)
-            throws ServletException, IOException {
+    private static void sisaankirjaus(final HttpServletRequest req,
+            final HttpServletResponse resp) throws ServletException,
+            IOException {
         final String kayttajatunnus = req.getParameter("kayttajatunnus"),
                 salasana = req.getParameter("salasana");
-        if (!kelvollinen(kayttajatunnus, salasana)) {
+        if (kayttajatunnus == null || salasana == null) {
+//            return "jsp/sisaankirjautuminen.jsp";
+            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjautuminen.jsp");
+            return;
+        }
+        Jasen jasen;
+        try {
+            jasen = (Jasen) TietokantaDAO.tuo(Jasen.class, kayttajatunnus);
+        } catch (SQLException e) {
+            Logger.getLogger(IstuntoServlet.class.getName()).log(Level.SEVERE, null, e);
+            jasen = null;
+        }
+        if (jasen == null || !kelvollinen(jasen, salasana)) {
             req.setAttribute("epaonnistui", true);
             req.setAttribute("kayttajatunnus", kayttajatunnus);
             req.setAttribute("salasana", salasana);
-            return "istunto";
+//            return "jsp/sisaankirjautuminen.jsp";
+            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjautuminen.jsp");
         } else {
-            req.getSession().setAttribute("jasen", kayttajatunnus);
-            return "etusivu";
+            req.getSession().setAttribute("jasen", jasen);
+            Uudelleenohjaaja.siirra(req, resp, "jsp/etusivu.jsp");
+//            return "etusivu";
         }
     }
 
-    private static String uloskirjaus(final HttpServletRequest req) {
-        req.getSession().removeAttribute("kayttajatunnus");
-        return "etusivu";
+    private static void uloskirjaus(final HttpServletRequest req,
+            final HttpServletResponse resp) throws ServletException,
+            IOException {
+        req.getSession().removeAttribute("jasen");
+        Uudelleenohjaaja.siirra(req, resp, "/etusivu");
+//        return "etusivu";
     }
 
 }

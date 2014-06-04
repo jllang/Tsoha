@@ -19,7 +19,6 @@ import mallit.TietokantaDAO;
  */
 public final class Alue extends Yksilotyyppi {
 
-//    public static final Alue OLIOKUMPPANI;
     private static final String LISAYSPOHJA, HAKUPOHJA;
 
     private final int   tunnus;
@@ -27,7 +26,6 @@ public final class Alue extends Yksilotyyppi {
     private Date        lukittu, poistettu;
 
     static {
-//        OLIOKUMPPANI = luo("Oliokumppani", "Tätä oliota ei viedä tietokantaan.");
         LISAYSPOHJA = "insert into alueet values (?, ?, ?, ?)";
         HAKUPOHJA   = "select * from alueet where tunnus = ?";
     }
@@ -41,11 +39,6 @@ public final class Alue extends Yksilotyyppi {
         this.lukittu    = lukittu;
         this.poistettu  = poistettu;
     }
-
-//    private static Alue luo(final String nimi, final String kuvaus, final Date lukittu,
-//            final Date poistettu) {
-//        return new Alue(false, nimi, kuvaus, lukittu, poistettu);
-//    }
 
     public static Alue luo(final String nimi, final String kuvaus) {
         if (nimi == null || nimi.length() == 0 || nimi.length() > 128) {
@@ -84,21 +77,6 @@ public final class Alue extends Yksilotyyppi {
         }
     }
 
-//    public static Alue hae(final String nimi) {
-//        final ResultSet vastaus = TietokantaDAO.hae(
-//                OLIOKUMPPANI.annaHakukysely(nimi));
-//        final Alue alue;
-//        try {
-//            vastaus.next();
-//            alue = luo(vastaus);
-//            vastaus.close();
-//        } catch (SQLException e) {
-//            Logger.getLogger(Alue.class.getName()).log(Level.SEVERE, null, e);
-//            return null;
-//        }
-//        return alue;
-//    }
-
     public static PreparedStatement hakukysely(final Connection yhteys,
             final int avain) throws SQLException {
         final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA);
@@ -106,14 +84,6 @@ public final class Alue extends Yksilotyyppi {
         return kysely;
     }
 
-//    @Override
-//    public void tallenna() {
-//        if (this != OLIOKUMPPANI) {
-//            TietokantaDAO.paivita(annaLisayskysely());
-//        } else {
-//            System.err.println("Oliokumppani yritettiin viedä tietokantaan!");
-//        }
-//    }
     @Override
     public PreparedStatement lisayskysely(final Connection yhteys)
             throws SQLException {
@@ -139,6 +109,10 @@ public final class Alue extends Yksilotyyppi {
             Logger.getLogger(Alue.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }
+    }
+
+    public int annaTunnus() {
+        return tunnus;
     }
 
     public String annaNimi() {

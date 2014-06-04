@@ -6,7 +6,7 @@
 <t:kehys otsikko="Esimerkkifoorumi: Kirjautuminen"
          fooruminNimi="Esimerkkifoorumi">
             <h2>Sisäänkirjautuminen</h2>
-            <form accept-charset="ASCII">
+            <form action="istunto" method="POST">
                 <table class="sisalto parillinen" style="width: auto">
                     <tr>
                         <td class="virhe" colspan="2">
@@ -18,13 +18,14 @@
                     <tr>
                         <td>Käyttäjätunnus</td>
                         <td><input title="Käyttäjätunnus" type="text"
+                                   name="kayttajatunnus"
                                    value="${kayttajatunnus}"
                                    autofocus="autofocus"></td>
                     </tr>
                     <tr>
                         <td>Salasana</td>
                         <td><input title="Salasana" type="password"
-                                   value="${salasana}"></td>
+                                   name="salasana" value="${salasana}"></td>
                     </tr>
                     <tr>
                         <td colspan="2">
@@ -33,5 +34,8 @@
                         </td>
                     </tr>
                 </table>
+                <p>
+                    <a href="rekisterointi.jsp" >Rekisteröityminen</a>
+                </p>
             </form>
 </t:kehys>

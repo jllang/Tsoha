@@ -45,7 +45,8 @@ td {
 }
 
 th {
-    background: #8B70E5;
+    /*background: #8B70E5;*/
+    background-color: #B75369;
     padding: 0.5em;
 }
 

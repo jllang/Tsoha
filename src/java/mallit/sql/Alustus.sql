@@ -1,7 +1,7 @@
 create type Kayttajataso as enum ('TAVALLINEN', 'MODERAATTORI', 'YLLAPITAJA');
 
 create table jasenet (
-    tunnus          varchar(32)     primary key,
+    tunnus          varchar(24)     primary key,
     rekisteroity    date            not null,
 --     numero          serial          unique not null,
     tiiviste        char(128)       not null,
@@ -14,13 +14,13 @@ create table jasenet (
 );
 
 create table porttikiellot (
-    kohde           varchar(64)     primary key references jasenet,
+    kohde           varchar(24)     primary key references jasenet,
     asetettu        date            not null,
     kesto           int             not null
 );
 
 create table alueet (
-    tunnus          serial          primary key,
+    tunnus          serial          primary key, -- Tilan säästämiseksi yhd. taulussa
     nimi            varchar(128)    unique not null,
     kuvaus          varchar(384),
     lukittu         date,
@@ -44,12 +44,12 @@ create table ketjujen_sijainnit (
 
 create table viestit (
     ketju_id        serial          references ketjut,
-    numero          serial,
-    kirjoittaja     varchar(64)     references jasenet not null,
+    numero          integer,
+    kirjoittaja     varchar(24)     references jasenet not null,
     kirjoitettu     date            not null,
     muokattu        date,
     moderoitu       date,
     poistettu       date,
-    sisalto         varchar(4096),
+    sisalto         text,
     primary key (ketju_id, numero)
 );
