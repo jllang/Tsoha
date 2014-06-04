@@ -1,11 +1,19 @@
 package kontrollerit;
 
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import kontrollerit.tyokalut.Uudelleenohjaaja;
+import mallit.TietokantaDAO;
+import mallit.yksilotyypit.Jasen;
 
 
 /**
@@ -15,35 +23,19 @@ import javax.servlet.http.HttpServletResponse;
 //@WebServlet(name = "ProfiiliServlet", urlPatterns = {"/kayttaja"})
 public class ProfiiliServlet extends HttpServlet {
 
-//    @Override
-//    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
-//
-//    }
-
-    public static void demoKayttaja(final PrintWriter out) {
-        out.println("           <table class=\"parillinen sisalto\">");
-        out.println("               <tr>");
-        out.println("                   <td class=\"viesti\">&lt;Käyttäjätunnus"
-                + "&gt;</td>");
-        out.println("                   <td class=\"avatar\" rowspan=\"4\">"
-                + "<img src=\"data/paikanpitaja.png\" alt=\"&lt;Nimimerkki&gt;"
-                + ":n Avatar\"></td>");
-        out.println("               </tr>");
-        out.println("               <tr>");
-        out.println("                   <td class=\"viesti\">&lt;Taso&gt;</td>");
-        out.println("               </tr>");
-        out.println("               <tr>");
-        out.println("                   <td class=\"viesti\">&lt;Rekisteröity"
-                + "&gt;</td>");
-        out.println("               </tr>");
-        out.println("               <tr>");
-        out.println("                   <td class=\"viesti\">&lt;Viestejä&gt;"
-                + "</td>");
-        out.println("               </tr>");
-        out.println("               <tr>");
-        out.println("                   <td class=\"viesti\" colspan=\"2\">&lt;"
-                + "Kuvaus&gt;</td>");
-        out.println("               </tr>");
-        out.println("           </table>");
+    @Override
+    protected void doGet(final HttpServletRequest req,
+            final HttpServletResponse resp) throws ServletException,
+            IOException {
+        Jasen jasen;
+        try {
+            jasen = (Jasen)TietokantaDAO.tuo(
+                    Jasen.class, req.getParameter("jasen"));
+        } catch (SQLException e) {
+            Logger.getLogger(ProfiiliServlet.class.getName()).log(Level.SEVERE,
+                    null, e);
+            jasen = null;
+        }
+        Uudelleenohjaaja.uudelleenohjaa(req, resp, "/jsp/profiili.jsp");
     }
 }

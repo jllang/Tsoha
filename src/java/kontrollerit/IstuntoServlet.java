@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import kontrollerit.tyokalut.PasswordHash;
 import kontrollerit.tyokalut.Uudelleenohjaaja;
 import mallit.TietokantaDAO;
@@ -44,15 +43,11 @@ public final class IstuntoServlet extends HttpServlet {
 
     private void kasittelePyynto(final HttpServletResponse resp, final HttpServletRequest req) throws ServletException, IOException {
         resp.setContentType("text/html;charset=UTF-8");
-//        final String seuraavaSivu;
         if (!aktiivinenIstunto(req)) {
-//            seuraavaSivu = sisaankirjaus(req);
             sisaankirjaus(req, resp);
         } else {
-//            seuraavaSivu = uloskirjaus(req);
             uloskirjaus(req, resp);
         }
-//        Uudelleenohjaaja.siirra(req, resp, seuraavaSivu);
     }
 
     /**
@@ -92,7 +87,6 @@ public final class IstuntoServlet extends HttpServlet {
         final String kayttajatunnus = req.getParameter("kayttajatunnus"),
                 salasana = req.getParameter("salasana");
         if (kayttajatunnus == null || salasana == null) {
-//            return "jsp/sisaankirjautuminen.jsp";
             Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjautuminen.jsp");
             return;
         }
@@ -107,12 +101,10 @@ public final class IstuntoServlet extends HttpServlet {
             req.setAttribute("epaonnistui", true);
             req.setAttribute("kayttajatunnus", kayttajatunnus);
             req.setAttribute("salasana", salasana);
-//            return "jsp/sisaankirjautuminen.jsp";
             Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjautuminen.jsp");
         } else {
             req.getSession().setAttribute("jasen", jasen);
             Uudelleenohjaaja.siirra(req, resp, "jsp/etusivu.jsp");
-//            return "etusivu";
         }
     }
 
@@ -121,7 +113,6 @@ public final class IstuntoServlet extends HttpServlet {
             IOException {
         req.getSession().removeAttribute("jasen");
         Uudelleenohjaaja.siirra(req, resp, "/etusivu");
-//        return "etusivu";
     }
 
 }

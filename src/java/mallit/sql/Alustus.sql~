@@ -22,7 +22,7 @@ create table porttikiellot (
 create table alueet (
     tunnus          serial          primary key, -- Tilan säästämiseksi yhd. taulussa
     nimi            varchar(128)    unique not null,
-    kuvaus          varchar(384)    unique,
+    kuvaus          varchar(384),
     lukittu         date,
     poistettu       date
 );
