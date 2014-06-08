@@ -19,8 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import kontrollerit.tyokalut.PasswordHash;
 import kontrollerit.tyokalut.Uudelleenohjaaja;
-import mallit.TietokantaDAO;
-import mallit.yksilotyypit.Jasen;
+import mallit.java.TietokantaDAO;
 
 /**
  *
@@ -35,16 +34,9 @@ public final class RekisterointiServlet extends HttpServlet {
             IOException {
         final String tunnus, salasana, tiiviste, suola, sposti;
         tunnus = req.getParameter("kayttajatunnus");
-        try {
-            if (TietokantaDAO.tuo(Jasen.class, tunnus) != null) {
-                kasitteleEpaonnistuminen(req, resp,
-                        "Käyttäjätunnus on jo olemassa");
-                return;
-            }
-        } catch (SQLException e) {
-//            Logger.getLogger(RekisterointiServlet.class.getName()).log(Level.SEVERE, null, e);
-            // Parempi olla speksaamatta tarkemmin random selailijoille:
-            kasitteleEpaonnistuminen(req, resp, "Palvelimella tapahtui virhe");
+        if (TietokantaDAO.tuoJasen(tunnus) != null) {
+            kasitteleEpaonnistuminen(req, resp,
+                    "Käyttäjätunnus on jo olemassa");
             return;
         }
         salasana = req.getParameter("salasana");
@@ -56,10 +48,9 @@ public final class RekisterointiServlet extends HttpServlet {
         try {
             final String[] raakatiiviste = PasswordHash.createHash(salasana)
                     .split(":");
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(RekisterointiServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeySpecException ex) {
-            Logger.getLogger(RekisterointiServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            Logger.getLogger(RekisterointiServlet.class.getName()).log(
+                    Level.SEVERE, null, e);
         }
     }
 
@@ -71,7 +62,7 @@ public final class RekisterointiServlet extends HttpServlet {
         req.setAttribute("sahkoposti", req.getParameter("sahkoposti"));
         req.setAttribute("salasana", req.getParameter("salasana"));
 //        req.setAttribute("salasana2", req.getParameter("salasana2"));
-        Uudelleenohjaaja.siirra(req, resp, viesti);
+//        Uudelleenohjaaja.siirra(req, resp, viesti);
     }
 
 }

@@ -1,5 +1,5 @@
 
-package mallit.yksilotyypit;
+package mallit.java;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -8,20 +8,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
+ * Mallintaa viestiä ketjussa. Kyseessä on epäitsenäinen, ketjusta
+ * olemassaoloriippuvainen yksilötyyppi.
  *
+ * @see Ketju
  * @author John Lång <jllang@cs.helsinki.fi>
  */
 public final class Viesti extends Yksilotyyppi {
 
     private static final String LISAYSPOHJA, HAKUPOHJA;
 
-    private int             ketjunTunnus;
-    private final String    kirjoittaja;
-    private final Date      kirjoitettu;
-    private Date            muokattu, moderoitu, poistettu;
-    private String          sisalto;
+    private int         ketjunTunnus;
+    private final int   kirjoittaja;
+    private final Date  kirjoitettu;
+    private Date        muokattu, moderoitu, poistettu;
+    private String      sisalto;
 
     static {
 //        OLIOKUMPPANI = luo(-1, "Oliokumppani", "Tätä oliota ei viedä tietokantaan.");
@@ -31,9 +35,8 @@ public final class Viesti extends Yksilotyyppi {
     }
 
     private Viesti(final boolean tuore, final int ketjunTunnus,
-            final String kirjoittaja, final Date kirjoitettu,
-            final Date muokattu, final Date moderoitu, final Date poistettu,
-            final String sisalto) {
+            final int kirjoittaja, final Date kirjoitettu, final Date muokattu,
+            final Date moderoitu, final Date poistettu, final String sisalto) {
         super(tuore);
         this.ketjunTunnus   = ketjunTunnus;
         this.kirjoitettu    = kirjoitettu;
@@ -44,10 +47,19 @@ public final class Viesti extends Yksilotyyppi {
         this.sisalto        = sisalto;
     }
 
-    public static Viesti luo(final int ketjunTunnus, final String kirjoittaja,
+    public static Viesti luo(final int ketjunTunnus, final int kirjoittaja,
+            final Date kirjoitettu, final String sisalto) {
+        if (sisalto == null || sisalto.isEmpty()) {
+            throw new IllegalArgumentException("Viesti ei saa olla tyhjä.");
+        }
+        return new Viesti(true, ketjunTunnus, kirjoittaja, kirjoitettu, null,
+                null, null, sisalto);
+    }
+
+    public static Viesti luo(final int ketjunTunnus, final int kirjoittaja,
             final String sisalto) {
-        return new Viesti(true, ketjunTunnus, kirjoittaja,
-                new Date(System.currentTimeMillis()), null, null, null, sisalto);
+        return luo(ketjunTunnus, kirjoittaja,
+                new Date(System.currentTimeMillis()), sisalto);
     }
 
     /**
@@ -58,19 +70,19 @@ public final class Viesti extends Yksilotyyppi {
      * @param rs Tietokantakyselyn palauttama ResultSet-olio.
      * @return Uusi Viesti.
      */
-    public static Viesti luo(final ResultSet rs) {
-        final int ketju;
+    static Viesti luo(final ResultSet rs) {
+        final int ketju, kirjoittaja;
         final Date kirjoitettu, muokattu, moderoitu, poistettu;
-        final String kirjoittaja, sisalto;
+        final String sisalto;
 
         try {
-            ketju       = rs.getInt("ketju_id");
-            kirjoittaja = rs.getString("kirjoittaja");
-            kirjoitettu = rs.getDate("kirjoitettu");
-            muokattu    = rs.getDate("muokattu");
-            moderoitu   = rs.getDate("moderoitu");
-            poistettu   = rs.getDate("poistettu");
-            sisalto     = rs.getString("sisalto");
+            ketju       = rs.getInt(1);
+            kirjoittaja = rs.getInt(2);
+            kirjoitettu = rs.getDate(3);
+            muokattu    = rs.getDate(4);
+            moderoitu   = rs.getDate(5);
+            poistettu   = rs.getDate(6);
+            sisalto     = rs.getString(7);
             return new Viesti(false, ketju, kirjoittaja, kirjoitettu, muokattu,
                     moderoitu, poistettu, sisalto);
         } catch (SQLException e) {
@@ -79,7 +91,7 @@ public final class Viesti extends Yksilotyyppi {
         }
     }
 
-    public static PreparedStatement hakukysely(final Connection yhteys,
+    static PreparedStatement hakukysely(final Connection yhteys,
             final int ketjunTunnus, final int numero) throws SQLException {
         final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA);
         kysely.setInt(1, ketjunTunnus);
@@ -88,12 +100,12 @@ public final class Viesti extends Yksilotyyppi {
     }
 
     @Override
-    public PreparedStatement lisayskysely(final Connection yhteys)
+    PreparedStatement lisayskysely(final Connection yhteys)
             throws SQLException {
         final PreparedStatement kysely = yhteys.prepareStatement(LISAYSPOHJA);
         kysely.setInt(1, ketjunTunnus);
         kysely.setDate(2, kirjoitettu);
-        kysely.setString(3, kirjoittaja);
+        kysely.setInt(3, kirjoittaja);
         kysely.setDate(4, muokattu);
         kysely.setDate(5, moderoitu);
         kysely.setDate(6, poistettu);
@@ -102,22 +114,8 @@ public final class Viesti extends Yksilotyyppi {
     }
 
     @Override
-    public String toString() {
-        StringBuilder mjr = new StringBuilder();
-        mjr.append('(');
-        mjr.append(ketjunTunnus);
-        mjr.append(", '");
-        mjr.append(kirjoitettu);
-        mjr.append("', '");
-        mjr.append(kirjoittaja);
-        mjr.append("', ");
-        mjr.append(muokattu == null ? "null, " : "'" + muokattu + "', ");
-        mjr.append(moderoitu == null ? "null, " : "'" + moderoitu + "', ");
-        mjr.append(poistettu == null ? "null, '" : "'" + poistettu + "', '");
-        mjr.append(sisalto);
-        mjr.append("'");
-        mjr.append(')');
-        return mjr.toString();
+    public String listausnimi() {
+        throw new UnsupportedOperationException("Viestillä ei ole listausnimeä!");
     }
 
     public int annaKetjunTunnus() {
@@ -128,7 +126,7 @@ public final class Viesti extends Yksilotyyppi {
         this.ketjunTunnus = ketju.annaTunnus();
     }
 
-    public String annaKirjoittaja() {
+    public int annaKirjoittaja() {
         return kirjoittaja;
     }
 

@@ -2,23 +2,19 @@
 package kontrollerit;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import kontrollerit.tyokalut.PasswordHash;
+import kontrollerit.tyokalut.Otsikoija;
 import kontrollerit.tyokalut.Uudelleenohjaaja;
-import mallit.TietokantaDAO;
-import mallit.tyypit.Kayttajataso;
-import mallit.yksilotyypit.Jasen;
+import kontrollerit.tyokalut.Valvoja;
+import mallit.java.Jasen;
+import mallit.java.TietokantaDAO;
 
 /**
  *
@@ -31,53 +27,25 @@ public final class IstuntoServlet extends HttpServlet {
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
-        kasittelePyynto(resp, req);
+        kasittelePyynto(req, resp);
     }
 
     @Override
     protected void doPost(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
-        kasittelePyynto(resp, req);
+        kasittelePyynto(req, resp);
     }
 
-    private void kasittelePyynto(final HttpServletResponse resp, final HttpServletRequest req) throws ServletException, IOException {
+    private static void kasittelePyynto(final HttpServletRequest req,
+            final HttpServletResponse resp) throws ServletException,
+            IOException {
         resp.setContentType("text/html;charset=UTF-8");
-        if (!aktiivinenIstunto(req)) {
+        if (!Valvoja.aktiivinenIstunto(req)) {
+            Otsikoija.asetaOtsikko(req, "Sisäänkirjautuminen");
             sisaankirjaus(req, resp);
         } else {
             uloskirjaus(req, resp);
-        }
-    }
-
-    /**
-     * Palauttaa tosi joss annettuun pyyntöön liittyy aktiivinen istunto.
-     *
-     * @param req   Pyyntö
-     * @return      Liittyykö pyyntöön istunto.
-     */
-    public static boolean aktiivinenIstunto(final HttpServletRequest req) {
-        return req.getSession().getAttribute("jasen") != null;
-    }
-
-    /**
-     * Palauttaa <tt>true</tt> joss annettu käyttäjätunnus on olemassa ja sillä
-     * on annettu salasana. Kaikissa virhetilanteissa palautetaan arvo false.
-     *
-     * @param kayttajatunnus    Autentikoitava käyttäjätunnus.
-     * @param salasana          Käyttäjän antama salasana.
-     * @return                  Tosi joss käyttäjätunnus ja salasana täsmäävät.
-     */
-    @SuppressWarnings({"TooBroadCatch", "UseSpecificCatch"})
-    static boolean kelvollinen(final Jasen jasen, final String salasana) {
-        try {
-            return PasswordHash.validatePassword(salasana,
-                    PasswordHash.PBKDF2_ITERATIONS + ":"
-                    + jasen.annaSuola() + ":"
-                    + jasen.annaSalasanatiiviste());
-        } catch (Exception e) {
-            Logger.getLogger(IstuntoServlet.class.getName()).log(Level.SEVERE, null, e);
-            return false;
         }
     }
 
@@ -87,24 +55,35 @@ public final class IstuntoServlet extends HttpServlet {
         final String kayttajatunnus = req.getParameter("kayttajatunnus"),
                 salasana = req.getParameter("salasana");
         if (kayttajatunnus == null || salasana == null) {
-            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjautuminen.jsp");
+            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp");
+            return;
+        }
+        if (kayttajatunnus.isEmpty() || salasana.isEmpty()) {
+            req.setAttribute("kayttajatunnus", kayttajatunnus);
+            req.setAttribute("salasana", salasana);
+            if (req.getParameter("lahetetty") != null) {
+                req.setAttribute("virhekoodi", 2);
+            }
+            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp");
             return;
         }
         Jasen jasen;
         try {
-            jasen = (Jasen) TietokantaDAO.tuo(Jasen.class, kayttajatunnus);
+            jasen = (Jasen) TietokantaDAO.tuo(Jasen.class,
+                    kayttajatunnus);
         } catch (SQLException e) {
-            Logger.getLogger(IstuntoServlet.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(IstuntoServlet.class.getName()).log(Level.SEVERE,
+                    null, e);
             jasen = null;
         }
-        if (jasen == null || !kelvollinen(jasen, salasana)) {
-            req.setAttribute("epaonnistui", true);
+        if (jasen != null && Valvoja.autentikoi(jasen, salasana)) {
+            req.getSession().setAttribute("jasen", jasen);
+            Uudelleenohjaaja.uudelleenohjaa(req, resp, "etusivu");
+        } else {
+            req.setAttribute("virhekoodi", 1);
             req.setAttribute("kayttajatunnus", kayttajatunnus);
             req.setAttribute("salasana", salasana);
-            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjautuminen.jsp");
-        } else {
-            req.getSession().setAttribute("jasen", jasen);
-            Uudelleenohjaaja.siirra(req, resp, "jsp/etusivu.jsp");
+            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp");
         }
     }
 
@@ -112,7 +91,7 @@ public final class IstuntoServlet extends HttpServlet {
             final HttpServletResponse resp) throws ServletException,
             IOException {
         req.getSession().removeAttribute("jasen");
-        Uudelleenohjaaja.siirra(req, resp, "/etusivu");
+        Uudelleenohjaaja.uudelleenohjaa(req, resp, "etusivu");
     }
 
 }

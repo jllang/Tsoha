@@ -1,17 +1,20 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@page import="mallit.tyypit.Kayttajataso"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"
         trimDirectiveWhitespaces="true" %>
-<t:kehys otsikko="Esimerkkifoorumi: Kirjautuminen"
+<t:kehys otsikko="${otsikko}"
          fooruminNimi="Esimerkkifoorumi">
             <h2>Sisäänkirjautuminen</h2>
             <form action="istunto" method="POST">
-                <table class="sisalto parillinen" style="width: auto">
+                <input type="hidden" name="lahetetty" value="tosi">
+                <table class="sisalto pariton" style="width: auto">
                     <tr>
                         <td class="virhe" colspan="2">
-                            <c:if test="${epaonnistui}">
+                            <c:if test="${virhekoodi == 1}">
                                 <t:virhe>Sisäänkirjautuminen epäonnistui.</t:virhe>
+                            </c:if>
+                            <c:if test="${virhekoodi == 2}">
+                                <t:virhe>Käyttäjätunnusta tai salasanaa ei annettu.</t:virhe>
                             </c:if>
                         </td>
                     </tr>

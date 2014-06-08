@@ -28,12 +28,12 @@ package kontrollerit.tyokalut;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.security.SecureRandom;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.SecretKeyFactory;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 /*
  * PBKDF2 salted password hashing.

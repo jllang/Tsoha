@@ -23,12 +23,12 @@ img {
 }
 
 .parillinen {
-    background-color: #BCD767;
+    background-color: #AECC5E;
     /*background-color: #5ECCB2;*/
 }
 
 .pariton {
-    background-color: #AECC5E;
+    background-color: #BCD767;
     /*background-color: #67D7B9;*/
 }
 
@@ -55,7 +55,11 @@ td.avatar {
     height:     256px;
 }
 
-td.viesti {
+td.peruskentta {
     text-align:     left;
     vertical-align: top;
+}
+
+td.listauskentta {
+    overflow:       hidden;
 }

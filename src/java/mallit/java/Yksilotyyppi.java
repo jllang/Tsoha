@@ -1,9 +1,10 @@
 
-package mallit.yksilotyypit;
+package mallit.java;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Yksilötyyppi mallintaa yhtä järjestelmän varsinaista tietokohdetta.
@@ -51,7 +52,17 @@ public abstract class Yksilotyyppi {
      * @return
      * @throws SQLException
      */
-    public abstract PreparedStatement lisayskysely(final Connection yhteys)
+    abstract PreparedStatement lisayskysely(final Connection yhteys)
             throws SQLException;
+
+    /**
+     * Palauttaa uniikin merkkijonon, jota voidaan käyttää olion nimenä
+     * listauksissa.
+     *
+     * @return Epätyhjä, uniikki merkkijono.
+     * @throws UnsupportedOperationException Jos yksilötyypille ei ole
+     * määritelty listausnimeä.
+     */
+    public abstract String listausnimi() throws UnsupportedOperationException;
 
 }

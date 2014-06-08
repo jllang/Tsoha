@@ -1,13 +1,22 @@
-
 package kontrollerit;
 
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import kontrollerit.tyokalut.Otsikoija;
+import kontrollerit.tyokalut.Uudelleenohjaaja;
+import kontrollerit.tyokalut.Valvoja;
+import mallit.java.Ketju;
+import mallit.java.TietokantaDAO;
+import mallit.java.Viesti;
 
 /**
  *
@@ -17,36 +26,29 @@ import javax.servlet.http.HttpServletResponse;
 public final class KetjuServlet extends HttpServlet {
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
-    }
-
-    public static void kasitteleKetju(final PrintWriter out, final List<String> lista) {
-        for (int i = 0; i < lista.size(); i++) {
-            out.println("           <div class=\""
-                    + (i % 2 == 0 ? "parillinen" : "pariton") + " sisalto\">");
-            out.println("               <table>");
-            out.println("                   <tr>");
-            out.println("                       <th>&lt;<a href=\"kayttaja\">"
-                    + "Nimimerkki</a>&gt;</th>");
-//            out.println("                       <th>&lt;Alue 1&gt;[, &lt;Alue "
-//                    + "2&gt;, &lt;Alue 3&gt;, ..., &lt;Alue n&gt;]</th>");
-            out.println("                       <th></th>");
-            out.println("                   </tr>");
-            out.println("                   <tr>");
-            out.println("                       <td class=\"avatar\">"
-                    + "<a href=\"kayttaja\"><img src=\"data/paikanpitaja.png\" "
-                    + "alt=\"Avatar\"></a></td>");
-            out.println("                       <td class=\"viesti\">"
-                    + lista.get(i) + "</td>");
-            out.println("                   </tr>");
-            out.println("                   <tr>");
-            out.println("                       <td>&lt;Kirjoitettu&gt;</td>");
-            out.println("                       <td>[&lt;Muokattu&gt;"
-                    + "|&lt;Moderoitu&gt;]</td>");
-            out.println("                   </tr>");
-            out.println("               </table>");
-            out.println("           </div>");
-            out.println("           <br>");
+    protected void doGet(final HttpServletRequest req,
+            final HttpServletResponse resp) throws ServletException,
+            IOException {
+        if (!Valvoja.aktiivinenIstunto(req)) {
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/sisaankirjaus.jsp");
+            return;
+        } else {
+            final Ketju ketju;
+            try {
+                final int tunnus = Integer.parseInt(req.getParameter("tunnus"));
+                ketju = (Ketju) TietokantaDAO.tuo(Ketju.class, tunnus);
+            } catch (NumberFormatException e) {
+                Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+                return;
+            } catch (SQLException e) {
+                Logger.getLogger(KetjuServlet.class.getName())
+                        .log(Level.SEVERE, null, e);
+                Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+                return;
+            }
+            final List<Viesti> viestit = ketju.annaViestit();
+            Otsikoija.asetaOtsikko(req, ketju.annaAihe());
+            req.setAttribute("viestit", viestit);
         }
     }
 }

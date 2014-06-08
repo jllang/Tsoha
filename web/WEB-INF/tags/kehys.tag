@@ -1,6 +1,7 @@
 <%@tag import="kontrollerit.IstuntoServlet"%>
-<%@tag import="mallit.yksilotyypit.Jasen"%>
-<%@tag import="mallit.tyypit.Kayttajataso"%>
+<%@tag import="kontrollerit.tyokalut.Valvoja"%>
+<%@tag import="mallit.java.Jasen"%>
+<%@tag import="mallit.java.Kayttajataso"%>
 <%@tag description="Sivupohja dynaamisella sisällöllä." pageEncoding="UTF-8"
        trimDirectiveWhitespaces="true" %>
 <%@attribute name="otsikko" %>
@@ -20,46 +21,52 @@
         <div id="ylaosa">
             <h1 id="paaotsikko">${fooruminNimi}</h1>
             <nav>
-                <a class="painike" href="etusivu">Etusivu</a>
                 <%
                     // Tämä koodi sopisi ehkä paremmin kontrolleriin...
+                    out.println("<a class=\"painike\" href=\"etusivu\">Etusivu"
+                            + "</a>");
                     final Kayttajataso taso;
-                    final String kayttajatunnus;
-                    if (IstuntoServlet.aktiivinenIstunto(request)) {
+                    final int kayttajanumero;
+                    if (Valvoja.aktiivinenIstunto(request)) {
                         final Jasen jasen = (Jasen) request.getSession()
                                 .getAttribute("jasen");
                         taso = jasen.annaTaso();
-                        kayttajatunnus = jasen.annaKayttajatunnus();
+                        kayttajanumero = jasen.annaKayttajanumero();
                     } else {
                         taso = Kayttajataso.VIERAILIJA;
-                        kayttajatunnus = "";
+                        kayttajanumero = 0;
                     }
                     switch (taso) {
                             case YLLAPITAJA:
-                                out.println("<a class=\"painike\" "
-                                        + "href=\"yllapito\">Ylläpito</a>");
+                                out.println("                <a class=\""
+                                        + "painike\" href=\"yllapito\">"
+                                        + "Ylläpito</a>");
                             case MODERAATTORI:
                             case TAVALLINEN:
-                                out.println("<a class=\"painike\" "
-                                        + "href=\"omasivu?jasen="
-                                        + kayttajatunnus
-                                        + "\">Oma sivu</a>");
-                                out.println("<a  class=\"painike\" "
-                                        + "href=\"haku\">Haku</a>");
-                                out.println("<a class=\"painike\" "
-                                        + "href=\"istunto\">"
+                                out.println("                <a class=\""
+                                        + "painike\" href=\"profiili?tunnus="
+                                        + kayttajanumero + "\">Oma sivu</a>");
+                                out.println("                <a class=\""
+                                        + "painike\" href=\"viesti?toiminto="
+                                        + "uusi\">Uusi ketju</a>");
+                                out.println("                <a class=\""
+                                        + "painike\" href=\"haku\">Haku</a>");
+                                out.println("                <a class=\""
+                                        + "painike\" href=\"istunto\">"
                                         + "Kirjaudu ulos</a>");
                                 break;
                             case VIERAILIJA:
-                                out.println("<a class=\"painike\" "
-                                        + "href=\"istunto\">"
+                                out.println("                <a class=\""
+                                        + "painike\" href=\"istunto\">"
                                         + "Kirjaudu / rekisteröidy</a>");
                         }
+                    out.print("            ");
                     %>
             </nav>
         </div>
         <div id="alaosa">
             <jsp:doBody />
+            <% out.print("        "); %>
         </div>
     </body>
 </html>
