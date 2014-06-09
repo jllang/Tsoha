@@ -31,6 +31,9 @@ public final class HakuServlet extends HttpServlet {
     private void kasittelePyynto(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
+//        resp.setContentType("text/html;charset=UTF-8");
+//        resp.setCharacterEncoding("UTF-8");
+//        req.setCharacterEncoding("UTF-8");
         if (!Valvoja.aktiivinenIstunto(req)) {
             Uudelleenohjaaja.siirra(req, resp, "/jsp/sisaankirjaus.jsp");
             return;

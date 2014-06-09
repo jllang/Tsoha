@@ -7,12 +7,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@tag description="Viestipohja dynaamisella sisällöllä." pageEncoding="UTF-8"
        trimDirectiveWhitespaces="true" %>
-<%@attribute name="numero" type="int" %>
-<%@attribute name="kirjoittaja" type="int" %>
+<%@tag import="java.sql.Date"%>
+<%@attribute name="numero" type="Integer" %>
+<%@attribute name="kirjoittaja" type="Integer" %>
 <%@attribute name="listausnimi" type="String" %>
-<%@attribute name="kirjoitettu" type="String" %>
-<%@attribute name="muokattu" type="String" %>
-<%@attribute name="moderoitu" type="String" %>
+<%@attribute name="kirjoitettu" type="Date" %>
+<%@attribute name="muokattu" type="Date" %>
+<%@attribute name="moderoitu" type="Date" %>
                 <table
                     class="<%=(numero % 2 == 0 ? "parillinen" : "pariton")%>">
                     <tr>

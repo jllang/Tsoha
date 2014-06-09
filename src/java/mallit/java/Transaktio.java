@@ -23,14 +23,15 @@ public final class Transaktio {
         final int alueita = alueidenNimet.length;
         final boolean useampiAlue = alueita > 1;
         final String hakulause = useampiAlue
-                ? "select tunnus from alueet where nimi = ?"
-                : "select tunnus from alueet where nimi in (";
+                ? "select tunnus from alueet where nimi in ("
+                : "select tunnus from alueet where nimi = ?";
         final StringBuilder mjr = new StringBuilder();
         int[] aluetunnukset = new int[alueita];
         try {
             yhteys = valmisteleYhteys();    // Riittäisiköhän tähän transaktioon
                                             // alempi eristystaso?
             if (useampiAlue) {
+                mjr.append(hakulause);
                 mjr.append('?');
                 for (int i = 1; i < alueita; i++) {
                     mjr.append(',');
@@ -60,7 +61,7 @@ public final class Transaktio {
     }
 
     public static int luoKetju(final Jasen kirjoittaja, final String aihe,
-            final String sisalto, final int... alueet) {
+            final String sisalto, final int[] alueet) {
         Connection yhteys = null;
         PreparedStatement ketjunLisays = null, ketjunTunnuksenHaku = null,
                 viestinLisays = null, alueenLisays = null;
@@ -91,8 +92,8 @@ public final class Transaktio {
                 alueenLisays.addBatch();
             }
             alueenLisays.executeBatch();
-            viesti = Viesti.luo(ketjunTunnus, kirjoittaja.annaKayttajanumero(),
-                    ajankohta, sisalto);
+            viesti = Viesti.luo(ketjunTunnus, 1,
+                    kirjoittaja.annaKayttajanumero(), ajankohta, sisalto);
             viestinLisays = viesti.lisayskysely(yhteys);
             viestinLisays.executeUpdate();
         } catch (SQLException e) {

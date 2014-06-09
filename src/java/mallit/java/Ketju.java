@@ -18,18 +18,25 @@ import java.util.logging.Logger;
  */
 public final class Ketju extends Yksilotyyppi {
 
-    private static final String LISAYSPOHJA, HAKUPOHJA1, HAKUPOHJA2, VIESTIHAKU;
+    private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
+            HAKULAUSE2, VIESTIHAKU, ALUEHAKU;
 
     private final int   tunnus;
     private String      aihe;
     private Date        muutettu, siirretty, moderoitu, lukittu, poistettu;
 
     static {
-//        OLIOKUMPPANI = luo(-1, "Oliokumppani");
-        LISAYSPOHJA = "insert into ketjut values (?, ?, ?, ?, ?, ?, ?)";
-        HAKUPOHJA1  = "select * from ketjut where tunnus = ?";
-        HAKUPOHJA2  = "select * from ketjut where aihe = ?";
-        VIESTIHAKU  = "select * from viestit where ketju_id = ?";
+        LISAYSLAUSE     = "insert into ketjut (aihe, muutettu) values (?, ?)";
+        PAIVITYSLAUSE   = "update ketjut set aihe = ?, muutettu = ?, "
+                + "siirretty = ?, moderoitu = ?, lukittu = ?, poistettu = ? "
+                + "where tunnus = ?";
+        HAKULAUSE1      = "select * from ketjut where tunnus = ?";
+        HAKULAUSE2      = "select * from ketjut where aihe = ?";
+        VIESTIHAKU      = "select * from viestit where ketju_id = ? order by "
+                + "numero limit ? offset ?";
+        ALUEHAKU        = "select nimi from ketjut join ketjujen_sijainnit on "
+                + "ketjut.tunnus = ketju_id join alueet on alueet.tunnus = "
+                + "alue_id where ketjut.tunnus = ?";
     }
 
     private Ketju(final boolean tuore, final int tunnus, final String aihe,
@@ -50,10 +57,17 @@ public final class Ketju extends Yksilotyyppi {
      * tietokantaan.
      *
      * @param aihe Luotavan ketjun aihe.
+     * @param muutettu Ketjulle kirjattava luomisajankohta.
      * @return Uusi ketju.
      * @see TietokantaDAO#vie(mallit.java.Yksilotyyppi)
      */
     public static Ketju luo(final String aihe, final Date muutettu) {
+        if (aihe == null || aihe.isEmpty()) {
+            throw new IllegalArgumentException("Ketjulla pitää olla aihe.");
+        }
+        if (muutettu == null) {
+            throw new IllegalArgumentException("Aikaleima puuttuu.");
+        }
         return new Ketju(true, 0, aihe, muutettu, null, null, null, null);
     }
 
@@ -87,14 +101,14 @@ public final class Ketju extends Yksilotyyppi {
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final int tunnus) throws SQLException {
-        PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA1);
+        PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE1);
         kysely.setInt(1, tunnus);
         return kysely;
     }
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final String tunnus) throws SQLException {
-        PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA2);
+        PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE2);
         kysely.setString(1, tunnus);
         return kysely;
     }
@@ -109,20 +123,19 @@ public final class Ketju extends Yksilotyyppi {
             // ollaan suorittamassa ketjun ensimmäistä vientiä tietokantaan. On
             // syytä huomata että tunnus ei päivity tässä oliossa, joten siltä
             // osin tiedot vanhentuvat.
-            kysely = yhteys.prepareStatement("insert into ketjut "
-                    + "(aihe, muutettu) values (?, ?)");
+            kysely = yhteys.prepareStatement(LISAYSLAUSE);
             kysely.setString(1, aihe);
             kysely.setDate(2, muutettu);
             return kysely;
         } else {
-            kysely = yhteys.prepareStatement(LISAYSPOHJA);
-            kysely.setInt(1, tunnus);
-            kysely.setString(2, aihe);
-            kysely.setDate(3, muutettu);
-            kysely.setDate(4, siirretty);
-            kysely.setDate(5, moderoitu);
-            kysely.setDate(6, lukittu);
-            kysely.setDate(7, poistettu);
+            kysely = yhteys.prepareStatement(PAIVITYSLAUSE);
+            kysely.setString(1, aihe);
+            kysely.setDate(2, muutettu);
+            kysely.setDate(3, siirretty);
+            kysely.setDate(4, moderoitu);
+            kysely.setDate(5, lukittu);
+            kysely.setDate(6, poistettu);
+            kysely.setInt(7, tunnus);
         }
         return kysely;
     }
@@ -145,30 +158,29 @@ public final class Ketju extends Yksilotyyppi {
         return aihe;
     }
 
-//    public static List<Ketju> tuoreimmat() throws SQLException {
-//        final List<Ketju> tuoreet = new LinkedList<>();
-//        final Connection yhteys = TietokantaDAO.annaYhteys();
-//
-//        return tuoreet;
-//    }
+    public List<String> annaAlueidenNimet() {
+        final List<String> nimet = new LinkedList<>();
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        try {
+            yhteys = TietokantaDAO.annaYhteys();
+            kysely = yhteys.prepareStatement(ALUEHAKU);
+            kysely.setInt(1, tunnus);
+            vastaus = kysely.executeQuery();
+            while (vastaus.next()) {
+                nimet.add(vastaus.getString(1));
+            }
+        } catch (SQLException e) {
+            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            TietokantaDAO.suljeYhteydet(yhteys, kysely, vastaus);
+        }
+        return nimet;
+    }
 
-//    public List<Alue> annaAlueet() {
-//        try {
-//            final List<Alue> paluuarvo = new LinkedList<>();
-//            final ResultSet vastaus = TietokantaDAO.hae("select alue_id from "
-//                    + "ketjujen_sijainnit where ketju_id = " + tunnus);
-//            while (vastaus.next()) {
-//                paluuarvo.add(Alue.luo(vastaus));
-//            }
-//            return paluuarvo;
-//        } catch (SQLException e) {
-//            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
-//            return null;
-//        }
-//    }
-
-    public List<Viesti> annaViestit() {
-        List<Viesti> viestit = new LinkedList<>();
+    public List<Viesti> annaViestit(final int pituus, final int siirto) {
+        final List<Viesti> viestit = new LinkedList<>();
         Connection yhteys           = null;
         PreparedStatement kysely    = null;
         ResultSet vastaus           = null;
@@ -176,6 +188,8 @@ public final class Ketju extends Yksilotyyppi {
             yhteys  = TietokantaDAO.annaYhteys();
             kysely  = yhteys.prepareStatement(VIESTIHAKU);
             kysely.setInt(1, tunnus);
+            kysely.setInt(2, pituus);
+            kysely.setInt(3, siirto);
             vastaus = kysely.executeQuery();
             while (vastaus.next()) {
                 viestit.add(Viesti.luo(vastaus));

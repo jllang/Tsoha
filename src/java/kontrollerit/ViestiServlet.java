@@ -46,6 +46,8 @@ public final class ViestiServlet extends HttpServlet {
             final HttpServletResponse resp) throws ServletException,
             IOException {
         resp.setContentType("text/html;charset=UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        req.setCharacterEncoding("UTF-8");
         if (!Valvoja.aktiivinenIstunto(req)) {
             Uudelleenohjaaja.siirra(req, resp, "/jsp/sisaankirjaus.jsp");
         } else {
@@ -94,8 +96,10 @@ public final class ViestiServlet extends HttpServlet {
             Jasen kirjoittaja = (Jasen) req.getSession().getAttribute("jasen");
             final int ketjunTunnus =
                     Transaktio.luoKetju(kirjoittaja, aihe,sisalto, alueet);
+            // Miksi relatiivinen URL ilman kovakoodattua Context dirriä ei
+            // toimi tässä?
             Uudelleenohjaaja.uudelleenohjaa(req, resp, "/Tsoha/ketju?tunnus="
-                    + ketjunTunnus);
+                    + ketjunTunnus + "&sivu=1");
         } else {
             req.setAttribute("aihe", aihe);
             req.setAttribute("alueet", valitutAlueet);

@@ -24,7 +24,9 @@ public final class IndexServlet extends HttpServlet {
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
-        resp.setContentType("text/html;charset=UTF-8");
+//        resp.setContentType("text/html;charset=UTF-8");
+//        resp.setCharacterEncoding("UTF-8");
+//        req.setCharacterEncoding("UTF-8");
         Otsikoija.asetaOtsikko(req, "Etusivu");
         req.setAttribute("aluelista", Listaaja.listaa("alueet"));
         req.setAttribute("aluelistanOtsikot", Listaaja.ALUEOTSIKOT);

@@ -10,7 +10,7 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:kehys otsikko="${otsikko}" fooruminNimi="Esimerkkifoorumi">
             <h2>Uusi ketju</h2>
-            <form action="viesti" method="POST">
+            <form action="viesti" method="POST" accept-charset="UTF-8">
                 <input type="hidden" name="lahetetty" value="tosi">
                 <table class="sisalto pariton" style="width: auto">
                     <tr>
