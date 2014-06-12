@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import kontrollerit.tyokalut.Listaaja;
 import kontrollerit.tyokalut.Otsikoija;
 import kontrollerit.tyokalut.Uudelleenohjaaja;
-import kontrollerit.tyokalut.Valvoja;
-import mallit.java.Jasen;
 
 /**
  *
@@ -30,7 +28,7 @@ public final class IndexServlet extends HttpServlet {
         Otsikoija.asetaOtsikko(req, "Etusivu");
         req.setAttribute("aluelista", Listaaja.listaa("alueet"));
         req.setAttribute("aluelistanOtsikot", Listaaja.ALUEOTSIKOT);
-        req.setAttribute("ketjulista", Listaaja.listaa("ketjut"));
+        req.setAttribute("ketjulista", Listaaja.listaa("tuoreet"));
         req.setAttribute("ketjulistanOtsikot", Listaaja.KETJUOTSIKOT);
         Uudelleenohjaaja.siirra(req, resp, "jsp/etusivu.jsp");
     }

@@ -5,7 +5,7 @@
 <t:kehys otsikko="${otsikko}"
          fooruminNimi="Esimerkkifoorumi">
             <h2>Sisäänkirjautuminen</h2>
-            <form action="istunto" method="POST">
+            <form action="istunto?${pageContext.request.queryString}" method="POST">
                 <input type="hidden" name="lahetetty" value="tosi">
                 <table class="sisalto pariton" style="width: auto">
                     <tr>

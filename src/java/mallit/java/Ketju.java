@@ -2,7 +2,7 @@
 package mallit.java;
 
 import java.sql.Connection;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,11 +19,17 @@ import java.util.logging.Logger;
 public final class Ketju extends Yksilotyyppi {
 
     private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
-            HAKULAUSE2, VIESTIHAKU, ALUEHAKU;
+            HAKULAUSE2, VIESTIHAKU, VIESTINUMERON_HAKU, ALUEHAKU,
+            KIRJOITTAJAHAKU;
 
-    private final int   tunnus;
-    private String      aihe;
-    private Date        muutettu, siirretty, moderoitu, lukittu, poistettu;
+    private final int       tunnus;
+    private String          aihe;
+    private Timestamp       muutettu, siirretty, moderoitu, lukittu, poistettu;
+
+    // Seuraavia kenttiä pidetään vain muistissa kyselytulvan vähentämiseksi:
+    private String          kirjoittajanNimi;
+    private int             kirjoittajanTunnus;
+    private Kayttajataso    kirjoittajanTaso;
 
     static {
         LISAYSLAUSE     = "insert into ketjut (aihe, muutettu) values (?, ?)";
@@ -34,14 +40,21 @@ public final class Ketju extends Yksilotyyppi {
         HAKULAUSE2      = "select * from ketjut where aihe = ?";
         VIESTIHAKU      = "select * from viestit where ketju_id = ? order by "
                 + "numero limit ? offset ?";
+        VIESTINUMERON_HAKU = "select max(numero) from viestit where ketju_id = "
+                + "?";
         ALUEHAKU        = "select nimi from ketjut join ketjujen_sijainnit on "
                 + "ketjut.tunnus = ketju_id join alueet on alueet.tunnus = "
                 + "alue_id where ketjut.tunnus = ?";
+        KIRJOITTAJAHAKU = "select jasenet.numero, nimimerkki, jasenet.tunnus, "
+                + "taso from ketjut join viestit on ketjut.tunnus = ketju_id "
+                + "and viestit.numero = 1 join jasenet on kirjoittaja = "
+                + "jasenet.numero where ketjut.tunnus = ?";
     }
 
     private Ketju(final boolean tuore, final int tunnus, final String aihe,
-            final Date muutettu, final Date siirretty, final Date moderoitu,
-            final Date lukittu, final Date poistettu) {
+            final Timestamp muutettu, final Timestamp siirretty,
+            final Timestamp moderoitu, final Timestamp lukittu,
+            final Timestamp poistettu) {
         super(tuore);
         this.tunnus     = tunnus;
         this.aihe       = aihe;
@@ -50,6 +63,8 @@ public final class Ketju extends Yksilotyyppi {
         this.moderoitu  = moderoitu;
         this.lukittu    = lukittu;
         this.poistettu  = poistettu;
+        this.kirjoittajanTunnus = 0;
+        this.kirjoittajanNimi = null;
     }
 
     /**
@@ -61,7 +76,7 @@ public final class Ketju extends Yksilotyyppi {
      * @return Uusi ketju.
      * @see TietokantaDAO#vie(mallit.java.Yksilotyyppi)
      */
-    public static Ketju luo(final String aihe, final Date muutettu) {
+    public static Ketju luo(final String aihe, final Timestamp muutettu) {
         if (aihe == null || aihe.isEmpty()) {
             throw new IllegalArgumentException("Ketjulla pitää olla aihe.");
         }
@@ -82,15 +97,15 @@ public final class Ketju extends Yksilotyyppi {
     static Ketju luo(final ResultSet rs) {
         final int       tunnus;
         final String    aihe;
-        final Date      muutettu, siirretty, moderoitu, lukittu, poistettu;
+        final Timestamp      muutettu, siirretty, moderoitu, lukittu, poistettu;
         try {
             tunnus      = rs.getInt(1);
             aihe        = rs.getString(2);
-            muutettu    = rs.getDate(3);
-            siirretty   = rs.getDate(4);
-            moderoitu   = rs.getDate(5);
-            lukittu     = rs.getDate(6);
-            poistettu   = rs.getDate(7);
+            muutettu    = rs.getTimestamp(3);
+            siirretty   = rs.getTimestamp(4);
+            moderoitu   = rs.getTimestamp(5);
+            lukittu     = rs.getTimestamp(6);
+            poistettu   = rs.getTimestamp(7);
             return new Ketju(false, tunnus, aihe, muutettu, siirretty,
                     moderoitu, lukittu, poistettu);
         } catch (SQLException e) {
@@ -114,35 +129,35 @@ public final class Ketju extends Yksilotyyppi {
     }
 
     @Override
-    PreparedStatement lisayskysely(final Connection yhteys)
-            throws SQLException {
-        final PreparedStatement kysely;
-        if (tunnus == 0) {
-            // Tunnus on tietokannan generoima serial-tyyppinen kokonaisluku.
-            // Erikoisarvo 0 tarkottaa sitä ettei tunnus ole tiedossa koska nyt
-            // ollaan suorittamassa ketjun ensimmäistä vientiä tietokantaan. On
-            // syytä huomata että tunnus ei päivity tässä oliossa, joten siltä
-            // osin tiedot vanhentuvat.
-            kysely = yhteys.prepareStatement(LISAYSLAUSE);
-            kysely.setString(1, aihe);
-            kysely.setDate(2, muutettu);
-            return kysely;
-        } else {
-            kysely = yhteys.prepareStatement(PAIVITYSLAUSE);
-            kysely.setString(1, aihe);
-            kysely.setDate(2, muutettu);
-            kysely.setDate(3, siirretty);
-            kysely.setDate(4, moderoitu);
-            kysely.setDate(5, lukittu);
-            kysely.setDate(6, poistettu);
-            kysely.setInt(7, tunnus);
-        }
-        return kysely;
+    String annaLisayslause() {
+        return LISAYSLAUSE;
+    }
+
+    @Override
+    String annaPaivityslause() {
+        return PAIVITYSLAUSE;
+    }
+
+    @Override
+    void valmisteleLisays(final PreparedStatement kysely) throws SQLException {
+        kysely.setString(1, aihe);
+        kysely.setTimestamp(2, muutettu);
+    }
+
+    @Override
+    void valmisteleUpdate(final PreparedStatement kysely) throws SQLException {
+        kysely.setString(1, aihe);
+        kysely.setTimestamp(2, muutettu);
+        kysely.setTimestamp(3, siirretty);
+        kysely.setTimestamp(4, moderoitu);
+        kysely.setTimestamp(5, lukittu);
+        kysely.setTimestamp(6, poistettu);
+        kysely.setInt(7, tunnus);
     }
 
     public void lisaaSijainti(final Alue alue) {
         try (
-            final Connection yhteys = TietokantaDAO.annaYhteys();
+            final Connection yhteys = TietokantaDAO.annaKertayhteys();
             final PreparedStatement kysely = yhteys.prepareStatement("insert "
                     + "into ketjujen sijainnit values (?, ?)");
                 ) {
@@ -164,7 +179,7 @@ public final class Ketju extends Yksilotyyppi {
         PreparedStatement kysely    = null;
         ResultSet vastaus           = null;
         try {
-            yhteys = TietokantaDAO.annaYhteys();
+            yhteys = TietokantaDAO.annaKertayhteys();
             kysely = yhteys.prepareStatement(ALUEHAKU);
             kysely.setInt(1, tunnus);
             vastaus = kysely.executeQuery();
@@ -174,18 +189,18 @@ public final class Ketju extends Yksilotyyppi {
         } catch (SQLException e) {
             Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
         } finally {
-            TietokantaDAO.suljeYhteydet(yhteys, kysely, vastaus);
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
         return nimet;
     }
 
     public List<Viesti> annaViestit(final int pituus, final int siirto) {
-        final List<Viesti> viestit = new LinkedList<>();
+        final List<Viesti> viestit  = new LinkedList<>();
         Connection yhteys           = null;
         PreparedStatement kysely    = null;
         ResultSet vastaus           = null;
         try {
-            yhteys  = TietokantaDAO.annaYhteys();
+            yhteys  = TietokantaDAO.annaKertayhteys();
             kysely  = yhteys.prepareStatement(VIESTIHAKU);
             kysely.setInt(1, tunnus);
             kysely.setInt(2, pituus);
@@ -197,10 +212,77 @@ public final class Ketju extends Yksilotyyppi {
         } catch (SQLException e) {
             Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
         } finally {
-            TietokantaDAO.suljeYhteydet(yhteys, kysely, vastaus);
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
 
         return viestit;
+    }
+
+    public int annaViimeisenViestinNumero() {
+        int numero = 0;
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(VIESTINUMERON_HAKU);
+            kysely.setInt(1, tunnus);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            numero = vastaus.getInt(1);
+        } catch (SQLException e) {
+            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+        return numero;
+    }
+
+    public int annaKirjoittajanTunnus() {
+        if (kirjoittajanTunnus == 0) {
+            haeKirjoittaja();
+        }
+        return kirjoittajanTunnus;
+    }
+
+    public String annaKirjoittajanNimi() {
+        if (kirjoittajanNimi == null) {
+            haeKirjoittaja();
+        }
+        return kirjoittajanNimi;
+    }
+
+    public Kayttajataso annaKirjoittajanTaso() {
+        if (kirjoittajanTaso == null) {
+            haeKirjoittaja();
+        }
+        return kirjoittajanTaso;
+    }
+
+    private void haeKirjoittaja() {
+        Connection yhteys = null;
+        PreparedStatement kysely = null;
+        ResultSet vastaus = null;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(KIRJOITTAJAHAKU);
+            kysely.setInt(1, tunnus);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            kirjoittajanTunnus = vastaus.getInt(1);
+            kirjoittajanNimi = vastaus.getString(2);
+            if (kirjoittajanNimi == null) {
+                // Jos nimimerkki oli tyhjä, käytetään käyttäjätunnusta (aivan
+                // kuten jäsenen listausNimi-metodissa):
+                kirjoittajanNimi = vastaus.getString(3);
+            }
+            kirjoittajanTaso = Kayttajataso.valueOf(vastaus.getString(4));
+        } catch (SQLException e) {
+            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+
     }
 
     public int annaTunnus() {
@@ -215,43 +297,43 @@ public final class Ketju extends Yksilotyyppi {
         this.aihe = aihe;
     }
 
-    public Date annaMuutettu() {
+    public Timestamp annaMuutettu() {
         return muutettu;
     }
 
-    public void asetaMuutettu(Date muutettu) {
+    public void asetaMuutettu(Timestamp muutettu) {
         this.muutettu = muutettu;
     }
 
-    public Date annaSiirretty() {
+    public Timestamp annaSiirretty() {
         return siirretty;
     }
 
-    public void asetaSiirretty(final Date siirretty) {
+    public void asetaSiirretty(final Timestamp siirretty) {
         this.siirretty = siirretty;
     }
 
-    public Date annaModeroitu() {
+    public Timestamp annaModeroitu() {
         return moderoitu;
     }
 
-    public void asetaModeroitu(final Date moderoitu) {
+    public void asetaModeroitu(final Timestamp moderoitu) {
         this.moderoitu = moderoitu;
     }
 
-    public Date annaLukittu() {
+    public Timestamp annaLukittu() {
         return lukittu;
     }
 
-    public void asetaLukittu(final Date lukittu) {
+    public void asetaLukittu(final Timestamp lukittu) {
         this.lukittu = lukittu;
     }
 
-    public Date annaPoistettu() {
+    public Timestamp annaPoistettu() {
         return poistettu;
     }
 
-    public void asetaPoistettu(final Date poistettu) {
+    public void asetaPoistettu(final Timestamp poistettu) {
         this.poistettu = poistettu;
     }
 }

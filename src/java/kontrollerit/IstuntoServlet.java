@@ -1,8 +1,8 @@
-
 package kontrollerit;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -43,7 +43,7 @@ public final class IstuntoServlet extends HttpServlet {
 //        resp.setContentType("text/html;charset=UTF-8");
 //        resp.setCharacterEncoding("UTF-8");
 //        req.setCharacterEncoding("UTF-8");
-        if (!Valvoja.aktiivinenIstunto(req)) {
+        if (req.getSession().getAttribute("jasen") == null) {
             Otsikoija.asetaOtsikko(req, "Sisäänkirjautuminen");
             sisaankirjaus(req, resp);
         } else {
@@ -56,9 +56,34 @@ public final class IstuntoServlet extends HttpServlet {
             IOException {
         final String kayttajatunnus = req.getParameter("kayttajatunnus"),
                 salasana = req.getParameter("salasana");
-        if (kayttajatunnus == null || salasana == null) {
-            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp");
+        if (puutteita(kayttajatunnus, salasana, req)) {
+            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp"
+                    + (req.getQueryString() == null ? ""
+                            : "?" + req.getQueryString()));
             return;
+        }
+        // Tämähän on vähän niinkuin malloc:
+        Jasen jasen = (Jasen) TietokantaDAO.tuo(Jasen.class, kayttajatunnus);
+        if (jasen != null && Valvoja.autentikoi(jasen, salasana)) {
+            final String[] parametrit = req.getQueryString().split("&");
+            String pyynto = jasennaPyynto(parametrit);
+            req.getSession().setAttribute("jasen", jasen);
+            Uudelleenohjaaja.uudelleenohjaa(req, resp, pyynto);
+        } else {
+            req.setAttribute("virhekoodi", 1);
+            req.setAttribute("kayttajatunnus", kayttajatunnus);
+            req.setAttribute("salasana", salasana);
+            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp"
+                    + (req.getQueryString() == null ? ""
+                            : "?" + req.getQueryString()));
+        }
+    }
+
+    private static boolean puutteita(final String kayttajatunnus,
+            final String salasana, final HttpServletRequest req)
+            throws IOException, ServletException {
+        if (kayttajatunnus == null || salasana == null) {
+            return true;
         }
         if (kayttajatunnus.isEmpty() || salasana.isEmpty()) {
             req.setAttribute("kayttajatunnus", kayttajatunnus);
@@ -66,26 +91,26 @@ public final class IstuntoServlet extends HttpServlet {
             if (req.getParameter("lahetetty") != null) {
                 req.setAttribute("virhekoodi", 2);
             }
-            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp");
-            return;
+            return true;
         }
-        Jasen jasen;
-        try {
-            jasen = (Jasen) TietokantaDAO.tuo(Jasen.class,
-                    kayttajatunnus);
-        } catch (SQLException e) {
-            Logger.getLogger(IstuntoServlet.class.getName()).log(Level.SEVERE,
-                    null, e);
-            jasen = null;
-        }
-        if (jasen != null && Valvoja.autentikoi(jasen, salasana)) {
-            req.getSession().setAttribute("jasen", jasen);
-            Uudelleenohjaaja.uudelleenohjaa(req, resp, "etusivu");
+        return false;
+    }
+
+    private static String jasennaPyynto(final String[] parametrit) {
+        if (parametrit.length >= 2) {
+            StringBuilder mjr = new StringBuilder();
+            mjr.append(parametrit[0].split("=")[1]);
+            mjr.append('?');
+            for (int i = 1; i < parametrit.length - 1; i++) {
+                mjr.append(parametrit[i]);
+                mjr.append('&');
+            }
+            mjr.append(parametrit[parametrit.length - 1]);
+            return mjr.toString();
+        } else if (parametrit.length == 1) {
+            return parametrit[0];
         } else {
-            req.setAttribute("virhekoodi", 1);
-            req.setAttribute("kayttajatunnus", kayttajatunnus);
-            req.setAttribute("salasana", salasana);
-            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp");
+            return "etusivu";
         }
     }
 

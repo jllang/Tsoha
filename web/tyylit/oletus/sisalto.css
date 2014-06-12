@@ -63,3 +63,15 @@ td.peruskentta {
 td.listauskentta {
     overflow:       hidden;
 }
+
+a.moderaattori {
+    color:          #00A0A0;
+}
+
+a.yllapitaja {
+    color:          #C00000;
+}
+
+a.tavallinen {
+    color:          #322454;
+}

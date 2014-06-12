@@ -19,7 +19,7 @@ public final class Otsikoija {
      */
     public static void asetaOtsikko(final HttpServletRequest req,
             final String sivunNimi) {
-        req.setAttribute("otsikko", Valvoja.aktiivinenIstunto(req)
+        req.setAttribute("otsikko", req.getSession().getAttribute("jasen") != null
                 ? ((Jasen) req.getSession().getAttribute("jasen")).listausnimi()
                 + "@Esimerkkifoorumi: " + sivunNimi
                 : "Esimerkkifoorumi: " + sivunNimi);

@@ -8,10 +8,6 @@
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
-    <!--<servlet-mapping>
-    <servlet-name>IndexServlet</servlet-name>
-    <url-pattern>/</url-pattern>
-    </servlet-mapping>-->
     <jsp-config>
         <jsp-property-group>
             <url-pattern>*.jsp</url-pattern>

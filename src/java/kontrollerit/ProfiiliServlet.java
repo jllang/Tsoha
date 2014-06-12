@@ -2,6 +2,7 @@ package kontrollerit;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -27,23 +28,16 @@ public final class ProfiiliServlet extends HttpServlet {
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
-//        resp.setContentType("text/html;charset=UTF-8");
-//        resp.setCharacterEncoding("UTF-8");
-//        req.setCharacterEncoding("UTF-8");
-        if (!Valvoja.aktiivinenIstunto(req)) {
-            // Tarkastetaan aivan aluksi onko käyttäjä kirjautunut sisään,
-            // jottei jouduta tekemään turhia tietokantakyselyjä:
-            Uudelleenohjaaja.siirra(req, resp, "/jsp/sisaankirjaus.jsp");
-            return;
+        if (Valvoja.aktiivinenIstunto(req, resp, "profiili")) {
+            naytaProfiili(req, resp);
         }
+    }
+
+    private void naytaProfiili(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Jasen kohde, katselija;
         try {
             kohde = (Jasen)TietokantaDAO.tuo(
                     Jasen.class, Integer.parseInt(req.getParameter("tunnus")));
-        } catch (SQLException e) {
-            Logger.getLogger(ProfiiliServlet.class.getName()).log(Level.SEVERE,
-                    null, e);
-            kohde = null;
         } catch (NumberFormatException e) {
             // Käyttäjä heitti urliin jotain roskaa.
             kohde = null;
@@ -63,10 +57,12 @@ public final class ProfiiliServlet extends HttpServlet {
         }
         req.setAttribute("nimimerkki", kohde.listausnimi());
         req.setAttribute("taso", kohde.annaTaso().toString().toLowerCase());
-        req.setAttribute("rekisteroity", kohde.annaRekisteroity());
-        req.setAttribute("viesteja", 0);
+        req.setAttribute("rekisteroity",
+                DateFormat.getDateInstance().format(kohde.annaRekisteroity()));
+        req.setAttribute("viesteja", kohde.annaViesteja());
         req.setAttribute("kuvaus", kohde.annaKuvaus());
         Otsikoija.asetaOtsikko(req, omaProfiili ? "Oma sivu" : "Profiilisivu");
         Uudelleenohjaaja.siirra(req, resp, "/jsp/profiili.jsp");
+        return;
     }
 }

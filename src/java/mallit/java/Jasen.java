@@ -7,7 +7,7 @@
 package mallit.java;
 
 import java.sql.Connection;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,12 +23,13 @@ import java.util.regex.Pattern;
  */
 public final class Jasen extends Yksilotyyppi {
 
-    private static final String     LISAYSPOHJA, HAKUPOHJA1, HAKUPOHJA2;
+    private static final String     LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
+            HAKULAUSE2;
     private static final Predicate<String> KELVOLLINEN_SP;
 
     private final int       kayttajanumero;
     private final String    kayttajatunnus;
-    private final Date      rekisteroity;
+    private final Timestamp rekisteroity;
     private String          salasanatiiviste, suola, sahkopostiosoite;
     private Kayttajataso    taso;
 
@@ -42,19 +43,22 @@ public final class Jasen extends Yksilotyyppi {
                                         // from viestit where kirjoittaja...).
 
     static {
-        LISAYSPOHJA = "insert into jasenet (numero, tunnus, rekisteroity, "
-                + "tiiviste, suola, sposti, taso, nimimerkki, avatar, kuvaus,"
-                + "viesteja) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        HAKUPOHJA1   = "select * from jasenet where numero = ?";
-        HAKUPOHJA2  = "select * from jasenet where tunnus = ?";
-        KELVOLLINEN_SP = Pattern.compile(
+        LISAYSLAUSE     = "insert into jasenet (tunnus, rekisteroity, tiiviste,"
+                + " suola, sposti, taso, nimimerkki, avatar, kuvaus, viesteja) "
+                + "values (?, ?, ?, ?, ?, ?::Kayttajataso, ?, ?, ?, ?)";
+        PAIVITYSLAUSE   = "update jasenet set tiiviste = ?, suola = ?, sposti ="
+                + " ?, taso = ?::Kayttajataso, nimimerkki = ?, avatar = ?,"
+                + "kuvaus = ?, viesteja = ? where numero = ?";
+        HAKULAUSE1      = "select * from jasenet where numero = ?";
+        HAKULAUSE2      = "select * from jasenet where tunnus = ?";
+        KELVOLLINEN_SP  = Pattern.compile(
                 "^([a-z0-9]|([a-z0-9][._-][a-z0-9]))+"
                         + "@([a-z0-9]|([a-z0-9][._-][a-z0-9]))+\\.[a-z]{2,4}$",
                 Pattern.CASE_INSENSITIVE).asPredicate();
     }
 
     private Jasen(final boolean tuore, final int numero,
-            final String kayttajatunnus, final Date rekisteroity,
+            final String kayttajatunnus, final Timestamp rekisteroity,
             final String salasanatiiviste, final String suola,
             final String sahkopostiosoite, final Kayttajataso taso,
             final String nimimerkki, final String avatar, final String kuvaus,
@@ -88,8 +92,9 @@ public final class Jasen extends Yksilotyyppi {
                     + "epätyhjä --ja järkevä-- korkeintaan 64 merkin jono.");
         }
         return new Jasen(true, 0, kayttajatunnus,
-                new Date(System.currentTimeMillis()), salasanatiiviste, suola,
-                sahkopostiosoite, Kayttajataso.TAVALLINEN, null, null, null, 0);
+                new Timestamp(System.currentTimeMillis()), salasanatiiviste,
+                suola, sahkopostiosoite, Kayttajataso.TAVALLINEN, null, null,
+                null, 0);
     }
 
     /**
@@ -104,12 +109,12 @@ public final class Jasen extends Yksilotyyppi {
         final int numero, viesteja;
         final String kayttajatunnus, salasanatiiviste, suola, sahkoposti,
                 nimimerkki, avatar, kuvaus;
-        final Date rekisteroity;
+        final Timestamp rekisteroity;
         final Kayttajataso taso;
         try {
             numero              = rs.getInt(1);
             kayttajatunnus      = rs.getString(2);
-            rekisteroity        = rs.getDate(3);
+            rekisteroity        = rs.getTimestamp(3);
             salasanatiiviste    = rs.getString(4);
             suola               = rs.getString(5);
             sahkoposti          = rs.getString(6);
@@ -129,32 +134,85 @@ public final class Jasen extends Yksilotyyppi {
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final int avain) throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA1);
+        final PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE1);
         kysely.setInt(1, avain);
         return kysely;
     }
 
-    static PreparedStatement hakukysely(
-            final Connection yhteys, final String avain) throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA2);
+    static PreparedStatement hakukysely(final Connection yhteys,
+            final String avain) throws SQLException {
+        final PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE2);
         kysely.setString(1, avain);
         return kysely;
     }
+//
+//    @Override
+//    PreparedStatement lisayskysely(final Connection yhteys)
+//            throws SQLException {
+//        final PreparedStatement kysely;
+//        if (onTuore()) {
+//            kysely = yhteys.prepareStatement(LISAYSLAUSE);
+//            kysely.setString(1, kayttajatunnus);
+//            kysely.setTimestamp(2, rekisteroity);
+//            kysely.setString(3, salasanatiiviste);
+//            kysely.setString(4, suola);
+//            kysely.setString(5, sahkopostiosoite);
+//            kysely.setString(6, taso.name());
+//            kysely.setString(7, nimimerkki);
+//            kysely.setString(8, avatar);
+//            kysely.setString(9, kuvaus);
+//            kysely.setInt(10, viesteja);
+//            asetaEpatuoreeksi();
+//        } else {
+//            kysely = yhteys.prepareStatement(PAIVITYSLAUSE);
+//            kysely.setString(1, salasanatiiviste);
+//            kysely.setString(2, suola);
+//            kysely.setString(3, sahkopostiosoite);
+//            kysely.setString(4, taso.name());
+//            kysely.setString(5, nimimerkki);
+//            kysely.setString(6, avatar);
+//            kysely.setString(7, kuvaus);
+//            kysely.setInt(8, viesteja);
+//            kysely.setInt(9, kayttajanumero);
+//        }
+//        return kysely;
+//    }
 
     @Override
-    PreparedStatement lisayskysely(final Connection yhteys)
-            throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(LISAYSPOHJA);
+    String annaLisayslause() {
+        return LISAYSLAUSE;
+    }
+
+    @Override
+    String annaPaivityslause() {
+        return PAIVITYSLAUSE;
+    }
+
+    @Override
+    void valmisteleLisays(final PreparedStatement kysely) throws SQLException {
         kysely.setString(1, kayttajatunnus);
-        kysely.setDate(  2, rekisteroity);
+        kysely.setTimestamp(2, rekisteroity);
         kysely.setString(3, salasanatiiviste);
         kysely.setString(4, suola);
         kysely.setString(5, sahkopostiosoite);
-        kysely.setString(6, taso.toString());
+        kysely.setString(6, taso.name());
         kysely.setString(7, nimimerkki);
         kysely.setString(8, avatar);
         kysely.setString(9, kuvaus);
-        return kysely;
+        kysely.setInt(10, viesteja);
+    }
+
+    @Override
+    void valmisteleUpdate(final PreparedStatement kysely) throws SQLException {
+        kysely.setString(1, salasanatiiviste);
+        kysely.setString(2, suola);
+        kysely.setString(3, sahkopostiosoite);
+        kysely.setString(4, taso.name());
+        kysely.setString(5, nimimerkki);
+        kysely.setString(6, avatar);
+        kysely.setString(7, kuvaus);
+        kysely.setInt(8, viesteja);
+        kysely.setInt(9, kayttajanumero);
     }
 
     @Override
@@ -184,29 +242,29 @@ public final class Jasen extends Yksilotyyppi {
      */
     public boolean onPorttikiellossa() {
         try {
-            final Connection yhteys = TietokantaDAO.annaYhteys();
+            final Connection yhteys = TietokantaDAO.annaKertayhteys();
             final PreparedStatement kysely = yhteys.prepareStatement("select "
                     + "asetettu, kesto from porttikiellot where kohde = ?");
             kysely.setInt(1, kayttajanumero);
             final ResultSet vastaus = kysely.executeQuery();
 
             if (!vastaus.next()) {
-                TietokantaDAO.suljeYhteydet(yhteys, kysely, vastaus);
+                TietokantaDAO.sulje(yhteys, kysely, vastaus);
                 return false;
             }
-            final Date alkanut  = vastaus.getDate(1);
+            final Timestamp alkanut  = vastaus.getTimestamp(1);
             final int kesto     = vastaus.getInt(2);
             if (kesto == 0) {
                 // 0 merkitsee toistaiseksi voimassa olevaa porttikieltoa.
                 return false;
             }
-            final Date paattyy  = new Date(alkanut.getTime() + 60000 * kesto);
-            final Date nykyhetki = new Date(System.currentTimeMillis());
+            final Timestamp paattyy  = new Timestamp(alkanut.getTime() + 60000 * kesto);
+            final Timestamp nykyhetki = new Timestamp(System.currentTimeMillis());
             boolean paattynyt = paattyy.compareTo(nykyhetki) <= 0;
             if (paattynyt) {
 //                poistaPorttikielto();
             }
-            TietokantaDAO.suljeYhteydet(yhteys, kysely, vastaus);
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
             return paattynyt;
         } catch (SQLException e) {
             Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
@@ -215,10 +273,10 @@ public final class Jasen extends Yksilotyyppi {
     }
 
 //    public void asetaPorttikielto(final int kesto) {
-////        setPorttikielto(new Date(System.currentTimeMillis()), kesto);
+////        setPorttikielto(new Timestamp(System.currentTimeMillis()), kesto);
 //        TietokantaDAO.paivita("insert into porttikiellot values ('"
 //                + kayttajatunnus + "', '"
-//                + new Date(System.currentTimeMillis()) + "', " + kesto + ")");
+//                + new Timestamp(System.currentTimeMillis()) + "', " + kesto + ")");
 //    }
 
 //    public void poistaPorttikielto() {
@@ -234,7 +292,7 @@ public final class Jasen extends Yksilotyyppi {
         return kayttajatunnus;
     }
 
-    public Date annaRekisteroity() {
+    public Timestamp annaRekisteroity() {
         return rekisteroity;
     }
 
@@ -300,6 +358,10 @@ public final class Jasen extends Yksilotyyppi {
 
     public void asetaViesteja(int viesteja) {
         this.viesteja = viesteja;
+    }
+
+    public void kasvataViesteja() {
+        viesteja++;
     }
 
 }

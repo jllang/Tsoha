@@ -10,13 +10,17 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:kehys otsikko="${otsikko}" fooruminNimi="Esimerkkifoorumi">
             <h2>Uusi ketju</h2>
-            <form action="viesti" method="POST" accept-charset="UTF-8">
+            <form action="viesti?${pageContext.request.queryString}"
+                  method="POST" accept-charset="UTF-8">
                 <input type="hidden" name="lahetetty" value="tosi">
                 <table class="sisalto pariton" style="width: auto">
                     <tr>
                         <td class="virhe" colspan="4">
-                            <c:if test="${epaonnistui == true}">
-                                <t:virhe>Aihetta, alueita tai viestiä ei annettu.</t:virhe>
+                            <c:if test="${virhekoodi == 1}">
+                            <t:virhe>Aihetta, alueita tai viestiä ei annettu.</t:virhe>
+                            </c:if>
+                            <c:if test="${virhekoodi == 2}">
+                            <t:virhe>Palvelimella tapahtui virhe. Ketjua ei luotu.</t:virhe>
                             </c:if>
                         </td>
                     </tr>
@@ -25,13 +29,13 @@
                         <td class="peruskentta">
                             <input title="Aihe" type="text" name="aihe"
                                    placeholder="Ketjun aihe" value="${aihe}"
-                                   autofocus="autofocus">
+                                   autofocus="autofocus" ${muokattavuus}>
                         </td>
                         <td class="peruskentta">Alueet</td>
                         <td class="peruskentta">
-                            <select multiple="multiple" name="alueet">
+                            <select multiple="multiple" name="alueet" ${muokattavuus}>
                                 <c:forEach items="${aluelista}" var="alue">
-                                <option>${alue}</option>
+                                    <option>${alue}</option>
                                 </c:forEach>
                             </select>
                         </td>
@@ -44,9 +48,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4"><input
-                                title="Vahvista ketjun aloittaminen"
-                                value="Lähetä" type="submit"></td>
+                        <td colspan="4"><input title="Lähetä" value="Lähetä"
+                                               type="submit"></td>
                     </tr>
                 </table>
             </form>

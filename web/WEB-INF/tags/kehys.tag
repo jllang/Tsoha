@@ -27,7 +27,7 @@
                             + "</a>");
                     final Kayttajataso taso;
                     final int kayttajanumero;
-                    if (Valvoja.aktiivinenIstunto(request)) {
+                    if (request.getSession().getAttribute("jasen") != null) {
                         final Jasen jasen = (Jasen) request.getSession()
                                 .getAttribute("jasen");
                         taso = jasen.annaTaso();
@@ -47,8 +47,8 @@
                                         + "painike\" href=\"profiili?tunnus="
                                         + kayttajanumero + "\">Oma sivu</a>");
                                 out.println("                <a class=\""
-                                        + "painike\" href=\"viesti?toiminto="
-                                        + "uusi\">Uusi ketju</a>");
+                                        + "painike\" href=\"viesti?ketju=0\">"
+                                        + "Uusi ketju</a>");
                                 out.println("                <a class=\""
                                         + "painike\" href=\"haku\">Haku</a>");
                                 out.println("                <a class=\""

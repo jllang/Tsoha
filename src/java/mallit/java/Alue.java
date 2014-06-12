@@ -2,12 +2,12 @@
 package mallit.java;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,20 +18,23 @@ import java.util.logging.Logger;
  */
 public final class Alue extends Yksilotyyppi {
 
-    private static final String LISAYSPOHJA, HAKUPOHJA1, HAKUPOHJA2;
+    private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
+            HAKULAUSE2;
 
     private final int   tunnus;
     private String      nimi, kuvaus;
-    private Date        lukittu, poistettu;
+    private Timestamp   lukittu, poistettu;
 
     static {
-        LISAYSPOHJA = "insert into alueet values (?, ?, ?, ?, ?)";
-        HAKUPOHJA1  = "select * from alueet where tunnus = ?";
-        HAKUPOHJA2  = "select * from alueet where nimi = ?";
+        LISAYSLAUSE     = "insert into alueet (nimi, kuvaus) values (?, ?)";
+        PAIVITYSLAUSE   = "update alueet set nimi = ?, kuvaus = ?, lukittu = ?,"
+                + " poistettu = ? where tunnus = ?";
+        HAKULAUSE1      = "select * from alueet where tunnus = ?";
+        HAKULAUSE2      = "select * from alueet where nimi = ?";
     }
 
     private Alue(final boolean tuore, final int tunnus, final String nimi,
-            final String kuvaus, final Date lukittu, final Date poistettu) {
+            final String kuvaus, final Timestamp lukittu, final Timestamp poistettu) {
         super(tuore);
         this.tunnus     = tunnus;
         this.nimi       = nimi;
@@ -63,13 +66,13 @@ public final class Alue extends Yksilotyyppi {
     static Alue luo(final ResultSet rs) {
         final int       tunnus;
         final String    nimi, kuvaus;
-        final Date      lukittu, poistettu;
+        final Timestamp      lukittu, poistettu;
         try {
             tunnus      = rs.getInt(1);
             nimi        = rs.getString(2);
             kuvaus      = rs.getString(3);
-            lukittu     = rs.getDate(4);
-            poistettu   = rs.getDate(5);
+            lukittu     = rs.getTimestamp(4);
+            poistettu   = rs.getTimestamp(5);
             return new Alue(false, tunnus, nimi, kuvaus, lukittu, poistettu);
         } catch (SQLException e) {
             Logger.getLogger(Alue.class.getName()).log(Level.SEVERE, null, e);
@@ -79,21 +82,21 @@ public final class Alue extends Yksilotyyppi {
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final int avain) throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA1);
+        final PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE1);
         kysely.setInt(1, avain);
         return kysely;
     }
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final String avain) throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(HAKUPOHJA2);
+        final PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE2);
         kysely.setString(1, avain);
         return kysely;
     }
 
     public static List<String> annaNimet() {
         try (
-            final Connection yhteys = TietokantaDAO.annaYhteys();
+            final Connection yhteys = TietokantaDAO.annaKertayhteys();
             final PreparedStatement kysely = yhteys.prepareStatement("select "
                     + "nimi from alueet");
             final ResultSet vastaus = kysely.executeQuery();
@@ -112,7 +115,7 @@ public final class Alue extends Yksilotyyppi {
     public List<Ketju> annaKetjut(final int sivunPituus, final int siirto)
             throws SQLException {
         final List<Ketju> paluuarvo = new LinkedList<>();
-        final Connection yhteys = TietokantaDAO.annaYhteys();
+        final Connection yhteys = TietokantaDAO.annaKertayhteys();
         final PreparedStatement kysely = yhteys.prepareStatement("select "
                 + "ketju.tunnus, aihe, muutettu, siirretty, moderoitu, "
                 + "ketju.lukittu, ketju.poistettu from alueet inner join "
@@ -127,7 +130,7 @@ public final class Alue extends Yksilotyyppi {
         while (vastaus.next()) {
             paluuarvo.add(Ketju.luo(vastaus));
         }
-        TietokantaDAO.suljeYhteydet(yhteys, kysely, vastaus);
+        TietokantaDAO.sulje(yhteys, kysely, vastaus);
         return paluuarvo;
     }
 
@@ -140,15 +143,40 @@ public final class Alue extends Yksilotyyppi {
 //        final ResultSet vastaus = kysely.executeQuery();
 //    }
 
+//    @Override
+//    PreparedStatement lisayskysely(final Connection yhteys)
+//            throws SQLException {
+//        final PreparedStatement kysely = yhteys.prepareStatement(LISAYSPOHJA);
+//        kysely.setString(1, nimi);
+//        kysely.setString(2, kuvaus);
+//        kysely.setTimestamp(3, lukittu);
+//        kysely.setTimestamp(4, poistettu);
+//        return kysely;
+//    }
+
     @Override
-    PreparedStatement lisayskysely(final Connection yhteys)
-            throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(LISAYSPOHJA);
+    String annaLisayslause() {
+        return LISAYSLAUSE;
+    }
+
+    @Override
+    String annaPaivityslause() {
+        return PAIVITYSLAUSE;
+    }
+
+    @Override
+    void valmisteleLisays(final PreparedStatement kysely) throws SQLException {
         kysely.setString(1, nimi);
         kysely.setString(2, kuvaus);
-        kysely.setDate(3, lukittu);
-        kysely.setDate(4, poistettu);
-        return kysely;
+    }
+
+    @Override
+    void valmisteleUpdate(final PreparedStatement kysely) throws SQLException {
+        kysely.setString(1, nimi);
+        kysely.setString(2, kuvaus);
+        kysely.setTimestamp(3, lukittu);
+        kysely.setTimestamp(4, poistettu);
+        kysely.setInt(5, tunnus);
     }
 
     @Override
@@ -176,19 +204,19 @@ public final class Alue extends Yksilotyyppi {
         this.kuvaus = kuvaus;
     }
 
-    public Date annaLukittu() {
+    public Timestamp annaLukittu() {
         return lukittu;
     }
 
-    public void asetaLukittu(final Date lukittu) {
+    public void asetaLukittu(final Timestamp lukittu) {
         this.lukittu = lukittu;
     }
 
-    public Date annaPoistettu() {
+    public Timestamp annaPoistettu() {
         return poistettu;
     }
 
-    public void asetaPoistettu(final Date poistettu) {
+    public void asetaPoistettu(final Timestamp poistettu) {
         this.poistettu = poistettu;
     }
 

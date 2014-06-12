@@ -6,9 +6,12 @@
 
 package kontrollerit.tyokalut;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import kontrollerit.IstuntoServlet;
 import mallit.java.Jasen;
 
@@ -19,16 +22,31 @@ import mallit.java.Jasen;
 public final class Valvoja {
 
     /**
-     * Palauttaa tosi joss annettuun pyyntöön liittyy aktiivinen istunto.
+     * Palauttaa <tt>true</tt> joss annettuun pyyntöön liittyy aktiivinen
+     * istunto. Muussa tapauksessa metodi ohjaa käyttäjän kirjautumissivulle ja
+     * palauttaa <tt>false</tt>, jolloin metodia kutsuneen servletin tulee
+     * lopettaa suoritus.
      *
-     * @param req   Pyyntö
+     * @param req       Pyyntö
+     * @param resp      Vastaus
+     * @param toiminto  Metodia kutsuneen servletin kuuntelema URL (ilman
+     *                  kauttaviivaa). Istunnon aloittamisesta vastaava servlet
+     *                  ohjaa käyttäjän tähän osoitteeseen kun kirjautuminen on
+     *                  suoritettu.
      * @return      Liittyykö pyyntöön istunto.
+     * @throws javax.servlet.ServletException
+     * @throws java.io.IOException
      */
-    public static boolean aktiivinenIstunto(final HttpServletRequest req) {
-        return req.getSession().getAttribute("jasen") != null;
+    public static boolean aktiivinenIstunto(final HttpServletRequest req,
+            HttpServletResponse resp, final String toiminto)
+            throws ServletException, IOException {
+        if (req.getSession().getAttribute("jasen") == null) {
+            Uudelleenohjaaja.siirra(req, resp, "/istunto?toiminto=" + toiminto
+                    + "&" + req.getQueryString());
+            return false;
+        }
+        return true;
     }
-
-//    public static void varmistaIstunto
 
     /**
      * Palauttaa <tt>true</tt> joss annettu käyttäjätunnus on olemassa ja sillä

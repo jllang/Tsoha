@@ -1,19 +1,10 @@
 package kontrollerit.tyokalut;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import kontrollerit.tyokalut.Uudelleenohjaaja;
+import javax.swing.text.DateFormatter;
 import kontrollerit.tyypit.ListaAlkio;
 import mallit.java.Alue;
 import mallit.java.Ketju;
@@ -54,6 +45,9 @@ public final class Listaaja {
     private static List<ListaAlkio> kasitteleParametrit(final String kohde) {
         final List<ListaAlkio> lista;
         switch (kohde) {
+            case "tuoreet":
+                lista = haeTuoreet();
+                break;
             case "ketjut":
 //                final int aluetunnus;
 //                try {
@@ -79,45 +73,59 @@ public final class Listaaja {
         return lista;
     }
 
-    private static List<ListaAlkio> haeKetjut() {
-        try {
-            Yksilotyyppi[] alueet = TietokantaDAO.tuoSivu(Ketju.class, "aihe",
-                    10, 0);
-            List<ListaAlkio> lista = new LinkedList<>();
-            for (int i = 0; i < alueet.length; i++) {
-                final Yksilotyyppi ketju = alueet[i];
-                if (ketju == null) {
-                    break;
-                }
-                lista.add(new ListaAlkio(i, "/ketju?tunnus=0", ketju.listausnimi(),
-                        new String[]{}));
+    private static List<ListaAlkio> haeTuoreet() {
+        Yksilotyyppi[] ketjut = TietokantaDAO.tuoSivu(Ketju.class, "muutettu",
+                true, 10, 0);
+        List<ListaAlkio> lista = new LinkedList<>();
+        for (int i = 0; i < ketjut.length; i++) {
+            final Ketju ketju = (Ketju) ketjut[i];
+            if (ketju == null) {
+                break;
             }
-            return lista;
-        } catch (SQLException e) {
-            Logger.getLogger(Listaaja.class.getName()).log(Level.SEVERE,
-                    null, e);
-            return null;
+            // Ketjuunkin kannattaisi ehkä lisätä viestien määrän kertova kenttä
+            // niin päästäisiin helposti linkittämään viimeiselle sivulle ilman
+            // yhteenvetokyselyjä...
+            lista.add(new ListaAlkio(i,
+                    "ketju?tunnus=" + ketju.annaTunnus() + "&sivu=1",
+                    ketju.listausnimi(), new String[]{
+                        "<a class=\"" + ketju.annaKirjoittajanTaso().toString()
+                                .toLowerCase() + "\" href=\"profiili?tunnus="
+                                + ketju.annaKirjoittajanTunnus() + "\">"
+                                + ketju.annaKirjoittajanNimi() + "</a>",
+                        DateFormat.getInstance().format(
+                                new Date(ketju.annaMuutettu().getTime()))
+                    }));
         }
+        return lista;
     }
 
+//    private static List<ListaAlkio> haeKetjut() {
+//        Yksilotyyppi[] alueet = TietokantaDAO.tuoSivu(Ketju.class, "aihe",
+//                10, 0);
+//        List<ListaAlkio> lista = new LinkedList<>();
+//        for (int i = 0; i < alueet.length; i++) {
+//            final Yksilotyyppi ketju = alueet[i];
+//            if (ketju == null) {
+//                break;
+//            }
+//            lista.add(new ListaAlkio(i, "/ketju?tunnus=0", ketju.listausnimi(),
+//                    new String[]{}));
+//        }
+//        return lista;
+//    }
+
     private static List<ListaAlkio> haeAlueet() {
-        try {
-            Yksilotyyppi[] alueet = TietokantaDAO.tuoSivu(Alue.class, "nimi",
-                    10, 0);
-            List<ListaAlkio> lista = new LinkedList<>();
-            for (int i = 0; i < alueet.length; i++) {
-                final Alue alue = (Alue) alueet[i];
-                if (alue == null) {
-                    break;
-                }
-                lista.add(new ListaAlkio(i, "/alue?tunnus=" + alue.annaTunnus(),
-                        alue.annaNimi(), new String[] {alue.annaKuvaus()}));
+        Yksilotyyppi[] alueet = TietokantaDAO.tuoSivu(Alue.class, "nimi", false,
+                10, 0);
+        List<ListaAlkio> lista = new LinkedList<>();
+        for (int i = 0; i < alueet.length; i++) {
+            final Alue alue = (Alue) alueet[i];
+            if (alue == null) {
+                break;
             }
-            return lista;
-        } catch (SQLException e) {
-            Logger.getLogger(Listaaja.class.getName()).log(Level.SEVERE,
-                    null, e);
-            return null;
+            lista.add(new ListaAlkio(i, "/alue?tunnus=" + alue.annaTunnus(),
+                    alue.annaNimi(), new String[] {alue.annaKuvaus()}));
         }
+        return lista;
     }
 }

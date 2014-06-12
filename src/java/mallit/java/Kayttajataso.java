@@ -1,6 +1,11 @@
 
 package mallit.java;
 
+import java.sql.SQLData;
+import java.sql.SQLException;
+import java.sql.SQLInput;
+import java.sql.SQLOutput;
+
 /**
  * Mallintaa käyttäjätunnukseen liittyvää käyttäjätasoa.
  *
