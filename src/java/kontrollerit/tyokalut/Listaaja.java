@@ -88,10 +88,10 @@ public final class Listaaja {
             lista.add(new ListaAlkio(i,
                     "ketju?tunnus=" + ketju.annaTunnus() + "&sivu=1",
                     ketju.listausnimi(), new String[]{
-                        "<a class=\"" + ketju.annaKirjoittajanTaso().toString()
+                        "<a class=\"" + ketju.annaAloittajanTaso().toString()
                                 .toLowerCase() + "\" href=\"profiili?tunnus="
-                                + ketju.annaKirjoittajanTunnus() + "\">"
-                                + ketju.annaKirjoittajanNimi() + "</a>",
+                                + ketju.annaAloittajaNumero() + "\">"
+                                + ketju.annaAloittajanListausnimi() + "</a>",
                         DateFormat.getInstance().format(
                                 new Date(ketju.annaMuutettu().getTime()))
                     }));

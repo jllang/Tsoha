@@ -28,13 +28,14 @@ a:hover {
     color:      #8CA949;
 }
 
+/*
 a:active {
     color:      #D3FF6E;
 }
 
 a:visited {
     color:      #261B40;
-}
+}*/
 
 #ylaosa {
     position:   fixed;

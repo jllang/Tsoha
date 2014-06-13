@@ -63,8 +63,10 @@ public final class TietokantaDAO {
      *
      * @param tietokohteet Tietokohteet, joiden kenttien arvot viedään
      * tietokantaan.
+     * @return <tt>true</tt> joss kaikki annetut tietokohteet saatiin viedyksi
+     * tietokantaan.
      */
-    public static void vie(final Yksilotyyppi... tietokohteet) {
+    public static boolean vie(final Yksilotyyppi... tietokohteet) {
         Connection yhteys           = null;
         PreparedStatement kysely    = null;
         boolean onnistui            = true;
@@ -92,6 +94,7 @@ public final class TietokantaDAO {
         } finally {
             sulje(yhteys, kysely, null);
         }
+        return onnistui;
     }
 
     /**
@@ -338,7 +341,7 @@ public final class TietokantaDAO {
             ajankohta = new Timestamp(System.currentTimeMillis());
             yhteys = TietokantaDAO.annaTransaktioyhteys();
             // Ketjun tunnus luodaan tietokannan puolella joten se pitää kysyä:
-            if (luoKetju(yhteys, ketjunLisays, aihe, ajankohta) != 1) {
+            if (lisaaKetju(yhteys, ketjunLisays, aihe, ajankohta) != 1) {
                 throw new TransactionRolledbackException("Ketjun luonti "
                         + "epäonnistui.");
             }
@@ -359,7 +362,7 @@ public final class TietokantaDAO {
                 throw new TransactionRolledbackException("Ketjun sijaintien "
                         + "lisäys epäonnistui.");
             }
-            if (luoViesti(yhteys, viestinLisays, ketjunTunnus, kirjoittaja,
+            if (lisaaViesti(yhteys, viestinLisays, ketjunTunnus, kirjoittaja,
                     ajankohta, sisalto) != 1) {
                 throw new TransactionRolledbackException("Viestin luonti "
                         + "epäonnistui.");
@@ -385,7 +388,7 @@ public final class TietokantaDAO {
         return ketjunTunnus;
     }
 
-    private static int luoKetju(final Connection yhteys,
+    private static int lisaaKetju(final Connection yhteys,
             PreparedStatement kysely, final String aihe,
             final Timestamp aikaleima) throws SQLException {
         final Ketju ketju = Ketju.luo(aihe, aikaleima);
@@ -456,7 +459,7 @@ public final class TietokantaDAO {
         return true;
     }
 
-    private static int luoViesti(final Connection yhteys,
+    private static int lisaaViesti(final Connection yhteys,
             PreparedStatement kysely, final int ketjunTunnus,
             final Jasen kirjoittaja, final Timestamp ajankohta,
             final String sisalto) throws SQLException {

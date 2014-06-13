@@ -18,8 +18,8 @@ import java.util.logging.Logger;
  */
 public final class Alue extends Yksilotyyppi {
 
-    private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
-            HAKULAUSE2;
+    private static final String LISAYSLAUSE, PAIVITYSLAUSE, TUNNUSHAKU,
+            NIMIHAKU, NIMIEN_MAARAN_KYSELY, NIMILISTAUS;
 
     private final int   tunnus;
     private String      nimi, kuvaus;
@@ -29,8 +29,10 @@ public final class Alue extends Yksilotyyppi {
         LISAYSLAUSE     = "insert into alueet (nimi, kuvaus) values (?, ?)";
         PAIVITYSLAUSE   = "update alueet set nimi = ?, kuvaus = ?, lukittu = ?,"
                 + " poistettu = ? where tunnus = ?";
-        HAKULAUSE1      = "select * from alueet where tunnus = ?";
-        HAKULAUSE2      = "select * from alueet where nimi = ?";
+        TUNNUSHAKU      = "select * from alueet where tunnus = ?";
+        NIMIHAKU        = "select * from alueet where nimi = ?";
+        NIMIEN_MAARAN_KYSELY = "select count(tunnus) from alueet";
+        NIMILISTAUS     = "select nimi from alueet";
     }
 
     private Alue(final boolean tuore, final int tunnus, final String nimi,
@@ -82,34 +84,49 @@ public final class Alue extends Yksilotyyppi {
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final int avain) throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE1);
+        final PreparedStatement kysely = yhteys.prepareStatement(TUNNUSHAKU);
         kysely.setInt(1, avain);
         return kysely;
     }
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final String avain) throws SQLException {
-        final PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE2);
+        final PreparedStatement kysely = yhteys.prepareStatement(NIMIHAKU);
         kysely.setString(1, avain);
         return kysely;
     }
 
-    public static List<String> annaNimet() {
-        try (
-            final Connection yhteys = TietokantaDAO.annaKertayhteys();
-            final PreparedStatement kysely = yhteys.prepareStatement("select "
-                    + "nimi from alueet");
-            final ResultSet vastaus = kysely.executeQuery();
-                ) {
-            List<String> alueidenNimet = new LinkedList<>();
-            while (vastaus.next()) {
-                alueidenNimet.add(vastaus.getString(1));
+    /**
+     * Palauttaa kaikkien olemassaolevien alueiden nimet merkkijonolistana.
+     *
+     * @return Merkkijonolista alueista.
+     */
+    public static String[] annaNimet() {
+        int maara                   = 0;
+        String[] nimet              = null;
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        try {
+            yhteys  = TietokantaDAO.annaKertayhteys();
+            kysely  = yhteys.prepareStatement(NIMIEN_MAARAN_KYSELY);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            maara   = vastaus.getInt(1);
+            try {vastaus.close();} catch (SQLException e) {}
+            try {kysely.close();} catch (SQLException e) {}
+            kysely  = yhteys.prepareStatement(NIMILISTAUS);
+            vastaus = kysely.executeQuery();
+            nimet   = new String[maara];
+            for (int i = 0; vastaus.next(); i++) {
+                nimet[i] = vastaus.getString(1);
             }
-            return alueidenNimet;
         } catch (SQLException e) {
             Logger.getLogger(Alue.class.getName()).log(Level.SEVERE, null, e);
-            return null;
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
+        return nimet;
     }
 
     public List<Ketju> annaKetjut(final int sivunPituus, final int siirto)
@@ -133,26 +150,6 @@ public final class Alue extends Yksilotyyppi {
         TietokantaDAO.sulje(yhteys, kysely, vastaus);
         return paluuarvo;
     }
-
-//    public void lisaaKetju(final Ketju ketju) {
-//        final Connection yhteys = TietokantaDAO.annaYhteys();
-//        final PreparedStatement kysely = yhteys.prepareStatement("insert "
-//                + "into ketjujen_sijainnit values (?, ?)");
-//        kysely.setInt(1, tunnus);
-//        kysely.setInt(2, ketju.annaTunnus());
-//        final ResultSet vastaus = kysely.executeQuery();
-//    }
-
-//    @Override
-//    PreparedStatement lisayskysely(final Connection yhteys)
-//            throws SQLException {
-//        final PreparedStatement kysely = yhteys.prepareStatement(LISAYSPOHJA);
-//        kysely.setString(1, nimi);
-//        kysely.setString(2, kuvaus);
-//        kysely.setTimestamp(3, lukittu);
-//        kysely.setTimestamp(4, poistettu);
-//        return kysely;
-//    }
 
     @Override
     String annaLisayslause() {

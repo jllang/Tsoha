@@ -11,10 +11,10 @@
                     <tr>
                         <td class="virhe" colspan="2">
                             <c:if test="${virhekoodi == 1}">
-                                <t:virhe>Sisäänkirjautuminen epäonnistui.</t:virhe>
+                                <t:virhe>Käyttäjätunnusta tai salasanaa ei annettu.</t:virhe>
                             </c:if>
                             <c:if test="${virhekoodi == 2}">
-                                <t:virhe>Käyttäjätunnusta tai salasanaa ei annettu.</t:virhe>
+                                <t:virhe>Sisäänkirjautuminen epäonnistui.</t:virhe>
                             </c:if>
                         </td>
                     </tr>

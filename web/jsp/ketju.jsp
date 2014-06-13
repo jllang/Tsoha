@@ -14,23 +14,28 @@
             <h2>${aihe}</h2>
             <p>
                 <em>
-                    <a href="alueet?kohde=${alueet.get(0)}">${alueet.get(0)}</a>
+                    <a href="alueet?kohde=${alueet.get(0).annaTunnus()}"
+                       >${alueet.get(0).listausnimi()}</a>
                     <c:forEach items="${alueet}" var="alue" begin="1">
-                        , <a href="alueet?kohde=${alue}">${alue}</a>
+                        , <a href="alueet?kohde=${alue.annaTunnus()}">
+                            ${alue.listausnimi()}</a>
                     </c:forEach>
                 </em>
             </p>
-            <div class="sisalto">
             <c:forEach items="${viestit}" var="viesti" varStatus="tila">
+            <div class="sisalto">
+                <c:if test="${viesti.annaPoistettu() == null}">
                 <t:viesti ketjunTunnus="${ketjunTunnus}"
+                          viestinumero="${viesti.annaNumero()}"
                           listausnumero="${tila.getCount()}"
-                          kirjoittaja="${viesti.annaKirjoittaja()}"
-                          listausnimi="&lt;nimi&gt;"
+                          kirjoittaja="${kirjoittajat.get(tila.getCount() - 1)}"
                           kirjoitettu="${viesti.annaKirjoitettu()}"
                           muokattu="${viesti.annaMuokattu()}"
-                          moderoitu="${viesti.annaModeroitu()}">
-                    ${viesti.annaSisalto()}
-                </t:viesti>
-            </c:forEach>
+                          moderoitu="${viesti.annaModeroitu()}"
+                          sisalto="${viesti.annaSisalto()}" />
+                </c:if>
             </div>
+            &nbsp;
+            </c:forEach>
+            <p>Sivu: 1</p>
 </t:kehys>

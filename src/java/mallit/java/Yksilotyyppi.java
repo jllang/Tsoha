@@ -19,29 +19,6 @@ public abstract class Yksilotyyppi {
         this.tuore = tuore;
     }
 
-//    /**
-//     * Ilmaisee onko yksilötyyppi jo kerran tallennettu tietokantaan.
-//     *
-//     * @return <tt>true</tt> joss yksilötyypin tietoja ei ole vielä tallennettu
-//     * tietokantaan.
-//     *
-//     * @see Yksilotyyppi#asetaEpatuoreeksi()
-//     */
-//    public final boolean onTuore() {
-//        return tuore;
-//    }
-
-//    /**
-//     * Asettaa yksilötyypin sisäisen tuoreutta ilmaisevan kentän arvoksi
-//     * <tt>false</tt>. Tätä metodia tulee kutsua kun yksilötyyppi on tallennettu
-//     * onnistuneesti tietokantaan.
-//     *
-//     * @see Yksilotyyppi#onTuore()
-//     */
-//    public final void asetaEpatuoreeksi() {
-//        this.tuore = false;
-//    }
-
     /**
      * Palauttaa merkkijonomuotoisen SQL insert tai update -lauseen, jossa
      * attribuuttien arvot on korvattu kysymysmerkeillä.
@@ -91,19 +68,7 @@ public abstract class Yksilotyyppi {
 
 //    abstract void valmistelePoisto(final PreparedStatement kysely)
 //            throws SQLException;
-
-//    /**
-//     * Palauttaa <tt>PreparedStatement</tt>-olion, joka suorittaa SQL insert
-//     * -kyselyn ja johon on lisätty yksilötyypin kenttien arvot. Metodi ei sulje
-//     * yhteyttä.
-//     *
-//     * @param yhteys
-//     * @return
-//     * @throws SQLException
-//     */
-//    abstract PreparedStatement lisayskysely(final Connection yhteys)
-//            throws SQLException;
-
+    
     /**
      * Palauttaa uniikin merkkijonon, jota voidaan käyttää olion nimenä
      * listauksissa.

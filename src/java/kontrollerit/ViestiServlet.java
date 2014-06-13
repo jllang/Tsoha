@@ -24,6 +24,19 @@ import mallit.java.Viesti;
 @WebServlet(name = "ViestiServlet", urlPatterns = {"/viesti"})
 public final class ViestiServlet extends HttpServlet {
 
+    // Virhekoodit ovat:
+    // 0 - Ei virhettä
+    // 1 - Lomakkeessa oli puuttuvia kenttiä
+    // 2 - Transaktio epäonnistui palvelimella
+
+    private static final int EI_VIRHETTA, PUUTTUVIA_KENTTIA, TIETOKANTAVIRHE;
+
+    static {
+        EI_VIRHETTA         = 0;
+        PUUTTUVIA_KENTTIA   = 1;
+        TIETOKANTAVIRHE     = 2;
+    }
+
     @Override
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
@@ -50,11 +63,25 @@ public final class ViestiServlet extends HttpServlet {
                 ketjunTunnus = Integer.parseInt(req.getParameter("ketju"));
             } catch (NumberFormatException e) {}
             if (ketjunTunnus == 0) {
+                req.setAttribute("lomakkeenNimi", "Uusi ketju");
+                Otsikoija.asetaOtsikko(req, "Uusi ketju");
                 uusiKetju(req, resp);
             } else {
                 ketjunTaydennys(req, resp, ketjunTunnus);
             }
         }
+    }
+
+    private static void siirryLomakkeeseen(final HttpServletRequest req,
+            final HttpServletResponse resp, final String aihe,
+            final String[] alueet, final String sisalto, final int virhekoodi)
+            throws IOException, ServletException {
+        req.setAttribute("aihe", aihe);
+        req.setAttribute("aluelista", alueet);
+        req.setAttribute("sisalto", sisalto);
+        req.setAttribute("virhekoodi", virhekoodi);
+        Uudelleenohjaaja.siirra(req, resp, "/jsp/viestilomake.jsp?"
+                + req.getQueryString());
     }
 
     private static void uusiKetju(final HttpServletRequest req,
@@ -67,7 +94,7 @@ public final class ViestiServlet extends HttpServlet {
         // Kyllä, tarkastetaan kahteen kertaan koska tietokantahaussa voi tulla
         // virhe:
         if (req.getAttribute("aluelista") == null) {
-            Uudelleenohjaaja.uudelleenohjaa(req, resp, "/jsp/virhesivu.jsp");
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
             return;
         }
         final String aihe   = (String) req.getParameter("aihe"),
@@ -76,38 +103,26 @@ public final class ViestiServlet extends HttpServlet {
         if (aihe != null && valitutAlueet != null && sisalto != null) {
             if (aihe.isEmpty() || valitutAlueet.length == 0
                     || sisalto.isEmpty()) {
-                req.setAttribute("aihe", aihe);
-                req.setAttribute("alueet", valitutAlueet);
-                req.setAttribute("sisalto", sisalto);
-                req.setAttribute("epaonnistui", true);
-                Uudelleenohjaaja.siirra(req, resp, "/jsp/viestilomake.jsp?"
-                        + req.getQueryString());
+                siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
+                        PUUTTUVIA_KENTTIA);
                 return;
             }
             final int ketjunTunnus = TietokantaDAO.luoKetju((Jasen)
-                    req.getAttribute("jasen"), aihe, sisalto, valitutAlueet);
+                    req.getSession().getAttribute("jasen"), aihe, sisalto,
+                    valitutAlueet);
             if (ketjunTunnus == 0) {
-                req.setAttribute("virhekoodi", 2);
-                req.setAttribute("aihe", aihe);
-                req.setAttribute("alueet", valitutAlueet);
-                req.setAttribute("sisalto", sisalto);
-                req.setAttribute("epaonnistui", true);
-                Uudelleenohjaaja.siirra(req, resp, "/jsp/viestilomake.jsp?"
-                        + req.getQueryString());
+                siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
+                        TIETOKANTAVIRHE);
+                return;
             }
             Uudelleenohjaaja.uudelleenohjaa(req, resp, "ketju?tunnus="
                     + ketjunTunnus + "&sivu=1");
         } else {
-            req.setAttribute("aihe", aihe);
-            req.setAttribute("alueet", valitutAlueet);
-            req.setAttribute("sisalto", sisalto);
-            req.setAttribute("virhekoodi", req.getAttribute("lahetetty")
-                    != null ? 1 : 0);
-            Uudelleenohjaaja.siirra(req, resp, "/jsp/viestilomake.jsp?"
-                        + req.getQueryString());
+            siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
+                    req.getAttribute("lahetetty") != null
+                            ? PUUTTUVIA_KENTTIA : EI_VIRHETTA);
         }
     }
-
     private static void ketjunTaydennys(final HttpServletRequest req,
             final HttpServletResponse resp, final int ketjunTunnus)
             throws ServletException, IOException {
@@ -115,21 +130,34 @@ public final class ViestiServlet extends HttpServlet {
         try {
             viestinTunnus = Integer.parseInt(req.getParameter("viesti"));
         } catch (NumberFormatException e) {}
-        if (viestinTunnus == 0) {
-            uusiViesti(req, resp, ketjunTunnus);
-        } else {
-            viestinMuokkaus(req, resp, ketjunTunnus, viestinTunnus);
+        switch (viestinTunnus) {
+            case 0:
+                req.setAttribute("lomakkeenNimi", "Uusi viesti");
+                req.setAttribute("muokattavuus", "disabled=\"disabled\"");
+                Otsikoija.asetaOtsikko(req, "Uusi viesti");
+                uusiViesti(req, resp, ketjunTunnus);
+                break;
+            case 1:
+                req.setAttribute("lomakkeenNimi", "Viestin muokkaus");
+                Otsikoija.asetaOtsikko(req, "Viestin muokkaus");
+                muokkaaViestia(req, resp, ketjunTunnus, viestinTunnus);
+                break;
+            default:
+                req.setAttribute("lomakkeenNimi", "Viestin muokkaus");
+                req.setAttribute("muokattavuus", "disabled=\"disabled\"");
+                Otsikoija.asetaOtsikko(req, "Viestin muokkaus");
+                muokkaaViestia(req, resp, ketjunTunnus, viestinTunnus);
         }
     }
 
     private static void uusiViesti(final HttpServletRequest req,
             final HttpServletResponse resp, final int ketjunTunnus)
             throws ServletException, IOException {
+        // Mitä jos tapahtuu tietokantavirhe tässä kohdassa?
         final Ketju ketju = (Ketju) TietokantaDAO.tuo(Ketju.class, ketjunTunnus);
-        req.setAttribute("aihe", ketju.annaAihe());
-        req.setAttribute("aluelista", ketju.annaAlueidenNimet());
-        req.setAttribute("muokattavuus", "disabled=\"disabled\"");
-        final String sisalto = req.getParameter("sisalto");
+        final String aihe = ketju.annaAihe(),
+                sisalto = req.getParameter("sisalto");
+        final String[] valitutAlueet = req.getParameterValues("alueet");
         if (sisalto != null && !sisalto.isEmpty()) {
             final int numero = ketju.annaViimeisenViestinNumero() + 1;
             final Timestamp aikaleima = new Timestamp(System.currentTimeMillis());
@@ -138,25 +166,54 @@ public final class ViestiServlet extends HttpServlet {
                     jasen.annaKayttajanumero(), aikaleima, sisalto);
             ketju.asetaMuutettu(aikaleima);
             jasen.kasvataViesteja();
-            TietokantaDAO.vie(viesti, ketju, jasen);
-            Uudelleenohjaaja.siirra(req, resp, "/jsp/ketju.jsp?tunnus="
-                    + ketjunTunnus +"&sivu=1");
+            if (TietokantaDAO.vie(viesti, ketju, jasen)) {
+                Uudelleenohjaaja.siirra(req, resp, "/jsp/ketju.jsp?tunnus="
+                        + ketjunTunnus +"&sivu=1");
+            } else {
+                siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
+                        TIETOKANTAVIRHE);
+            }
         } else {
-            req.setAttribute("sisalto", sisalto);
-            req.setAttribute("epaonnistui", req.getAttribute("lahetetty")
-                    != null);
-            Uudelleenohjaaja.siirra(req, resp, "/jsp/viestilomake.jsp?"
-                        + req.getQueryString());
+            siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
+                    req.getAttribute("lahetetty") != null
+                            ? PUUTTUVIA_KENTTIA : EI_VIRHETTA);
         }
     }
 
-    private static void viestinMuokkaus(final HttpServletRequest req,
+    private static void muokkaaViestia(final HttpServletRequest req,
             final HttpServletResponse resp, final int ketjunTunnus,
-            final int viestinTunnus) {
-        if (viestinTunnus == 1) {
-
+            final int viestinTunnus) throws ServletException, IOException {
+        final Ketju ketju = (Ketju) TietokantaDAO.tuo(Ketju.class, ketjunTunnus);
+        final Viesti viesti = (Viesti) TietokantaDAO.tuo(Viesti.class,
+                ketjunTunnus, viestinTunnus);
+        if (ketju == null || viesti == null) {
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+        }
+        final String aihe = ketju.annaAihe();
+        String sisalto = req.getParameter("sisalto");
+        final String[] valitutAlueet = Alue.annaNimet();
+        if (sisalto == null || sisalto.isEmpty() || valitutAlueet == null
+                || valitutAlueet.length == 0) {
+            sisalto = viesti.annaSisalto();
+            siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
+                    req.getAttribute("lahetetty") != null
+                            ? PUUTTUVIA_KENTTIA : EI_VIRHETTA);
+            return;
+        }
+        final Timestamp aikaleima = new Timestamp(System.currentTimeMillis());
+        viesti.asetaSisalto(sisalto);
+        viesti.asetaMuokattu(aikaleima);
+//        if (viestinTunnus == 1) {
+//            //Hoida ketjujen_sijainnit ajan tasalle.
+//        }
+        ketju.asetaMuutettu(aikaleima);
+        if (TietokantaDAO.vie(viesti, ketju)) {
+            // Miksi tämä ohjaa /viestiin???
+            Uudelleenohjaaja.uudelleenohjaa(req, resp, "ketju?tunnus="
+                    + ketjunTunnus +"&sivu=1");
         } else {
-            req.setAttribute("ketjunMuokattavuus", "disabled=\"disabled\"");
+            siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
+                    TIETOKANTAVIRHE);
         }
     }
 }

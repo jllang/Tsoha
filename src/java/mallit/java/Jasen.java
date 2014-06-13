@@ -145,38 +145,6 @@ public final class Jasen extends Yksilotyyppi {
         kysely.setString(1, avain);
         return kysely;
     }
-//
-//    @Override
-//    PreparedStatement lisayskysely(final Connection yhteys)
-//            throws SQLException {
-//        final PreparedStatement kysely;
-//        if (onTuore()) {
-//            kysely = yhteys.prepareStatement(LISAYSLAUSE);
-//            kysely.setString(1, kayttajatunnus);
-//            kysely.setTimestamp(2, rekisteroity);
-//            kysely.setString(3, salasanatiiviste);
-//            kysely.setString(4, suola);
-//            kysely.setString(5, sahkopostiosoite);
-//            kysely.setString(6, taso.name());
-//            kysely.setString(7, nimimerkki);
-//            kysely.setString(8, avatar);
-//            kysely.setString(9, kuvaus);
-//            kysely.setInt(10, viesteja);
-//            asetaEpatuoreeksi();
-//        } else {
-//            kysely = yhteys.prepareStatement(PAIVITYSLAUSE);
-//            kysely.setString(1, salasanatiiviste);
-//            kysely.setString(2, suola);
-//            kysely.setString(3, sahkopostiosoite);
-//            kysely.setString(4, taso.name());
-//            kysely.setString(5, nimimerkki);
-//            kysely.setString(6, avatar);
-//            kysely.setString(7, kuvaus);
-//            kysely.setInt(8, viesteja);
-//            kysely.setInt(9, kayttajanumero);
-//        }
-//        return kysely;
-//    }
 
     @Override
     String annaLisayslause() {
@@ -271,18 +239,6 @@ public final class Jasen extends Yksilotyyppi {
             return true;
         }
     }
-
-//    public void asetaPorttikielto(final int kesto) {
-////        setPorttikielto(new Timestamp(System.currentTimeMillis()), kesto);
-//        TietokantaDAO.paivita("insert into porttikiellot values ('"
-//                + kayttajatunnus + "', '"
-//                + new Timestamp(System.currentTimeMillis()) + "', " + kesto + ")");
-//    }
-
-//    public void poistaPorttikielto() {
-//        TietokantaDAO.paivita("delete from porttikiellot where kohde = '"
-//                + kayttajatunnus + "'");
-//    }
 
     public int annaKayttajanumero() {
         return kayttajanumero;

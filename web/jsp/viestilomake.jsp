@@ -9,7 +9,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:kehys otsikko="${otsikko}" fooruminNimi="Esimerkkifoorumi">
-            <h2>Uusi ketju</h2>
+            <h2>${lomakkeenNimi}</h2>
             <form action="viesti?${pageContext.request.queryString}"
                   method="POST" accept-charset="UTF-8">
                 <input type="hidden" name="lahetetty" value="tosi">
@@ -20,7 +20,8 @@
                             <t:virhe>Aihetta, alueita tai viestiä ei annettu.</t:virhe>
                             </c:if>
                             <c:if test="${virhekoodi == 2}">
-                            <t:virhe>Palvelimella tapahtui virhe. Ketjua ei luotu.</t:virhe>
+                            <t:virhe>Palvelimella tapahtui virhe. Toimintoa ei
+                                voitu suorittaa.</t:virhe>
                             </c:if>
                         </td>
                     </tr>
@@ -34,6 +35,8 @@
                         <td class="peruskentta">Alueet</td>
                         <td class="peruskentta">
                             <select multiple="multiple" name="alueet" ${muokattavuus}>
+                                <%-- TODO: muista valitut alueet jollain
+                                fiksulla tavalla. --%>
                                 <c:forEach items="${aluelista}" var="alue">
                                     <option>${alue}</option>
                                 </c:forEach>
@@ -44,7 +47,8 @@
                         <td class="peruskentta">Viesti</td>
                         <td colspan="3" class="peruskentta">
                             <textarea rows="10" cols="80" name="sisalto"
-                                      placeholder="Viestin sisältö"></textarea>
+                                placeholder="Viestin sisältö">${sisalto}
+                            </textarea>
                         </td>
                     </tr>
                     <tr>

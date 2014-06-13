@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import kontrollerit.tyokalut.Otsikoija;
 import kontrollerit.tyokalut.Uudelleenohjaaja;
 import kontrollerit.tyokalut.Valvoja;
+import mallit.java.Jasen;
 import mallit.java.Ketju;
 import mallit.java.TietokantaDAO;
 import mallit.java.Viesti;
@@ -42,14 +43,20 @@ public final class KetjuServlet extends HttpServlet {
                 Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
                 return;
             }
+            if (ketju == null) {
+                Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+            }
             final List<Viesti> viestit = ketju.annaViestit(10, (sivu - 1) * 10);
+            final List<Jasen> kirjoittajat = ketju.annaKirjoittajat(10,
+                    (sivu - 1) * 10);
             Otsikoija.asetaOtsikko(req, ketju.annaAihe());
             // TODO: pistä viestien kirjoittajien nimet johonkin tauluun, jotta
             // niitä pääsee iteroimaan ketju.jsp:ssä viestien rinnalla.
             req.setAttribute("ketjunTunnus", ketju.annaTunnus());
             req.setAttribute("aihe", ketju.annaAihe());
-            req.setAttribute("alueet", ketju.annaAlueidenNimet());
+            req.setAttribute("alueet", ketju.annaAlueet());
             req.setAttribute("viestit", viestit);
+            req.setAttribute("kirjoittajat", kirjoittajat);
             Uudelleenohjaaja.siirra(req, resp, "/jsp/ketju.jsp");
         }
     }

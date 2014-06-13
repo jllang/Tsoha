@@ -18,8 +18,8 @@ import java.util.logging.Logger;
  */
 public final class Ketju extends Yksilotyyppi {
 
-    private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
-            HAKULAUSE2, VIESTIHAKU, VIESTINUMERON_HAKU, ALUEHAKU,
+    private static final String LISAYSLAUSE, PAIVITYSLAUSE, TUNNUSHAKU,
+            AIHEHAKU, VIESTIHAKU, VIESTINUMERON_HAKU, ALUEHAKU, ALOITTAJAHAKU,
             KIRJOITTAJAHAKU;
 
     private final int       tunnus;
@@ -27,28 +27,39 @@ public final class Ketju extends Yksilotyyppi {
     private Timestamp       muutettu, siirretty, moderoitu, lukittu, poistettu;
 
     // Seuraavia kenttiä pidetään vain muistissa kyselytulvan vähentämiseksi:
-    private String          kirjoittajanNimi;
-    private int             kirjoittajanTunnus;
-    private Kayttajataso    kirjoittajanTaso;
+    private List<Alue>      alueet;
+//    private List<Viesti>    viestit;
+//    private List<Jasen>     kirjoittajat;
+    private String          aloittajanListausnimi;
+    private int             aloittajanNumero;
+    private Kayttajataso    aloittajanTaso;
 
     static {
         LISAYSLAUSE     = "insert into ketjut (aihe, muutettu) values (?, ?)";
         PAIVITYSLAUSE   = "update ketjut set aihe = ?, muutettu = ?, "
                 + "siirretty = ?, moderoitu = ?, lukittu = ?, poistettu = ? "
                 + "where tunnus = ?";
-        HAKULAUSE1      = "select * from ketjut where tunnus = ?";
-        HAKULAUSE2      = "select * from ketjut where aihe = ?";
+        TUNNUSHAKU      = "select * from ketjut where tunnus = ?";
+        AIHEHAKU        = "select * from ketjut where aihe = ?";
         VIESTIHAKU      = "select * from viestit where ketju_id = ? order by "
-                + "numero limit ? offset ?";
+                + "numero asc limit ? offset ?";
         VIESTINUMERON_HAKU = "select max(numero) from viestit where ketju_id = "
                 + "?";
-        ALUEHAKU        = "select nimi from ketjut join ketjujen_sijainnit on "
-                + "ketjut.tunnus = ketju_id join alueet on alueet.tunnus = "
-                + "alue_id where ketjut.tunnus = ?";
-        KIRJOITTAJAHAKU = "select jasenet.numero, nimimerkki, jasenet.tunnus, "
+        ALUEHAKU        = "select alueet.tunnus, alueet.nimi, alueet.kuvaus, "
+                + "alueet.lukittu, alueet.poistettu from ketjut join "
+                + "ketjujen_sijainnit on ketjut.tunnus = ketju_id join alueet "
+                + "on alueet.tunnus = alue_id where ketjut.tunnus = ?";
+        ALOITTAJAHAKU   = "select jasenet.numero, nimimerkki, jasenet.tunnus, "
                 + "taso from ketjut join viestit on ketjut.tunnus = ketju_id "
                 + "and viestit.numero = 1 join jasenet on kirjoittaja = "
                 + "jasenet.numero where ketjut.tunnus = ?";
+        KIRJOITTAJAHAKU = "select jasenet.numero, jasenet.tunnus, "
+                + "jasenet.rekisteroity, jasenet.tiiviste, jasenet.suola, "
+                + "jasenet.sposti, jasenet.taso, jasenet.nimimerkki, "
+                + "jasenet.avatar, jasenet.kuvaus, jasenet.viesteja from ketjut"
+                + " join viestit on ketjut.tunnus = ketju_id  join jasenet on "
+                + "kirjoittaja = jasenet.numero where ketjut.tunnus = ? order "
+                + "by viestit.numero asc limit ? offset ?";
     }
 
     private Ketju(final boolean tuore, final int tunnus, final String aihe,
@@ -63,8 +74,10 @@ public final class Ketju extends Yksilotyyppi {
         this.moderoitu  = moderoitu;
         this.lukittu    = lukittu;
         this.poistettu  = poistettu;
-        this.kirjoittajanTunnus = 0;
-        this.kirjoittajanNimi = null;
+        this.aloittajanNumero = 0;
+        this.aloittajanListausnimi = null;
+        this.aloittajanTaso = null;
+        this.alueet     = null;
     }
 
     /**
@@ -116,14 +129,14 @@ public final class Ketju extends Yksilotyyppi {
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final int tunnus) throws SQLException {
-        PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE1);
+        PreparedStatement kysely = yhteys.prepareStatement(TUNNUSHAKU);
         kysely.setInt(1, tunnus);
         return kysely;
     }
 
     static PreparedStatement hakukysely(final Connection yhteys,
             final String tunnus) throws SQLException {
-        PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE2);
+        PreparedStatement kysely = yhteys.prepareStatement(AIHEHAKU);
         kysely.setString(1, tunnus);
         return kysely;
     }
@@ -173,29 +186,31 @@ public final class Ketju extends Yksilotyyppi {
         return aihe;
     }
 
-    public List<String> annaAlueidenNimet() {
-        final List<String> nimet = new LinkedList<>();
-        Connection yhteys           = null;
-        PreparedStatement kysely    = null;
-        ResultSet vastaus           = null;
-        try {
-            yhteys = TietokantaDAO.annaKertayhteys();
-            kysely = yhteys.prepareStatement(ALUEHAKU);
-            kysely.setInt(1, tunnus);
-            vastaus = kysely.executeQuery();
-            while (vastaus.next()) {
-                nimet.add(vastaus.getString(1));
+    public List<Alue> annaAlueet() {
+        if (alueet == null) {
+            Connection yhteys = null;
+            PreparedStatement kysely = null;
+            ResultSet vastaus = null;
+            try {
+                yhteys = TietokantaDAO.annaKertayhteys();
+                kysely = yhteys.prepareStatement(ALUEHAKU);
+                kysely.setInt(1, tunnus);
+                vastaus = kysely.executeQuery();
+                alueet  = new LinkedList<>();
+                while (vastaus.next()) {
+                    alueet.add(Alue.luo(vastaus));
+                }
+            } catch (SQLException e) {
+                Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
+            } finally {
+                TietokantaDAO.sulje(yhteys, kysely, vastaus);
             }
-        } catch (SQLException e) {
-            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
-        return nimet;
+        return alueet;
     }
 
     public List<Viesti> annaViestit(final int pituus, final int siirto) {
-        final List<Viesti> viestit  = new LinkedList<>();
+        List<Viesti> viestit        = null;
         Connection yhteys           = null;
         PreparedStatement kysely    = null;
         ResultSet vastaus           = null;
@@ -206,6 +221,7 @@ public final class Ketju extends Yksilotyyppi {
             kysely.setInt(2, pituus);
             kysely.setInt(3, siirto);
             vastaus = kysely.executeQuery();
+            viestit = new LinkedList<>();
             while (vastaus.next()) {
                 viestit.add(Viesti.luo(vastaus));
             }
@@ -214,8 +230,31 @@ public final class Ketju extends Yksilotyyppi {
         } finally {
             TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
-
         return viestit;
+    }
+
+    public List<Jasen> annaKirjoittajat(final int pituus, final int siirto) {
+        List<Jasen> kirjoittajat    = null;
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(KIRJOITTAJAHAKU);
+            kysely.setInt(1, tunnus);
+            kysely.setInt(2, pituus);
+            kysely.setInt(3, siirto);
+            vastaus = kysely.executeQuery();
+            kirjoittajat = new LinkedList<>();
+            while (vastaus.next()) {
+                kirjoittajat.add(Jasen.luo(vastaus));
+            }
+        } catch (SQLException e) {
+            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+        return kirjoittajat;
     }
 
     public int annaViimeisenViestinNumero() {
@@ -238,45 +277,45 @@ public final class Ketju extends Yksilotyyppi {
         return numero;
     }
 
-    public int annaKirjoittajanTunnus() {
-        if (kirjoittajanTunnus == 0) {
-            haeKirjoittaja();
+    public int annaAloittajaNumero() {
+        if (aloittajanNumero == 0) {
+            haeAloittaja();
         }
-        return kirjoittajanTunnus;
+        return aloittajanNumero;
     }
 
-    public String annaKirjoittajanNimi() {
-        if (kirjoittajanNimi == null) {
-            haeKirjoittaja();
+    public String annaAloittajanListausnimi() {
+        if (aloittajanListausnimi == null) {
+            haeAloittaja();
         }
-        return kirjoittajanNimi;
+        return aloittajanListausnimi;
     }
 
-    public Kayttajataso annaKirjoittajanTaso() {
-        if (kirjoittajanTaso == null) {
-            haeKirjoittaja();
+    public Kayttajataso annaAloittajanTaso() {
+        if (aloittajanTaso == null) {
+            haeAloittaja();
         }
-        return kirjoittajanTaso;
+        return aloittajanTaso;
     }
 
-    private void haeKirjoittaja() {
+    private void haeAloittaja() {
         Connection yhteys = null;
         PreparedStatement kysely = null;
         ResultSet vastaus = null;
         try {
             yhteys = TietokantaDAO.annaKertayhteys();
-            kysely = yhteys.prepareStatement(KIRJOITTAJAHAKU);
+            kysely = yhteys.prepareStatement(ALOITTAJAHAKU);
             kysely.setInt(1, tunnus);
             vastaus = kysely.executeQuery();
             vastaus.next();
-            kirjoittajanTunnus = vastaus.getInt(1);
-            kirjoittajanNimi = vastaus.getString(2);
-            if (kirjoittajanNimi == null) {
+            aloittajanNumero = vastaus.getInt(1);
+            aloittajanListausnimi = vastaus.getString(2);
+            if (aloittajanListausnimi == null) {
                 // Jos nimimerkki oli tyhjä, käytetään käyttäjätunnusta (aivan
                 // kuten jäsenen listausNimi-metodissa):
-                kirjoittajanNimi = vastaus.getString(3);
+                aloittajanListausnimi = vastaus.getString(3);
             }
-            kirjoittajanTaso = Kayttajataso.valueOf(vastaus.getString(4));
+            aloittajanTaso = Kayttajataso.valueOf(vastaus.getString(4));
         } catch (SQLException e) {
             Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
         } finally {

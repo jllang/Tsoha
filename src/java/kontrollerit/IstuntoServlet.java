@@ -23,6 +23,11 @@ import mallit.java.TietokantaDAO;
 @WebServlet(name = "IstuntoServlet", urlPatterns = {"/istunto"})
 public final class IstuntoServlet extends HttpServlet {
 
+    // Virhekoodit ovat:
+    // (0 - Ei virhettä)
+    // 1 - Käyttäjätunnusta tai salasanaa ei annettu
+    // 2 - Väärä käyttäjätunnus tai salasana
+
     @Override
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
@@ -70,7 +75,7 @@ public final class IstuntoServlet extends HttpServlet {
             req.getSession().setAttribute("jasen", jasen);
             Uudelleenohjaaja.uudelleenohjaa(req, resp, pyynto);
         } else {
-            req.setAttribute("virhekoodi", 1);
+            req.setAttribute("virhekoodi", 2);
             req.setAttribute("kayttajatunnus", kayttajatunnus);
             req.setAttribute("salasana", salasana);
             Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp"
@@ -89,7 +94,7 @@ public final class IstuntoServlet extends HttpServlet {
             req.setAttribute("kayttajatunnus", kayttajatunnus);
             req.setAttribute("salasana", salasana);
             if (req.getParameter("lahetetty") != null) {
-                req.setAttribute("virhekoodi", 2);
+                req.setAttribute("virhekoodi", 1);
             }
             return true;
         }

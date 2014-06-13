@@ -123,12 +123,17 @@ public final class Viesti extends Yksilotyyppi {
         kysely.setTimestamp(2, moderoitu);
         kysely.setTimestamp(3, poistettu);
         kysely.setString(4, sisalto);
-
+        kysely.setInt(5, ketjunTunnus);
+        kysely.setInt(6, numero);
     }
 
     @Override
     public String listausnimi() {
         throw new UnsupportedOperationException("Viestillä ei ole listausnimeä!");
+    }
+
+    public int annaNumero() {
+        return numero;
     }
 
     public int annaKetjunTunnus() {
