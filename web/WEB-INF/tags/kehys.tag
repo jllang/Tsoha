@@ -8,6 +8,8 @@
 <%@attribute name="fooruminNimi" %>
 <!DOCTYPE html>
 <html>
+    <!-- Tämä lähdekoodi on suunniteltu katseltavaksi 80 merkin rivin leveydellä
+    ja neljän merkin sarkaimen leveydellä. -->
     <head>
         <meta charset="UTF-8">
         <meta name="author" content="John Lång">

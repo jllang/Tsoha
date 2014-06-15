@@ -20,7 +20,7 @@ public final class Ketju extends Yksilotyyppi {
 
     private static final String LISAYSLAUSE, PAIVITYSLAUSE, TUNNUSHAKU,
             AIHEHAKU, VIESTIHAKU, VIESTINUMERON_HAKU, ALUEHAKU, ALOITTAJAHAKU,
-            KIRJOITTAJAHAKU;
+            KIRJOITTAJAHAKU, LUKUMAARALAUSE;
 
     private final int       tunnus;
     private String          aihe;
@@ -60,6 +60,7 @@ public final class Ketju extends Yksilotyyppi {
                 + " join viestit on ketjut.tunnus = ketju_id  join jasenet on "
                 + "kirjoittaja = jasenet.numero where ketjut.tunnus = ? order "
                 + "by viestit.numero asc limit ? offset ?";
+        LUKUMAARALAUSE  = "select count(tunnus) from ketjut";
     }
 
     private Ketju(final boolean tuore, final int tunnus, final String aihe,
@@ -138,6 +139,25 @@ public final class Ketju extends Yksilotyyppi {
         PreparedStatement kysely = yhteys.prepareStatement(AIHEHAKU);
         kysely.setString(1, tunnus);
         return kysely;
+    }
+
+    public static int lukumaara() {
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        int lukumaara               = 0;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(LUKUMAARALAUSE);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            lukumaara = vastaus.getInt(1);
+        } catch (SQLException e) {
+
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+        return lukumaara;
     }
 
     @Override

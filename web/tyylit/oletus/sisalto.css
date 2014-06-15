@@ -11,6 +11,13 @@
     color:      red;
 }
 
+ul.selitys {
+    width:          400px;
+    margin-left:    auto;
+    margin-right:   auto;
+    text-align:     left;
+}
+
 img {
     border: 1px solid #8CA949;
 }

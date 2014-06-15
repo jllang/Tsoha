@@ -8,7 +8,6 @@ package kontrollerit.tyokalut;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -82,6 +81,16 @@ public final class Valvoja {
     }
 
     /**
+     * Ilmoittaa onko annetun jäsenen käyttäjätunnuksella aktiivinen istunto.
+     *
+     * @param jasen
+     * @return <tt>true</tt> joss jäsen on kirjautunut.
+     */
+    public static boolean onKirjautunut(final Jasen jasen) {
+        return KIRJAUTUNEET.containsKey(jasen);
+    }
+
+    /**
      * Käytetään porttikiellon ja uloskirjautumisen toimeenpanossa.
      *
      * @param kohde Käyttäjätunnus, jonka istunto suljetaan. Sulkeminen näkyy
@@ -100,8 +109,9 @@ public final class Valvoja {
     }
 
     /**
-     * Palauttaa <tt>true</tt> joss annettu käyttäjätunnus on olemassa ja sillä
-     * on annettu salasana. Kaikissa virhetilanteissa palautetaan arvo false.
+     * Palauttaa <tt>true</tt> joss annettu käyttäjätunnus on olemassa, sillä on
+     * annettu salasana, eikä se ole porttikiellossa. Kaikissa virhetilanteissa
+     * palautetaan arvo false.
      *
      * @param jasen             Autentikoitava käyttäjätunnus.
      * @param salasana          Käyttäjän antama salasana.
@@ -110,8 +120,10 @@ public final class Valvoja {
     @SuppressWarnings({"TooBroadCatch", "UseSpecificCatch"})
     public static boolean autentikoi(final Jasen jasen, final String salasana) {
         try {
-            return KIRJAUTUNEET.get(jasen) != null
-                    && !jasen.onPorttikiellossa()
+            // Nukutaan hetki, jottei brute force arvailu / sanakirjahyökkäys
+            // toimi liian nopeasti:
+            Thread.sleep(1000);
+            return !jasen.onPorttikiellossa()
                     && PasswordHash.validatePassword(salasana,
                     PasswordHash.PBKDF2_ITERATIONS + ":"
                     + jasen.annaSuola() + ":"

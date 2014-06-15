@@ -81,7 +81,8 @@ public final class IstuntoServlet extends HttpServlet {
         }
         // Tämähän on vähän niinkuin malloc:
         Jasen jasen = (Jasen) TietokantaDAO.tuo(Jasen.class, kayttajatunnus);
-        if (jasen != null && Valvoja.autentikoi(jasen, salasana)) {
+        if (jasen != null && !Valvoja.onKirjautunut(jasen)
+                && Valvoja.autentikoi(jasen, salasana)) {
             final String[] parametrit = req.getQueryString().split("&");
             String pyynto = jasennaPyynto(parametrit);
             HttpSession istunto = req.getSession();

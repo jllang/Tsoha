@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public final class Alue extends Yksilotyyppi {
 
     private static final String LISAYSLAUSE, PAIVITYSLAUSE, TUNNUSHAKU,
-            NIMIHAKU, NIMIEN_MAARAN_KYSELY, NIMILISTAUS;
+            NIMIHAKU, NIMIEN_MAARAN_KYSELY, NIMILISTAUS, LUKUMAARALAUSE;
 
     private final int   tunnus;
     private String      nimi, kuvaus;
@@ -33,6 +33,7 @@ public final class Alue extends Yksilotyyppi {
         NIMIHAKU        = "select * from alueet where nimi = ?";
         NIMIEN_MAARAN_KYSELY = "select count(tunnus) from alueet";
         NIMILISTAUS     = "select nimi from alueet";
+        LUKUMAARALAUSE  = "select count(tunnus) from alueet";
     }
 
     private Alue(final boolean tuore, final int tunnus, final String nimi,
@@ -127,6 +128,26 @@ public final class Alue extends Yksilotyyppi {
             TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
         return nimet;
+    }
+
+    public static int lukumaara() {
+        // Jälleen tätä toistoa kun pitää olla staattinen metodi...
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        int lukumaara               = 0;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(LUKUMAARALAUSE);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            lukumaara = vastaus.getInt(1);
+        } catch (SQLException e) {
+
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+        return lukumaara;
     }
 
     public List<Ketju> annaKetjut(final int sivunPituus, final int siirto)

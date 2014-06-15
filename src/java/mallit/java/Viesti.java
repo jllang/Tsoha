@@ -18,7 +18,8 @@ import java.util.logging.Logger;
  */
 public final class Viesti extends Yksilotyyppi {
 
-    private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE;
+    private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE,
+            LUKUMAARALAUSE;
 
     private final int       ketjunTunnus, numero, kirjoittaja;
     private final Timestamp kirjoitettu;
@@ -33,6 +34,7 @@ public final class Viesti extends Yksilotyyppi {
                 + "?";
         HAKULAUSE       = "select * from viestit where ketju_id = ? "
                 + "and numero = ?";
+        LUKUMAARALAUSE  = "select count(*) from viestit";
     }
 
     private Viesti(final boolean tuore, final int ketjunTunnus,
@@ -96,6 +98,25 @@ public final class Viesti extends Yksilotyyppi {
         kysely.setInt(1, ketjunTunnus);
         kysely.setInt(2, numero);
         return kysely;
+    }
+
+    public static int lukumaara() {
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        int lukumaara               = 0;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(LUKUMAARALAUSE);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            lukumaara = vastaus.getInt(1);
+        } catch (SQLException e) {
+
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+        return lukumaara;
     }
 
     @Override

@@ -37,6 +37,18 @@
                         </td>
                     </tr>
                 </table>
+                <c:if test="${virhekoodi == 2}">
+                <%-- Tämä näyttää vähän rumalta tässä. Ehkäpä selityksen voisi
+                siirtää jonnekin muualle... --%>
+                <h3>Mahdollisia syitä sisäänkirjautumisen epäonnistumiselle:</h3>
+                <ul class="selitys">
+                    <li>annettua käyttäjätunnusta ei ole;</li>
+                    <li>annettu salasana oli väärä;</li>
+                    <li>annettu käyttäjätunnus on porttikiellossa;</li>
+                    <li>annettu käyttäjätunnus on jo kirjautunut; tai</li>
+                    <li>palvelimella tapahtui jokin virhe.</li>
+                </ul>
+                </c:if>
                 <p>
                     <a href="rekisterointi.jsp" >Rekisteröityminen</a>
                 </p>

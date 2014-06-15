@@ -66,13 +66,12 @@ public final class ViestiServlet extends HttpServlet {
             MUOKKAUS    = req.getContextPath() + "/muokkaus";
             POISTO      = req.getContextPath() + "/poisto";
         }
+        int ketjunTunnus = 0;
+        try {
+            ketjunTunnus = Integer.parseInt(req.getParameter("ketju"));
+        } catch (NumberFormatException e) {}
         if (req.getRequestURI().equals(MUOKKAUS)) {
             if (Valvoja.aktiivinenIstunto(req, resp, "muokkaus")) {
-                int ketjunTunnus = 0;
-                try {
-                    ketjunTunnus = Integer.parseInt(req.getParameter("ketju"));
-                } catch (NumberFormatException e) {
-                }
                 if (ketjunTunnus == 0) {
                     req.setAttribute("lomakkeenNimi", "Uusi ketju");
                     Otsikoija.asetaOtsikko(req, "Uusi ketju");
@@ -83,11 +82,20 @@ public final class ViestiServlet extends HttpServlet {
             }
         } else if (req.getRequestURI().equals(POISTO)) {
             if (Valvoja.aktiivinenIstunto(req, resp, "poisto")) {
-
+                if (req.getParameter("viesti") == null) {
+                    ketjunPoisto(req, resp, ketjunTunnus);
+                } else {
+                    try {
+                        final int viestinTunnus = Integer.parseInt(req.getParameter(
+                                "viesti"));
+                        viestinPoisto(req, resp, ketjunTunnus, viestinTunnus);
+                    } catch (NumberFormatException e) {
+                        Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+                    }
+                }
             }
         } else {
             Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
-            return;
         }
     }
 
@@ -159,13 +167,13 @@ public final class ViestiServlet extends HttpServlet {
             case 1:
                 req.setAttribute("lomakkeenNimi", "Viestin muokkaus");
                 Otsikoija.asetaOtsikko(req, "Viestin muokkaus");
-                muokkaaViestia(req, resp, ketjunTunnus, viestinTunnus);
+                viestinMuokkaus(req, resp, ketjunTunnus, viestinTunnus);
                 break;
             default:
                 req.setAttribute("lomakkeenNimi", "Viestin muokkaus");
                 req.setAttribute("muokattavuus", "disabled=\"disabled\"");
                 Otsikoija.asetaOtsikko(req, "Viestin muokkaus");
-                muokkaaViestia(req, resp, ketjunTunnus, viestinTunnus);
+                viestinMuokkaus(req, resp, ketjunTunnus, viestinTunnus);
         }
     }
 
@@ -199,7 +207,7 @@ public final class ViestiServlet extends HttpServlet {
         }
     }
 
-    private static void muokkaaViestia(final HttpServletRequest req,
+    private static void viestinMuokkaus(final HttpServletRequest req,
             final HttpServletResponse resp, final int ketjunTunnus,
             final int viestinTunnus) throws ServletException, IOException {
         final Ketju ketju = (Ketju) TietokantaDAO.tuo(Ketju.class, ketjunTunnus);
@@ -214,7 +222,8 @@ public final class ViestiServlet extends HttpServlet {
             // Jos muokkaaja ei ole sama kuin alkuperäinen kirjoittaja ja jos
             // muokkaaja ei ole moderaattori, tulee pääsy muokkauslomakkeeseen
             // estää:
-            Uudelleenohjaaja.uudelleenohjaa(req, resp, "virhesivu");
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+            return;
         }
         if (ketju == null || viesti == null) {
             Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
@@ -247,5 +256,17 @@ public final class ViestiServlet extends HttpServlet {
             siirryLomakkeeseen(req, resp, aihe, valitutAlueet, sisalto,
                     TIETOKANTAVIRHE);
         }
+    }
+
+    private static void ketjunPoisto(final HttpServletRequest req,
+            final HttpServletResponse resp, final int ketjunTunnus)
+            throws ServletException, IOException {
+
+    }
+
+    private static void viestinPoisto(final HttpServletRequest req,
+        final HttpServletResponse resp, final int ketjunTunnus,
+        final int viestinTunnus) throws ServletException, IOException {
+
     }
 }

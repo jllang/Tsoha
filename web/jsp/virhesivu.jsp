@@ -11,5 +11,14 @@
 <t:kehys fooruminNimi="Esimerkkifoorumi" otsikko="Virhe">
             <h2 class="virhe">Virhe</h2>
             <%-- Ei pidä paljastaa liikoja jottei script kiddiet innostu. --%>
-            <t:virhe>Pyydettyä kohdetta ei voida näyttää.</t:virhe>
+            <t:virhe>
+                Pyydettyä kohdetta ei voida näyttää.
+                <hr style="color: red; max-width: 800px" />
+            </t:virhe>
+                <h3>Mahdollisia syitä virheeseen:</h3>
+                <ul class="selitys">
+                    <li>Pyydettyä sivua tai kohdetta ei ole olemassa;</li>
+                    <li>käyttäjällä ei ole tarvittavia pääsyoikeuksia; tai</li>
+                    <li>palvelimella tapahtui jokin virhe.</li>
+                </ul>
 </t:kehys>

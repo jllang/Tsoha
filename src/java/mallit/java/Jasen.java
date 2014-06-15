@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 public final class Jasen extends Yksilotyyppi {
 
     private static final String     LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
-            HAKULAUSE2, PORTTIKIELTOLAUSE;
+            HAKULAUSE2, PORTTIKIELTOLAUSE, LUKUMAARALAUSE;
     private static final Predicate<String> KELVOLLINEN_SP;
 
     private final int       kayttajanumero;
@@ -53,6 +53,7 @@ public final class Jasen extends Yksilotyyppi {
         HAKULAUSE2      = "select * from jasenet where tunnus = ?";
         PORTTIKIELTOLAUSE = "select asetettu, kesto from porttikiellot where "
                 + "kohde = ?";
+        LUKUMAARALAUSE  = "select count(tunnus) from jasenet";
         KELVOLLINEN_SP  = Pattern.compile(
                 "^([a-z0-9]|([a-z0-9][._-][a-z0-9]))+"
                         + "@([a-z0-9]|([a-z0-9][._-][a-z0-9]))+\\.[a-z]{2,4}$",
@@ -146,6 +147,25 @@ public final class Jasen extends Yksilotyyppi {
         final PreparedStatement kysely = yhteys.prepareStatement(HAKULAUSE2);
         kysely.setString(1, avain);
         return kysely;
+    }
+
+    public static int lukumaara() {
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        int lukumaara               = 0;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(LUKUMAARALAUSE);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            lukumaara = vastaus.getInt(1);
+        } catch (SQLException e) {
+
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+        return lukumaara;
     }
 
     @Override
