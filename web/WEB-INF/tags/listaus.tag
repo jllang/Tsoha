@@ -1,7 +1,7 @@
 <%--
     Document   : listaus
     Created on : 6.6.2014, 16:57:05
-    Author     : John Lång <jllang@cs.helsinki.fi>
+    Author     : John Lång (jllang@cs.helsinki.fi)
 --%>
 
 <%@tag description="Listaus dynaamisella sisällöllä." pageEncoding="UTF-8"

@@ -1,7 +1,7 @@
 <%--
     Document   : rekisterointi
     Created on : 1.6.2014, 20:13:04
-    Author     : John Lång <jllang@cs.helsinki.fi>
+    Author     : John Lång (jllang@cs.helsinki.fi)
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"

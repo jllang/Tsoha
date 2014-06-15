@@ -1,7 +1,7 @@
 <%--
     Document   : alkio
     Created on : 5.6.2014, 22:18:28
-    Author     : John Lång <jllang@cs.helsinki.fi>
+    Author     : John Lång (jllang@cs.helsinki.fi)
 --%>
 
 <%@tag description="Listauksen rivi dynaamisella sisällöllä."

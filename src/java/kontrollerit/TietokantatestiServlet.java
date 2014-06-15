@@ -22,7 +22,7 @@
 //
 ///**
 // *
-// * @author John Lång <jllang@cs.helsinki.fi>
+// * @author John Lång (jllang@cs.helsinki.fi)
 // */
 //@WebServlet(name = "TietokantatestiServlet", urlPatterns = {"/tietokantatesti"})
 //public final class TietokantatestiServlet extends HttpServlet {

@@ -16,7 +16,7 @@ import javax.transaction.TransactionRolledbackException;
  * Tämä luokka vastaa pääosin yksilötyyppien tuonnista ja viennistä tietokantaan.
  * Lisäksi luokka käsittelee monimutkaisemmat usean taulun transaktiot.
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class TietokantaDAO {
 
@@ -56,7 +56,7 @@ public final class TietokantaDAO {
         return yhteys;
     }
 
-    /**
+   /**
      * Tallentaa annettujen olioiden tilan tietokantaan yhtenä transaktiona. Jos
      * jonkin olion vienti tietokantaan epäonnistuu, transaktio perutaan.
      * Tietokanta jää eheään tilaan kun tämä metodi on suoritettu.
@@ -196,11 +196,9 @@ public final class TietokantaDAO {
      * haetaan tietokannasta annetun avaimen perusteella luokkaa vastaavasta
      * relaatiosta.
      *
-     * @param <T>
      * @param luokka Haettavan olion luokka.
      * @param avain Oliota vastaavan monikon avain.
      * @return Uusi
-     * @throws SQLException
      * @throws AssertionError Jos syötteeksi annetaan jokin tuntematon luokka.
      */
     public static Yksilotyyppi tuo(final Class luokka, final int... avain) {
@@ -259,11 +257,9 @@ public final class TietokantaDAO {
      * haetaan tietokannasta annetun avaimen perusteella luokkaa vastaavasta
      * relaatiosta.
      *
-     * @param <T>
      * @param luokka Haettavan olion luokka.
      * @param avain Oliota vastaavan monikon avain.
      * @return Uusi
-     * @throws SQLException
      * @throws AssertionError Jos syötteeksi annetaan jokin tuntematon luokka.
      */
     public static Yksilotyyppi tuo(final Class luokka, final String avain) {
@@ -315,7 +311,7 @@ public final class TietokantaDAO {
     /**
      * Luo uuden ketjun ja suorittaa siihen tarvittavat tietokantakyselyt.
      * Kyseessä on transaktio, joten tietokanta jää koherenttiin tilaan metodin
-     * suorituksen päätyttyä.
+     * suorituksen päätyttyä. (Ketjun luonti tosin ei ole taattu.)
      *
      * @param kirjoittaja   Ensimmäisen viestin kirjoittaja.
      * @param aihe          Ensimmäisen viestin aihe.

@@ -23,7 +23,7 @@
 //
 ///**
 // *
-// * @author John Lång <jllang@cs.helsinki.fi>
+// * @author John Lång (jllang@cs.helsinki.fi)
 // */
 //@WebServlet(name = "RekisterointiServlet", urlPatterns = {"/rekisterointi"})
 //public final class RekisterointiServlet extends HttpServlet {

@@ -19,12 +19,12 @@ import java.util.regex.Pattern;
 /**
  * Mallintaa rekisteröityyn foorumin käyttäjätunnukseen liittyviä asioita.
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class Jasen extends Yksilotyyppi {
 
     private static final String     LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
-            HAKULAUSE2;
+            HAKULAUSE2, PORTTIKIELTOLAUSE;
     private static final Predicate<String> KELVOLLINEN_SP;
 
     private final int       kayttajanumero;
@@ -51,6 +51,8 @@ public final class Jasen extends Yksilotyyppi {
                 + "kuvaus = ?, viesteja = ? where numero = ?";
         HAKULAUSE1      = "select * from jasenet where numero = ?";
         HAKULAUSE2      = "select * from jasenet where tunnus = ?";
+        PORTTIKIELTOLAUSE = "select asetettu, kesto from porttikiellot where "
+                + "kohde = ?";
         KELVOLLINEN_SP  = Pattern.compile(
                 "^([a-z0-9]|([a-z0-9][._-][a-z0-9]))+"
                         + "@([a-z0-9]|([a-z0-9][._-][a-z0-9]))+\\.[a-z]{2,4}$",
@@ -209,35 +211,38 @@ public final class Jasen extends Yksilotyyppi {
      * Virhetilanteissa palautetaan <tt>false</tt>.
      */
     public boolean onPorttikiellossa() {
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        boolean porttikielto        = true;
         try {
-            final Connection yhteys = TietokantaDAO.annaKertayhteys();
-            final PreparedStatement kysely = yhteys.prepareStatement("select "
-                    + "asetettu, kesto from porttikiellot where kohde = ?");
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(PORTTIKIELTOLAUSE);
             kysely.setInt(1, kayttajanumero);
-            final ResultSet vastaus = kysely.executeQuery();
+            vastaus = kysely.executeQuery();
 
             if (!vastaus.next()) {
-                TietokantaDAO.sulje(yhteys, kysely, vastaus);
-                return false;
+                porttikielto = false;
+                // Olisipa meillä goto...
             }
-            final Timestamp alkanut  = vastaus.getTimestamp(1);
-            final int kesto     = vastaus.getInt(2);
-            if (kesto == 0) {
-                // 0 merkitsee toistaiseksi voimassa olevaa porttikieltoa.
-                return false;
+            if (porttikielto) {
+                final Timestamp alkanut = vastaus.getTimestamp(1);
+                final int kesto = vastaus.getInt(2);
+                if (kesto != 0) {
+                    // 0 merkitsee toistaiseksi voimassa olevaa porttikieltoa.
+                    final Timestamp paattyy = new Timestamp(alkanut.getTime()
+                            + 60000 * kesto);
+                    final Timestamp nykyhetki = new Timestamp(
+                            System.currentTimeMillis());
+                    porttikielto = paattyy.compareTo(nykyhetki) <= 0;
+                }
             }
-            final Timestamp paattyy  = new Timestamp(alkanut.getTime() + 60000 * kesto);
-            final Timestamp nykyhetki = new Timestamp(System.currentTimeMillis());
-            boolean paattynyt = paattyy.compareTo(nykyhetki) <= 0;
-            if (paattynyt) {
-//                poistaPorttikielto();
-            }
-            TietokantaDAO.sulje(yhteys, kysely, vastaus);
-            return paattynyt;
         } catch (SQLException e) {
             Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
-            return true;
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
+        return porttikielto;
     }
 
     public int annaKayttajanumero() {

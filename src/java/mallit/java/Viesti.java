@@ -14,16 +14,16 @@ import java.util.logging.Logger;
  * olemassaoloriippuvainen yksilötyyppi.
  *
  * @see Ketju
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class Viesti extends Yksilotyyppi {
 
     private static final String LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE;
 
-    private final int   ketjunTunnus, numero, kirjoittaja;
-    private final Timestamp  kirjoitettu;
-    private Timestamp        muokattu, moderoitu, poistettu;
-    private String      sisalto;
+    private final int       ketjunTunnus, numero, kirjoittaja;
+    private final Timestamp kirjoitettu;
+    private Timestamp       muokattu, moderoitu, poistettu;
+    private String          sisalto;
 
     static {
         LISAYSLAUSE     = "insert into viestit (ketju_id, numero, kirjoittaja,"

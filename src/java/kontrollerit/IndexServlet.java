@@ -13,7 +13,7 @@ import kontrollerit.tyokalut.Uudelleenohjaaja;
 
 /**
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 @WebServlet(name = "IndexServlet", urlPatterns = {"/etusivu"})
 public final class IndexServlet extends HttpServlet {

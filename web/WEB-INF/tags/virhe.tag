@@ -1,7 +1,7 @@
 <%--
     Document   : virhe
     Created on : 30.5.2014, 21:05:12
-    Author     : John Lång <jllang@cs.helsinki.fi>
+    Author     : John Lång (jllang@cs.helsinki.fi)
 --%>
 
 <%@tag description="Virheilmoitus dynaamisella sisällöllä." pageEncoding="UTF-8"

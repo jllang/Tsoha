@@ -9,7 +9,7 @@ import java.sql.SQLException;
  * Yksilötyyppi mallintaa yhtä järjestelmän varsinaista tietokohdetta.
  * Yksilötyypin edustaja voidaan säilöä SQL-tietokannassa.
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public abstract class Yksilotyyppi {
 
@@ -24,7 +24,6 @@ public abstract class Yksilotyyppi {
      * attribuuttien arvot on korvattu kysymysmerkeillä.
      *
      * @return SQL insert tai update -kysely.
-     * @see Yksilotyyppi#taydennaAttribuutit(java.sql.PreparedStatement)
      */
     public final String paivityslause() {
         if (tuore) {
@@ -68,7 +67,7 @@ public abstract class Yksilotyyppi {
 
 //    abstract void valmistelePoisto(final PreparedStatement kysely)
 //            throws SQLException;
-    
+
     /**
      * Palauttaa uniikin merkkijonon, jota voidaan käyttää olion nimenä
      * listauksissa.

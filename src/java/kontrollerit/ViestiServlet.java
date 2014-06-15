@@ -13,15 +13,18 @@ import kontrollerit.tyokalut.Uudelleenohjaaja;
 import kontrollerit.tyokalut.Valvoja;
 import mallit.java.Alue;
 import mallit.java.Jasen;
+import mallit.java.Kayttajataso;
 import mallit.java.Ketju;
 import mallit.java.TietokantaDAO;
 import mallit.java.Viesti;
 
 /**
+ * Tämä servlet käsittelee viestien lisäämiseen, muokkaamiseen ja poistoon
+ * liittyvää logiikkaa.
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
-@WebServlet(name = "ViestiServlet", urlPatterns = {"/viesti"})
+@WebServlet(name = "ViestiServlet", urlPatterns = {"/muokkaus", "/poisto"})
 public final class ViestiServlet extends HttpServlet {
 
     // Virhekoodit ovat:
@@ -30,6 +33,8 @@ public final class ViestiServlet extends HttpServlet {
     // 2 - Transaktio epäonnistui palvelimella
 
     private static final int EI_VIRHETTA, PUUTTUVIA_KENTTIA, TIETOKANTAVIRHE;
+
+    private static String MUOKKAUS, POISTO;
 
     static {
         EI_VIRHETTA         = 0;
@@ -54,21 +59,35 @@ public final class ViestiServlet extends HttpServlet {
     private static void kasittelePyynto(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
-        resp.setContentType("text/html;charset=UTF-8");
-        resp.setCharacterEncoding("UTF-8");
         req.setCharacterEncoding("UTF-8");
-        if (Valvoja.aktiivinenIstunto(req, resp, "viesti")) {
-            int ketjunTunnus = 0;
-            try {
-                ketjunTunnus = Integer.parseInt(req.getParameter("ketju"));
-            } catch (NumberFormatException e) {}
-            if (ketjunTunnus == 0) {
-                req.setAttribute("lomakkeenNimi", "Uusi ketju");
-                Otsikoija.asetaOtsikko(req, "Uusi ketju");
-                uusiKetju(req, resp);
-            } else {
-                ketjunTaydennys(req, resp, ketjunTunnus);
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=UTF-8");
+        if (MUOKKAUS == null) {
+            MUOKKAUS    = req.getContextPath() + "/muokkaus";
+            POISTO      = req.getContextPath() + "/poisto";
+        }
+        if (req.getRequestURI().equals(MUOKKAUS)) {
+            if (Valvoja.aktiivinenIstunto(req, resp, "muokkaus")) {
+                int ketjunTunnus = 0;
+                try {
+                    ketjunTunnus = Integer.parseInt(req.getParameter("ketju"));
+                } catch (NumberFormatException e) {
+                }
+                if (ketjunTunnus == 0) {
+                    req.setAttribute("lomakkeenNimi", "Uusi ketju");
+                    Otsikoija.asetaOtsikko(req, "Uusi ketju");
+                    uusiKetju(req, resp);
+                } else {
+                    ketjunTaydennys(req, resp, ketjunTunnus);
+                }
             }
+        } else if (req.getRequestURI().equals(POISTO)) {
+            if (Valvoja.aktiivinenIstunto(req, resp, "poisto")) {
+
+            }
+        } else {
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+            return;
         }
     }
 
@@ -186,8 +205,20 @@ public final class ViestiServlet extends HttpServlet {
         final Ketju ketju = (Ketju) TietokantaDAO.tuo(Ketju.class, ketjunTunnus);
         final Viesti viesti = (Viesti) TietokantaDAO.tuo(Viesti.class,
                 ketjunTunnus, viestinTunnus);
+        final Jasen kirjoittaja = (Jasen) TietokantaDAO.tuo(Jasen.class,
+                viesti.annaKirjoittaja()),
+                muokkaaja = (Jasen) req.getSession().getAttribute("jasen");
+        if (muokkaaja.annaKayttajanumero() != kirjoittaja.annaKayttajanumero()
+                && !Kayttajataso.vahintaan(muokkaaja.annaTaso(),
+                        Kayttajataso.MODERAATTORI)) {
+            // Jos muokkaaja ei ole sama kuin alkuperäinen kirjoittaja ja jos
+            // muokkaaja ei ole moderaattori, tulee pääsy muokkauslomakkeeseen
+            // estää:
+            Uudelleenohjaaja.uudelleenohjaa(req, resp, "virhesivu");
+        }
         if (ketju == null || viesti == null) {
             Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+            return;
         }
         final String aihe = ketju.annaAihe();
         String sisalto = req.getParameter("sisalto");
@@ -205,10 +236,11 @@ public final class ViestiServlet extends HttpServlet {
         viesti.asetaMuokattu(aikaleima);
 //        if (viestinTunnus == 1) {
 //            //Hoida ketjujen_sijainnit ajan tasalle.
+//            throw new UnsupportedOperationException("Ketjun siirtoa ei ole "
+//                    + "vielä toteutettu");
 //        }
         ketju.asetaMuutettu(aikaleima);
         if (TietokantaDAO.vie(viesti, ketju)) {
-            // Miksi tämä ohjaa /viestiin???
             Uudelleenohjaaja.uudelleenohjaa(req, resp, "ketju?tunnus="
                     + ketjunTunnus +"&sivu=1");
         } else {

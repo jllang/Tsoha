@@ -7,19 +7,31 @@
 package kontrollerit.tyokalut;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import kontrollerit.IstuntoServlet;
 import mallit.java.Jasen;
 
 /**
+ * Tämä luokka sisältää yleisiä pääsynvalvontaan liittyviä toimintoja.
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class Valvoja {
+
+    private static final Map<Jasen, HttpSession> KIRJAUTUNEET;
+
+    static {
+        KIRJAUTUNEET = new HashMap<>();
+    }
 
     /**
      * Palauttaa <tt>true</tt> joss annettuun pyyntöön liittyy aktiivinen
@@ -49,6 +61,45 @@ public final class Valvoja {
     }
 
     /**
+     * Palauttaa metodin kutsuhetkellä aktiivisiin istuntoihin liittyvät
+     * käyttäjätunnukset.
+     *
+     * @return Sisäänkirjautuneet jäsenet.
+     */
+    public static Set<Jasen> annaKirjautuneet() {
+        return KIRJAUTUNEET.keySet();
+    }
+
+    /**
+     * Asettaa annetulle jäsenelle annetun istunnon.
+     *
+     * @param jasen
+     * @param istunto
+     */
+    public static void lisaaIstunto(final Jasen jasen,
+            final HttpSession istunto) {
+        KIRJAUTUNEET.put(jasen, istunto);
+    }
+
+    /**
+     * Käytetään porttikiellon ja uloskirjautumisen toimeenpanossa.
+     *
+     * @param kohde Käyttäjätunnus, jonka istunto suljetaan. Sulkeminen näkyy
+     * käyttäjälle tämän pyytäessä seuraavan istuntoa edellyttävän sivun.
+     */
+    // ...Näin ainakin luulisin.
+    public static void suljeIstunto(final Jasen kohde) {
+        if (kohde == null) {
+            return;
+        }
+        // Pitäisi tutkiskella joskus voisiko porttikiellon jotenkin helposti
+        // saada aiheuttamaan välitön uudelleenohjaus esimerkiksi virhesivulle.
+        final HttpSession istunto = KIRJAUTUNEET.get(kohde);
+        istunto.removeAttribute("jasen");
+        KIRJAUTUNEET.remove(kohde);
+    }
+
+    /**
      * Palauttaa <tt>true</tt> joss annettu käyttäjätunnus on olemassa ja sillä
      * on annettu salasana. Kaikissa virhetilanteissa palautetaan arvo false.
      *
@@ -59,7 +110,8 @@ public final class Valvoja {
     @SuppressWarnings({"TooBroadCatch", "UseSpecificCatch"})
     public static boolean autentikoi(final Jasen jasen, final String salasana) {
         try {
-            return !jasen.onPorttikiellossa()
+            return KIRJAUTUNEET.get(jasen) != null
+                    && !jasen.onPorttikiellossa()
                     && PasswordHash.validatePassword(salasana,
                     PasswordHash.PBKDF2_ITERATIONS + ":"
                     + jasen.annaSuola() + ":"

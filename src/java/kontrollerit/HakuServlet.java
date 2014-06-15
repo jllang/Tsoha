@@ -11,7 +11,7 @@ import kontrollerit.tyokalut.Valvoja;
 
 /**
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 @WebServlet(name = "HakuServlet", urlPatterns = {"/haku"})
 public final class HakuServlet extends HttpServlet {

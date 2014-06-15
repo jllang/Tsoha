@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * Mallintaa viestiketjua.
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class Ketju extends Yksilotyyppi {
 
@@ -87,7 +87,6 @@ public final class Ketju extends Yksilotyyppi {
      * @param aihe Luotavan ketjun aihe.
      * @param muutettu Ketjulle kirjattava luomisajankohta.
      * @return Uusi ketju.
-     * @see TietokantaDAO#vie(mallit.java.Yksilotyyppi)
      */
     public static Ketju luo(final String aihe, final Timestamp muutettu) {
         if (aihe == null || aihe.isEmpty()) {

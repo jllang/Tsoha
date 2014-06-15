@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * Mallintaa keskustelualuetta foorumilla.
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class Alue extends Yksilotyyppi {
 

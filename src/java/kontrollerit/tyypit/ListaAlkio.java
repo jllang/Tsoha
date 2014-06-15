@@ -3,7 +3,7 @@ package kontrollerit.tyypit;
 
 /**
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class ListaAlkio {
 

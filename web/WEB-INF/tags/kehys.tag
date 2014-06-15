@@ -47,7 +47,7 @@
                                         + "painike\" href=\"profiili?tunnus="
                                         + kayttajanumero + "\">Oma sivu</a>");
                                 out.println("                <a class=\""
-                                        + "painike\" href=\"viesti?ketju=0\">"
+                                        + "painike\" href=\"muokkaus?ketju=0\">"
                                         + "Uusi ketju</a>");
                                 out.println("                <a class=\""
                                         + "painike\" href=\"haku\">Haku</a>");

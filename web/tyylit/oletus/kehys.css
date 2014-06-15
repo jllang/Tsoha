@@ -1,7 +1,7 @@
 
 /*
     Created on : 21.5.2014, 20:23:22
-    Author     : John Lång <jllang@cs.helsinki.fi>
+    Author     : John Lång (jllang@cs.helsinki.fi)
 */
 
 body {
@@ -28,14 +28,13 @@ a:hover {
     color:      #8CA949;
 }
 
-/*
 a:active {
     color:      #D3FF6E;
 }
 
 a:visited {
-    color:      #261B40;
-}*/
+    color:      #322454;
+}
 
 #ylaosa {
     position:   fixed;

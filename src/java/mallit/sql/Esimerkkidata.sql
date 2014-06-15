@@ -15,7 +15,7 @@ insert into jasenet (tunnus, rekisteroity, tiiviste, suola, sposti, taso)
 values ('tRolli', 'tomorrow', 'b9c524b95e5987fb76f87675c207b5f8a5776003e32ec75d62f5e8ebbf167e0f62ed961766793cdf3d94a123d8820a0d20e03c48098b50309c1c71193e24b265',
 '6eec746a39bcd01861083a3c1259cf4450471b638957acc6b8a1cab435bb5073ec2c67112a79916291c323e79f0a32476bc1685760386adb99a85ca22a64d232',
 'tiina.rolli@spe.de', 'TAVALLINEN');
-insert into porttikiellot values (4, 'tomorrow', 10080);
+insert into porttikiellot values (4, 'now', 0);
 insert into alueet (nimi, kuvaus) values ('Yleinen', 'Yleinen keskustelu');
 insert into alueet (nimi, kuvaus) values ('Kulttuuri', 'Taiteeseen ja kulttuuriin liittyvä keskustelu');
 insert into alueet (nimi, kuvaus) values ('Tekniikka', 'Tiede ja tekniikka');

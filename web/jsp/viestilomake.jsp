@@ -1,7 +1,7 @@
 <%--
     Document   : uusiviesti
     Created on : 8.6.2014, 12:50:59
-    Author     : John Lång <jllang@cs.helsinki.fi>
+    Author     : John Lång (jllang@cs.helsinki.fi)
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"
@@ -10,7 +10,7 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:kehys otsikko="${otsikko}" fooruminNimi="Esimerkkifoorumi">
             <h2>${lomakkeenNimi}</h2>
-            <form action="viesti?${pageContext.request.queryString}"
+            <form action="muokkaus?${pageContext.request.queryString}"
                   method="POST" accept-charset="UTF-8">
                 <input type="hidden" name="lahetetty" value="tosi">
                 <table class="sisalto pariton" style="width: auto">
@@ -52,6 +52,7 @@
                         </td>
                     </tr>
                     <tr>
+                        <!-- Pitäisiköhän lisätä myös perusmisnamiska? -->
                         <td colspan="4"><input title="Lähetä" value="Lähetä"
                                                type="submit"></td>
                     </tr>

@@ -20,7 +20,7 @@ import mallit.java.Viesti;
 
 /**
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 @WebServlet(name = "KetjuServlet", urlPatterns = {"/ketju"})
 public final class KetjuServlet extends HttpServlet {
@@ -52,11 +52,11 @@ public final class KetjuServlet extends HttpServlet {
             Otsikoija.asetaOtsikko(req, ketju.annaAihe());
             // TODO: pistä viestien kirjoittajien nimet johonkin tauluun, jotta
             // niitä pääsee iteroimaan ketju.jsp:ssä viestien rinnalla.
-            req.setAttribute("ketjunTunnus", ketju.annaTunnus());
             req.setAttribute("aihe", ketju.annaAihe());
             req.setAttribute("alueet", ketju.annaAlueet());
             req.setAttribute("viestit", viestit);
             req.setAttribute("kirjoittajat", kirjoittajat);
+            req.setAttribute("katselija", req.getSession().getAttribute("jasen"));
             Uudelleenohjaaja.siirra(req, resp, "/jsp/ketju.jsp");
         }
     }

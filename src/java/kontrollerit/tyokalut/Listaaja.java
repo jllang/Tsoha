@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import javax.swing.text.DateFormatter;
 import kontrollerit.tyypit.ListaAlkio;
 import mallit.java.Alue;
 import mallit.java.Ketju;
@@ -13,7 +12,7 @@ import mallit.java.Yksilotyyppi;
 
 /**
  *
- * @author John Lång <jllang@cs.helsinki.fi>
+ * @author John Lång (jllang@cs.helsinki.fi)
  */
 public final class Listaaja {
 
@@ -48,24 +47,11 @@ public final class Listaaja {
             case "tuoreet":
                 lista = haeTuoreet();
                 break;
-            case "ketjut":
-//                final int aluetunnus;
-//                try {
-//                    aluetunnus = Integer.parseInt(req.getParameter("tunnus"));
-//                    Alue alue = (Alue) TietokantaDAO.tuo(Alue.class, aluetunnus);
-//                } catch (NumberFormatException | NullPointerException e) {
-//                    lista = null;
-//                    break;
-//                } catch (SQLException e) {
-//                    Logger.getLogger(Listaaja.class.getName()).log(
-//                            Level.SEVERE, null, e);
-//                    lista = null;
-//                    break;
-//                }
-//
-//                lista = haeKetjut();
-                lista = null;
-                break;
+//            case "ketjut":
+//            case "jasenet":
+//            case "porttikiellot":
+//                lista = null;
+//                break;
             case "alueet":
             default:
                 lista = haeAlueet();
@@ -82,9 +68,10 @@ public final class Listaaja {
             if (ketju == null) {
                 break;
             }
-            // Ketjuunkin kannattaisi ehkä lisätä viestien määrän kertova kenttä
-            // niin päästäisiin helposti linkittämään viimeiselle sivulle ilman
-            // yhteenvetokyselyjä...
+            if (ketju.annaPoistettu() != null) {
+                // Poistetut ketjut yksinkertaisesti jätetään listaamatta.
+                continue;
+            }
             lista.add(new ListaAlkio(i,
                     "ketju?tunnus=" + ketju.annaTunnus() + "&sivu=1",
                     ketju.listausnimi(), new String[]{
@@ -122,6 +109,9 @@ public final class Listaaja {
             final Alue alue = (Alue) alueet[i];
             if (alue == null) {
                 break;
+            }
+            if (alue.annaPoistettu() != null) {
+                continue;
             }
             lista.add(new ListaAlkio(i, "/alue?tunnus=" + alue.annaTunnus(),
                     alue.annaNimi(), new String[] {alue.annaKuvaus()}));
