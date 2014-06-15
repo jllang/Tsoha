@@ -73,6 +73,7 @@ public enum Kayttajataso {
      * @return  Onko pari (a,b) relaatiossa "stk".
      */
     public static boolean vahintaan(final Kayttajataso a, final Kayttajataso b) {
+        // Tästä voisi ehkä tehdä myös instanssimetodin...
         return a.vertailuluku >= b.vertailuluku;
     }
 }

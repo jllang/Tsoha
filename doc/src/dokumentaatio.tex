@@ -212,8 +212,10 @@
 	\section{Relaatiotietokantakaaviot}
 		\subsection{ER-kaavio} Seuraavalla sivulla on tietokannan riippuvuuksia korkealla tasolla kuvaava
 		ER-kaavio. Olen esittänyt siinä kohteiden tyypit väreillä, mikä ilmenee kuvassa ole-vasta selityksestä.
-		Lisäksi selvennettäköön, että olen tilan säästämiseksi esittänyt tietotyypin "Jäsen" valinnaiset
-		attribuutit moniarvoisena attribuuttina "muut" se-kä viitannut porttikiellon asettamiseen potkimisena.
+		Lisäksi selvennettäköön, että olen tilan säästämiseksi niputtanut osan samankaltaisista attribuuteista
+		yhteen moniarvoisiksi attribuuteiksi sekä viitannut porttikiellon asettamiseen potkimisena. Kaikki
+		järjestelmän todelliset tietokantataulut ovat vähintään kolmannessa normaalimuodossa, joten moniarvoisia
+		attribuutteja ei tietokannassani esiinny.
 		
 		\subsection{UML-kaavio} Olen myös laatinut tarkemman kaavion, josta ilmenee kaikki varsinaiseen
 		tie-tokantaan luotavat taulut attribuutteineen ja avaimineen. UML-kaavio on sivulla 21. Olen merkinnyt
@@ -238,24 +240,179 @@
 \newpage
 \thispagestyle{plain}
 	\section{Järjestelmän yleisrakenne}
+		\subsection{Hakemistorakenne}
+			Kuvaan tässä luvussa lyhyesti järjestelmän yleisrakennetta hakemistorakenteen muodossa.
+			Projektin tärkein sisältö sijaitsee juurihakemiston alikansioissa \emph{doc}, \emph{src} ja
+			\emph{web}.
+	
+		\subsection{/doc}
+			Tämä hakemisto sisältää projektin dokumentaation, kuten muunmuassa tämän asiakirjan. Hakemistossa
+			\emph{/doc/src} sijaitsee dokumentaation latex-lähdekoodi sekä kaaviot ja kuvat.
+			
+		\subsection{/src/java}
+			Tämä hakemisto sisältää projektin MVC-mallin mukaiset kontrollerit ja mallit omissa
+			alihakemistoissaan. Lisäksi hakemisto sisältää foorumin käyttöönoton kannalta tarpeellisen
+			konfiguraatiotiedoston omassa alihakemistossaan.
+			
+			\emph{/src/java/kontrollerit} sisältää varsinaisia HTTP-pyyntöjä käsittelevät servletit. Sillä on
+			myös kaksi alihakemistoa:
+			
+			\emph{/src/java/kontrollerit/tyokalut} sisältää työkaluluokkia joiden staattisia metodeja eri
+			servletit voivat käyttää. Työkaluluokkiin olen pyrkinyt keräämään yleiskäyttöi-siä koodinpätkiä
+			käytettäväksi kirjastometodien tapaan.
+			
+			\emph{/src/java/kontrollerit/tyypit} sisältää aputyyppejä. Esimerkiksi työkaluluokka
+			\emph{Listaaja} käyttää aputyyppiä \emph{ListaAlkio}, joka mallintaa web-sivuilla esitettävän
+			listausnäkymän yhden rivin sisältämiä tietoja.
+			
+			\emph{/src/java/mallit} taas sisältää MVC-mallin mukaiset mallitiedostot. Sen alihakemistot on
+			nimetty käytetyn ohjelmointikielen mukaisesti.
+			
+			\emph{/src/java/mallit/java} sisältää järjestelmän yksilötyyppejä mallintavat Java-luokat,
+			pääsynvalvonnan peruspilarina toimivan käyttäjätunnuksen tasoa mallintavan enumeroidun luokan
+			sekä Yksilötyyppien tuonnista ja viennistä vastaavan luokan \emph{TietokantaDAO}. Viimeksi
+			mainittu vastaa myös useamman yksilötyypin tietokantataulujen käyttöä vaativien transaktioiden
+			toteuttamisesta.
+			
+			Viimeisenä alihakemistona mainittakoon \emph{/src/java/mallit/sql}, joka sisältää foorumin
+			ylläpidon ja käyttöönoton kannalta tärkeimmät SQL-tiedostot. Foorumin käyttöönoton yhteydessä
+			tarvitaan tiedostoa \emph{Alustus.sql}.
+			
+		\newpage
+		\thispagestyle{plain}
+		\subsection{/web}
+			Hakemisto sisältää MVC-mallin mukaiset näkymätiedostot.
+			
+			\emph{/web/META-INF} on foorumin käyttöönoton kannalta tärkeä hakemisto, jossa sijaitseva 
+			tiedosto \emph{content.xml} sisältää tietokantayhteyden muodostamiseen tarvittavat tiedot.
+			Foorumin ylläpitäjän tulee käyttöönoton yhteydessä päivittää mainittuun tiedostoon tietokannan
+			sijainti, käyttäjätunnus sekä salasana.
+			
+			\emph{/web/WEB-INF} sisältää äsken mainitun hakemiston tavoin tiedostoja jotka eivät näy
+			web-sivuja selaaville asiakkaille. Kansiossa on konfiguraatiotiedosto \emph{web.xml} sekä yksi
+			alihakemisto.
+			
+			\emph{/web/WEB-INF/tags} sisältää kirjastoja muistuttavia tag-tiedostoja. Niitä olen
+			käyttänyt toisteisuuden vähentämiseen ja koodin rakenteen selkiyttämiseen näkymätiedostoissa.
+			
+			\emph{/web/jsp} sisältää näkymätiedostot, jotka voivat käyttää apunaan toistuvan tiedon
+			esittämiseen tag-tiedostoja.
+			
+			\emph{/web/tyylit} puolestaan sisältää web-sivujen graafisen tyylin määrittelystä vastaavat
+			CSS-tiedostot omissa tyylien mukaisissa alihakemistoissaan. Tällä hetkellä tyylejä on vain yksi
+			ja sen tiedostot löytyvät alihakemistosta \emph{oletus}.
+			
+			\emph{/web/data}-hakemistossa sijaitsee muita kuin koodiksi tulkittavia tiedostoja. Sillä on
+			kaksi alihakemistoa:
+			
+			\emph{/web/data/staattinen}, joka sisältää foorumin graafisessa esityksessä tarvittavia
+			kuvatiedostoja; sekä
+			
+			\emph{/web/data/dynaaminen}, jossa puolestaan sijaitsee käyttäjien foorumille lä-hettämät
+			tiedostot joita ei katsota osaksi ohjelmistoa. Esimerkiksi käyttäjien mahdolliset avatar-kuvat
+			sekä viesteihin laittamat liitetiedostot tulevat tähän hakemistoon.
+			
+		\subsection{Muut hakemistot}
+			Muita projektikansiosta mahdollisesti löytyviä hakemistoja ovat \emph{build}, \emph{dist},
+			\emph{test}, \emph{nbproject} sekä piilohakemisto \emph{.git}. Nämä hakemistot eivät 
+			varsinaisesti liity tässä dokumentissa käsiteltäviin asiakokonaisuuksiin, joten katson 
+			parhaaksi ohittaa niiden käyttötarkoituksen kuvailemisen. (Kyseessä on projektin tekniseen
+			toteutukseen liittyviä hakemistoja, jotka lienevät Java-ohjelmoijille entuudestaan tuttuja.)
+			
+			Sanotusta huolimatta tahdon huomauttaa että jos projektin 
+			kääntää NetBeans IDE:llä, niin .war-arkisto ilmestyy kansioon /dist. Tämä arkisto voidaan
+			sijoittaa \emph{Tomcat}-palvelimen \emph{webapps}-hakemistoon.
 	
 \newpage
 \thispagestyle{plain}
 	\section{Käyttöliittymä}
 		\subsection{Käyttöliittymäkaavio} Seuraavalla sivulla näkyvä kaavio antaa yleiskuvan käyttöliittymän
-		komponenteista ja niiden välisistä suhteista. (Päivitän komponenttien lopulliset tiedostonimet näkyviin
-		myöhemmin.) Esityksen selkeyttämiseksi olen värikoodannut komponentit niiden käyttöön tarvittavaa
-		pienintä käyttäjätasoa vastaavalla väril-lä aiempaa käytäntöäni vastaavasti. (Toisin sanoen kaikkien
-		käytettävissä olevat komponentit ovat sinisiä, jäsenten käytettävissä olevat vihreitä, moderaattoreiden
-		keltaisia sekä ylläpitäjän punaisia.) Lisäksi on syytä huomata että joihinkin komponentteihin liittyy
-		lisätoiminnallisuutta korkeammilla käyttäjätasoilla. Esi-merkiksi komponentti "Käyttäjätunnus" tarjoaa
-		ylläpitäjälle palvelun, joka mahdollistaa kohteena olevan käyttäjätunnuksen käyttäjätason muuttamisen.
+		komponenteista ja niiden välisistä suhteista.\footnote{Minun on pakko myöntää, että kaavio on hieman
+		ikävän näköinen kun se on suunnattu poikittain, mutta kaikkien näkymien välisten yhteyksin esittäminen
+		olisi ollut mahdotonta muulla tavoin. (Käytin yli tunnin aikaa pelkästään komponenttien sijoitteluun 
+		välttääkseni kaavion nuolten menemisen päällekkäin.)} (Päivitän komponenttien lopulliset tiedostonimet
+		näkyviin myöhemmin.) Esityksen selkeyttämiseksi olen värikoodannut komponentit niiden käyttöön
+		tarvittavaa pienintä käyttäjätasoa vastaavalla väril-lä aiempaa käytäntöäni vastaavasti. (Toisin sanoen
+		kaikkien käytettävissä olevat komponentit ovat sinisiä, jäsenten käytettävissä olevat vihreitä,
+		moderaattoreiden keltaisia sekä ylläpitäjän punaisia.) Lisäksi on syytä huomata että joihinkin
+		komponentteihin liittyy	lisätoiminnallisuutta korkeammilla käyttäjätasoilla. Esi-merkiksi komponentti
+		"Käyttäjätunnus" tarjoaa ylläpitäjälle palvelun, joka mahdollistaa kohteena olevan käyttäjätunnuksen
+		käyttäjätason muuttamisen.
+		
+		\subsection{Komponentit} Luettelen seuraavaksi ne kaaviossa näkyvät komponentit (tai ehkä pikemminkin
+		toiminnot), jotka olen tähän mennessä ehtinyt toteuttaa.
+		
+		\emph{Navigointi} on foorumin keskeisimpiä ominaisuuksia ja siihen liittyvät toiminnot ovat läsnä
+		jokaisella sivulla. Tämän vuoksi navigaatioon liittyvä koodi sijaitsee tagitiedostossa nimeltä
+		\emph{kehys.tag} ja se sisällytetään jokaiseen näkymätiedos-toon.
+		
+		\emph{Etusivusta} vastaa kontrolleri \emph{IndexServlet.java}, joka listaa foorumin keskuste-lualueet,
+		viimeisimmät viestit sekä joitain tilastotietoja.
+		
+		\emph{Listaus} on toiminto, joka on toteutettu työkaluluokassa \emph{Listaaja.java}. Sen tehtävänä
+		on tulostaa taulukkomuodossa tietokannan tilaa kuvastavia näkymiä.
+		
+		\emph{Kirjautuminen} on toteutettu luokassa \emph{IstuntoServlet.java} ja se kommunikoi mm.
+		työkaluluokan \emph{Valvoja} kanssa.
+		
+		\emph{Viestien muokkaus} on kontrollerin \emph{ViestiServlet.java} vastuulla. Se kuuntelee kahta eri
+		URL-kuviota (engl. URL pattern) ja ohjaa selaimen oikealle näkymäsi-vulle.
+		
+		\emph{Ketjujen lukeminen} suoritetaan kontrollerin \emph{KetjuServlet.java} kautta ja jäsen-ten
+		\emph{profiilin} esittäminen kuuluu kontrollerille \emph{ProfiiliServlet.java}.
 		
 		\newpage
 		\begin{figure}[H]		
 			\includegraphics[trim = 0mm 0mm 23mm -7mm, scale = 1.5, angle = 90]{kayttoliittymakaavio.eps}
 			\caption{Käyttöliittymäkaavio}
 		\end{figure}
+		
+\newpage
+\thispagestyle{plain}
+	\section{Asentaminen}
+		\subsection{Esivalmistelut} Oletan, että ylläpitäjä on tätä ohjetta lukiessaan jo asentanut 
+		\emph{Apache Tomcat 7.0.53}\footnote{versio 7.0.28 ei ole yhteensopiva.} (tai omalla
+		vastuullaan uudemman) web-palvelimen sekä \emph{PostgreSQL}\\ -tietokannan hallintaohjelmiston
+		sekä luonut kaikki tarvittavat käyttäjätunnukset.
+		
+		\subsection{Varsinaiset toimenpiteet} Ensiksi projektikansio tai war-arkisto tulee sijoittaa
+		palvelimen \emph{webapps}-hakemis-toon. Oletan seuraavaksi, että ylläpitäjä on siirtynyt
+		komentotulkissa projektikansion juureen.
+		
+		Kun hakemistorakenne on luotu, tulee suorittaa tietokantataulut määrittelevä SQL-tiedosto komennolla
+		\emph{psql src/java/mallit/sql/Alustus.sql}.\footnote{Tilanteesta riippuen saattaa olla
+		tarpeellista määrittää esimerkiksi käyttäjä, tietokannan nimi sekä salasana asianmukaisin lipuin,
+		joiden käyttöohjeet löytyvät psql:n manuaalista.}
+		
+		Seuraavaksi tulee tietokantayhteyden muodostamiseen tarvittavat tiedot täyt-tää tiedostoon
+		\emph{web/META-inf/context.xml.dist} ja poistaa sen nimen perästä .dist-pääte. Kyseisessä tiedostossa
+		on mainittu kommentissa mitä tietoja tulee täydentää. 
+		
+		(Tässä vaiheessa mainittakoon, että koska en kyennyt erinäisten teknisten vaikeuksien vuoksi täysin
+		noudattamaan aikataulua, jäivät käyttäjätunnusten ja keskustelualueiden lisäystoiminnot toteuttamatta.
+		Tällä hetkellä nämä toimenpiteet täytyy tehdä käsin tietokantakyselyillä, mikä on melko teknistä ja 
+		vaatii sovelluksen sisäisen logiikan ja tietokantataulujen rakenteen tuntemista.)
+		
+		Kun kaikki nämä toimenpiteet on onnistuneesti suoritettu, on foorumi valmis käytettäväksi ja sivun
+		voi avata yleisölle.
+		
+\newpage
+\thispagestyle{plain}
+	\section{Käyttöohje}
+		\subsection{Esimerkkidata} Foorumin toimintoja pääsee helposti testaamaan suorittamalla (vasta
+		alustetussa tietokannassa) psql-komentotulkilla kansiossa \emph{src/java/mallit/sql} sijaitseva
+		tiedosto \emph{Esimerkkidata.sql}. Kyseisen tiedoston sisältämät \emph{insert}-lauseet lisäävät
+		tietokantaan neljä keskustelualuetta sekä neljä käyttäjätunnusta.
+		
+		Käyttäjätunnukset ovat \emph{maija} (ylläpitäjä) salasanalla \emph{salasana}, \emph{esmer}
+		(moderaattori) salasanalla \emph{1234}, \emph{mattimeik} salasanalla \emph{abcdef} sekä tRolli
+		(pysyvässä porttikiellossa) salasanalla \emph{lällispöö}.
+		
+		%\subsection{}
+		
+\newpage
+\thispagestyle{plain}
+	\section{Omat kokemukset}
 
 %\newpage
 %\section{Relaatiotietokantakaavio}

@@ -242,7 +242,12 @@ public final class ViestiServlet extends HttpServlet {
         }
         final Timestamp aikaleima = new Timestamp(System.currentTimeMillis());
         viesti.asetaSisalto(sisalto);
-        viesti.asetaMuokattu(aikaleima);
+        if (Kayttajataso.vahintaan(muokkaaja.annaTaso(),
+                Kayttajataso.MODERAATTORI)) {
+            viesti.asetaModeroitu(aikaleima);
+        } else {
+            viesti.asetaMuokattu(aikaleima);
+        }
 //        if (viestinTunnus == 1) {
 //            //Hoida ketjujen_sijainnit ajan tasalle.
 //            throw new UnsupportedOperationException("Ketjun siirtoa ei ole "
