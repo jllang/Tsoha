@@ -81,21 +81,22 @@ public final class IstuntoServlet extends HttpServlet {
         }
         // Tämähän on vähän niinkuin malloc:
         Jasen jasen = (Jasen) TietokantaDAO.tuo(Jasen.class, kayttajatunnus);
-        if (jasen != null && !Valvoja.onKirjautunut(jasen)
-                && Valvoja.autentikoi(jasen, salasana)) {
-            final String[] parametrit = req.getQueryString().split("&");
-            String pyynto = jasennaPyynto(parametrit);
-            HttpSession istunto = req.getSession();
-            istunto.setAttribute("jasen", jasen);
-            Valvoja.lisaaIstunto(jasen, istunto);
-            Uudelleenohjaaja.uudelleenohjaa(req, resp, pyynto);
-        } else {
+        if ((jasen == null || Valvoja.onKirjautunut(jasen))
+                || !Valvoja.autentikoi(jasen, salasana)) {
             req.setAttribute("virhekoodi", AUTENTIKOINTIVIRHE);
             req.setAttribute("kayttajatunnus", kayttajatunnus);
             req.setAttribute("salasana", salasana);
             Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp"
                     + (req.getQueryString() == null ? ""
                             : "?" + req.getQueryString()));
+        } else {
+            final String[] parametrit = req.getQueryString().split("&");
+            String pyynto = jasennaPyynto(parametrit);
+            HttpSession istunto = req.getSession();
+            istunto.setMaxInactiveInterval(3600);
+            istunto.setAttribute("jasen", jasen);
+            Valvoja.lisaaIstunto(jasen, istunto);
+            Uudelleenohjaaja.uudelleenohjaa(req, resp, pyynto);
         }
     }
 

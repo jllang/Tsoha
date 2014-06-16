@@ -35,7 +35,7 @@
                                 Muokkaa
                             </a>
                             </c:if>
-                            <c:if test="<%= Kayttajataso.syk(katselija
+                            <c:if test="<%= Kayttajataso.vahintaan(katselija
                                     .annaTaso(), Kayttajataso.MODERAATTORI)
                                     && !omaViesti %>">
                             | <a href="muokkaus?ketju=${viesti.annaKetjunTunnus()}&viesti=${viesti.annaNumero()}">

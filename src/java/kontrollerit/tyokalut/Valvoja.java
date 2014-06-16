@@ -3,33 +3,73 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package kontrollerit.tyokalut;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import kontrollerit.IstuntoServlet;
 import mallit.java.Jasen;
 
 /**
- * Tämä luokka sisältää yleisiä pääsynvalvontaan liittyviä toimintoja.
+ * Tämä luokka sisältää yleisiä pääsynvalvontaan liittyviä toimintoja. Lisäksi
+ * valvojan vastuulla on tasaisin väliajoin poistaa vanhentuneet istunnot
+ * sisäisestä kirjanpidostaan.
  *
  * @author John Lång (jllang@cs.helsinki.fi)
  */
-public final class Valvoja {
+public final class Valvoja extends Thread {
 
+    private static final Valvoja ILMENTYMA;
     private static final Map<Jasen, HttpSession> KIRJAUTUNEET;
 
     static {
-        KIRJAUTUNEET = new HashMap<>();
+        ILMENTYMA = new Valvoja();
+        KIRJAUTUNEET = new ConcurrentHashMap<>();
+    }
+
+    private Valvoja() {
+
+    }
+
+    /**
+     * Tämä tehdasmetodi palauttaa luokan ilmentymän.
+     *
+     * @return Valvoja-olio.
+     */
+    public static Valvoja annaIlmentyma() {
+        return ILMENTYMA;
+    }
+
+    @Override
+    @SuppressWarnings("SleepWhileInLoop")
+    public void run() {
+        while (true) {
+            try {
+                sleep(900000L); // Suoritetaan putsaus vartin välein.
+                final long tarkastushetki = System.currentTimeMillis();
+                KIRJAUTUNEET.keySet().forEach(jasen -> {
+                    final HttpSession istunto = KIRJAUTUNEET.get(jasen);
+                    if (tarkastushetki - istunto.getLastAccessedTime()
+                            >= 3600000L) {
+                        istunto.setAttribute("jasen", null);
+                        istunto.invalidate();
+                        KIRJAUTUNEET.remove(jasen);
+                    }
+                });
+            } catch (InterruptedException e) {
+                // Keskeytys tarkoittaa että palvelinta ollaan sulkemassa.
+                return;
+            }
+        }
     }
 
     /**
@@ -38,13 +78,12 @@ public final class Valvoja {
      * palauttaa <tt>false</tt>, jolloin metodia kutsuneen servletin tulee
      * lopettaa suoritus.
      *
-     * @param req       Pyyntö
-     * @param resp      Vastaus
-     * @param toiminto  Metodia kutsuneen servletin kuuntelema URL (ilman
-     *                  kauttaviivaa). Istunnon aloittamisesta vastaava servlet
-     *                  ohjaa käyttäjän tähän osoitteeseen kun kirjautuminen on
-     *                  suoritettu.
-     * @return      Liittyykö pyyntöön istunto.
+     * @param req Pyyntö
+     * @param resp Vastaus
+     * @param toiminto Metodia kutsuneen servletin kuuntelema URL (ilman
+     * kauttaviivaa). Istunnon aloittamisesta vastaava servlet ohjaa käyttäjän
+     * tähän osoitteeseen kun kirjautuminen on suoritettu.
+     * @return Liittyykö pyyntöön istunto.
      * @throws javax.servlet.ServletException
      * @throws java.io.IOException
      */
@@ -105,6 +144,7 @@ public final class Valvoja {
         // saada aiheuttamaan välitön uudelleenohjaus esimerkiksi virhesivulle.
         final HttpSession istunto = KIRJAUTUNEET.get(kohde);
         istunto.removeAttribute("jasen");
+        istunto.invalidate();
         KIRJAUTUNEET.remove(kohde);
     }
 
@@ -113,9 +153,9 @@ public final class Valvoja {
      * annettu salasana, eikä se ole porttikiellossa. Kaikissa virhetilanteissa
      * palautetaan arvo false.
      *
-     * @param jasen             Autentikoitava käyttäjätunnus.
-     * @param salasana          Käyttäjän antama salasana.
-     * @return                  Tosi joss käyttäjätunnus ja salasana täsmäävät.
+     * @param jasen Autentikoitava käyttäjätunnus.
+     * @param salasana Käyttäjän antama salasana.
+     * @return Tosi joss käyttäjätunnus ja salasana täsmäävät.
      */
     @SuppressWarnings({"TooBroadCatch", "UseSpecificCatch"})
     public static boolean autentikoi(final Jasen jasen, final String salasana) {
@@ -125,9 +165,9 @@ public final class Valvoja {
             Thread.sleep(1000);
             return !jasen.onPorttikiellossa()
                     && PasswordHash.validatePassword(salasana,
-                    PasswordHash.PBKDF2_ITERATIONS + ":"
-                    + jasen.annaSuola() + ":"
-                    + jasen.annaSalasanatiiviste());
+                            PasswordHash.PBKDF2_ITERATIONS + ":"
+                            + jasen.annaSuola() + ":"
+                            + jasen.annaSalasanatiiviste());
         } catch (Exception e) {
             Logger.getLogger(IstuntoServlet.class.getName()).log(Level.SEVERE,
                     null, e);

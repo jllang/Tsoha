@@ -1,4 +1,3 @@
-
 package kontrollerit;
 
 import java.io.IOException;
@@ -28,6 +27,7 @@ import mallit.java.Viesti;
 @WebServlet(name = "IndexServlet", urlPatterns = {"/etusivu"})
 public final class IndexServlet extends HttpServlet {
 
+    private static final Object TILASTOLUKKO = new Object();
     private static final String[] TILASTO_OTSIKOT = {"Avain", "Arvo"};
     private static final long PAIVITYSVALI = 300000L; // 5 min
     private static long paivityshetki = 0;
@@ -46,27 +46,29 @@ public final class IndexServlet extends HttpServlet {
     }
 
     private void paivitaNakyma(final HttpServletRequest req) {
-        if (paivityshetki == 0
-                || System.currentTimeMillis() - paivityshetki >= PAIVITYSVALI) {
-            alueet          = Listaaja.listaa("alueet");
-            ketjut          = Listaaja.listaa("tuoreet");
-            paivityshetki   = System.currentTimeMillis();
-            tilastot        = new LinkedList<>();
-            tilastot.add(new ListaAlkio(0, null, "Rekisteröityjä "
-                    + "käyttäjätunnuksia", new String[]{
-                        "" + Jasen.lukumaara()}));
-            tilastot.add(new ListaAlkio(1, null, "Kirjautuneita "
-                    + "käyttäjätunnuksia", new String[]{
-                        "" + Valvoja.annaKirjautuneet().size()}));
-            tilastot.add(new ListaAlkio(2, null, "Keskustelualueita",
-                    new String[]{"" + Alue.lukumaara()}));
-            tilastot.add(new ListaAlkio(3, null, "Viestiketjuja",
-                    new String[]{"" + Ketju.lukumaara()}));
-            tilastot.add(new ListaAlkio(4, null, "Viestejä ketjuissa",
-                    new String[]{"" + Viesti.lukumaara()}));
-            tilastot.add(new ListaAlkio(5, null, "Etusivun päivitysajankohta",
-                    new String[]{DateFormat.getInstance()
+        synchronized (TILASTOLUKKO) {
+            if (paivityshetki == 0
+                    || System.currentTimeMillis() - paivityshetki >= PAIVITYSVALI) {
+                alueet = Listaaja.listaa("alueet");
+                ketjut = Listaaja.listaa("tuoreet");
+                paivityshetki = System.currentTimeMillis();
+                tilastot = new LinkedList<>();
+                tilastot.add(new ListaAlkio(0, null, "Rekisteröityjä "
+                        + "käyttäjätunnuksia", new String[]{
+                            "" + Jasen.lukumaara()}));
+                tilastot.add(new ListaAlkio(1, null, "Kirjautuneita "
+                        + "käyttäjätunnuksia", new String[]{
+                            "" + Valvoja.annaKirjautuneet().size()}));
+                tilastot.add(new ListaAlkio(2, null, "Keskustelualueita",
+                        new String[]{"" + Alue.lukumaara()}));
+                tilastot.add(new ListaAlkio(3, null, "Viestiketjuja",
+                        new String[]{"" + Ketju.lukumaara()}));
+                tilastot.add(new ListaAlkio(4, null, "Viestejä ketjuissa",
+                        new String[]{"" + Viesti.lukumaara()}));
+                tilastot.add(new ListaAlkio(5, null, "Etusivun päivitysajankohta",
+                        new String[]{DateFormat.getInstance()
                             .format(new Date(paivityshetki))}));
+            }
         }
         req.setAttribute("aluelista", alueet);
         req.setAttribute("aluelistanOtsikot", Listaaja.ALUEOTSIKOT);

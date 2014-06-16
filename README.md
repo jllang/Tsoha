@@ -4,10 +4,10 @@ Tsoha
 Tämän työn aiheena on web-pohjainen keskustelufoorumi.
 
 Esimerkkifoorumilla on seuraavat käyttäjätunnukset:
-* maija (ylläpitäjä) salasanalla "salasana"
-* esmer (moderaattori) salasanalla "1234"
-* mattimeik (tavallinen) salasanalla "abcdef"
-* tRolli (porttikiellossa) salasanalla "lällispöö"
+* **maija** (ylläpitäjä) salasanalla **salasana**
+* **esmer** (moderaattori) salasanalla **1234**
+* **mattimeik** (tavallinen) salasanalla **abcdef**
+* **tRolli** (porttikiellossa) salasanalla **lällispöö**
 
 Linkit
 ------
