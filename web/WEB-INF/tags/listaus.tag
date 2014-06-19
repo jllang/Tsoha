@@ -11,11 +11,16 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags/" %>
 <%@attribute name="listanNimi" type="String" %>
+<%@attribute name="listanKuvaus" type="String" %>
 <%@attribute name="otsikot" type="String[]" %>
 <%@attribute name="lista" type="List<ListaAlkio>" %>
 <%@attribute name="lisakenttia" type="Integer"%>
+<%@attribute name="sivu" type="Integer"%>
+            <h2>${listanNimi}</h2>
+            <c:if test="${listanKuvaus ne null and not empty listanKuvaus}">
+                <p><em>${listanKuvaus}</em></p>
+            </c:if>
             <div class="sisalto">
-                <h2>${ListanNimi}</h2>
                 <table>
                     <tr>
                         <c:forEach items="${otsikot}" var="otsikko">
@@ -27,3 +32,5 @@
                     </c:forEach>
                 </table>
             </div>
+            <c:if test="${sivu ne null}"><p>Sivu: ${sivu}</p></c:if>
+            <%=""%>

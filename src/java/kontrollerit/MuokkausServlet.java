@@ -13,7 +13,6 @@ import kontrollerit.tyokalut.Uudelleenohjaaja;
 import kontrollerit.tyokalut.Valvoja;
 import mallit.java.Alue;
 import mallit.java.Jasen;
-import mallit.java.Kayttajataso;
 import mallit.java.Ketju;
 import mallit.java.TietokantaDAO;
 import mallit.java.Viesti;
@@ -99,6 +98,7 @@ public final class MuokkausServlet extends HttpServlet {
                         }
                     } catch (NumberFormatException e) {
                         Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+                        return;
                     }
                 }
             }
@@ -222,18 +222,22 @@ public final class MuokkausServlet extends HttpServlet {
         final Ketju ketju = (Ketju) TietokantaDAO.tuo(Ketju.class, ketjunTunnus);
         final Viesti viesti = (Viesti) TietokantaDAO.tuo(Viesti.class,
                 ketjunTunnus, viestinTunnus);
+        if (ketju == null || viesti == null) {
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+            return;
+        }
         final Jasen kirjoittaja = (Jasen) TietokantaDAO.tuo(Jasen.class,
                 viesti.annaKirjoittaja()),
                 muokkaaja = (Jasen) req.getSession().getAttribute("jasen");
         if (!muokkaaja.equals(kirjoittaja)
-                && !muokkaaja.annaTaso().onModeraattori()) {
+                && !(muokkaaja.annaTaso().onModeraattori()
+                && muokkaaja.annaTaso().samaTaiKorkeampiKuin(
+                        kirjoittaja.annaTaso()))
+                ) {
             // Jos muokkaaja ei ole sama kuin alkuperäinen kirjoittaja, ja jos
             // muokkaaja ei ole moderaattori, tulee pääsy muokkauslomakkeeseen
-            // estää:
-            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
-            return;
-        }
-        if (ketju == null || viesti == null) {
+            // estää. Lisäksi modderaattorit eivät saa moderoida ylläpitäjien
+            // viestejä.
             Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
             return;
         }
@@ -302,6 +306,9 @@ public final class MuokkausServlet extends HttpServlet {
         final Viesti viesti = (Viesti) TietokantaDAO.tuo(
                 Viesti.class, ketjunTunnus, viestinTunnus);
         final Jasen poistaja = (Jasen) req.getSession().getAttribute("jasen");
+        // Huom. Tässä pitäisi myös tarkastaa ettei moderaattori yritä poistaa
+        // ylläpitäjän viestiä. Linkkiähän tämä ei näe mutta URL on helposti
+        // arvattavissa. (Sama koskee tietysti myös moderointia.)
         if (!poistaja.annaTaso().onModeraattori()
                 && poistaja.annaKayttajanumero() != viesti.annaKirjoittaja()) {
             // Muiden viestejä voivat poistaa vain operaattorit.

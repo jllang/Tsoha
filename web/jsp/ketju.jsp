@@ -16,10 +16,10 @@
             <h2><c:out value="${aihe}" escapeXml="true" /></h2>
             <p>
                 <em>
-                    <a href="alueet?kohde=${alueet[0].annaTunnus()}"
+                    <a href="alue?tunnus=${alueet[0].annaTunnus()}"
                        >${alueet[0].listausnimi()}</a>
                     <c:forEach items="${alueet}" var="alue" begin="1">
-                        , <a href="alueet?kohde=${alue.annaTunnus()}">
+                        , <a href="alue?tunnus=${alue.annaTunnus()}">
                             ${alue.listausnimi()}</a>
                     </c:forEach>
                 </em>

@@ -2,10 +2,10 @@
 package mallit.java;
 
 import java.sql.Connection;
-import java.sql.Timestamp;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +34,9 @@ public final class Viesti extends Yksilotyyppi {
                 + "?";
         HAKULAUSE       = "select * from viestit where ketju_id = ? "
                 + "and numero = ?";
-        LUKUMAARALAUSE  = "select count(*) from viestit";
+        LUKUMAARALAUSE  = "select count(*) from viestit join ketjut on "
+                + "viestit.ketju_id = ketjut.tunnus where ketjut.poistettu is "
+                + "null and viestit.poistettu is null";
     }
 
     private Viesti(final boolean tuore, final int ketjunTunnus,
@@ -100,6 +102,12 @@ public final class Viesti extends Yksilotyyppi {
         return kysely;
     }
 
+    /**
+     * Kuinka monta viestiä tietokannassa on. Mukaan ei lasketa poistetuksi
+     * merkittyjä viestejä eikä viestejä poistetuksi merkityissä ketjuissa.
+     *
+     * @return Poistamattomien viestien lukumäärä.
+     */
     public static int lukumaara() {
         Connection yhteys           = null;
         PreparedStatement kysely    = null;

@@ -27,30 +27,46 @@ import mallit.java.Viesti;
 @WebServlet(name = "IndexServlet", urlPatterns = {"/etusivu"})
 public final class IndexServlet extends HttpServlet {
 
-    private static final Object TILASTOLUKKO = new Object();
-    private static final String[] TILASTO_OTSIKOT = {"Avain", "Arvo"};
-    private static final long PAIVITYSVALI = 300000L; // 5 min
-    private static long paivityshetki = 0;
+    private static final Object PAIVITYSLUKKO;
+    private static final String[] TILASTO_OTSIKOT;
+    private static final long PAIVITYSVALI;
+    private static long paivityshetki;
     private static List<ListaAlkio> alueet, ketjut, tilastot;
+
+    static {
+        PAIVITYSLUKKO   = new Object();
+        TILASTO_OTSIKOT = new String[]{"Avain", "Arvo"}; // Yhdyssana (väliviivalla)
+        PAIVITYSVALI    = 300000L; // 5 min
+        paivityshetki   = 0;
+    }
 
     @Override
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
+//        req.setCharacterEncoding("UTF-8");
 //        resp.setContentType("text/html;charset=UTF-8");
 //        resp.setCharacterEncoding("UTF-8");
-//        req.setCharacterEncoding("UTF-8");
         Otsikoija.asetaOtsikko(req, "Etusivu");
-        paivitaNakyma(req);
+        kasitteleListat(req);
         Uudelleenohjaaja.siirra(req, resp, "jsp/etusivu.jsp");
     }
 
-    private void paivitaNakyma(final HttpServletRequest req) {
-        synchronized (TILASTOLUKKO) {
-            if (paivityshetki == 0
-                    || System.currentTimeMillis() - paivityshetki >= PAIVITYSVALI) {
-                alueet = Listaaja.listaa("alueet");
-                ketjut = Listaaja.listaa("tuoreet");
+    private static void kasitteleListat(final HttpServletRequest req) {
+        paivitaNakyma();
+        req.setAttribute("aluelista", alueet);
+        req.setAttribute("aluelistanOtsikot", Listaaja.ALUEOTSIKOT);
+        req.setAttribute("ketjulista", ketjut);
+        req.setAttribute("ketjulistanOtsikot", Listaaja.KETJUOTSIKOT);
+        req.setAttribute("tilastolista", tilastot);
+        req.setAttribute("tilastolistanOtsikot", TILASTO_OTSIKOT);
+    }
+
+    private static void paivitaNakyma() {
+        synchronized (PAIVITYSLUKKO) {
+            if (System.currentTimeMillis() - paivityshetki >= PAIVITYSVALI) {
+                alueet = Listaaja.listaaAlueet();
+                ketjut = Listaaja.listaaTuoreet();
                 paivityshetki = System.currentTimeMillis();
                 tilastot = new LinkedList<>();
                 tilastot.add(new ListaAlkio(0, null, "Rekisteröityjä "
@@ -67,14 +83,8 @@ public final class IndexServlet extends HttpServlet {
                         new String[]{"" + Viesti.lukumaara()}));
                 tilastot.add(new ListaAlkio(5, null, "Etusivun päivitysajankohta",
                         new String[]{DateFormat.getInstance()
-                            .format(new Date(paivityshetki))}));
+                                .format(new Date(paivityshetki))}));
             }
         }
-        req.setAttribute("aluelista", alueet);
-        req.setAttribute("aluelistanOtsikot", Listaaja.ALUEOTSIKOT);
-        req.setAttribute("ketjulista", ketjut);
-        req.setAttribute("ketjulistanOtsikot", Listaaja.KETJUOTSIKOT);
-        req.setAttribute("tilastolista", tilastot);
-        req.setAttribute("tilastolistanOtsikot", TILASTO_OTSIKOT);
     }
 }

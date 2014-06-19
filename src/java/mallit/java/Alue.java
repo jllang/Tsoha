@@ -6,8 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +17,8 @@ import java.util.logging.Logger;
 public final class Alue extends Yksilotyyppi {
 
     private static final String LISAYSLAUSE, PAIVITYSLAUSE, TUNNUSHAKU,
-            NIMIHAKU, NIMIEN_MAARAN_KYSELY, NIMILISTAUS, LUKUMAARALAUSE;
+            NIMIHAKU, NIMIEN_MAARAN_KYSELY, NIMILISTAUS, LUKUMAARALAUSE,
+            KETJUHAKU;
 
     private final int   tunnus;
     private String      nimi, kuvaus;
@@ -33,7 +32,14 @@ public final class Alue extends Yksilotyyppi {
         NIMIHAKU        = "select * from alueet where nimi = ?";
         NIMIEN_MAARAN_KYSELY = "select count(tunnus) from alueet";
         NIMILISTAUS     = "select nimi from alueet";
-        LUKUMAARALAUSE  = "select count(tunnus) from alueet";
+        LUKUMAARALAUSE  = "select count(tunnus) from alueet where poistettu is "
+                + "null";
+        KETJUHAKU       = "select ketjut.tunnus, aihe, muutettu, siirretty, "
+                + "moderoitu, ketjut.lukittu, ketjut.poistettu from alueet "
+                + "inner join ketjujen_sijainnit on alueet.tunnus = alue_id "
+                + "inner join ketjut on ketju_id = ketjut.tunnus where "
+                + "alueet.tunnus = ? and ketjut.poistettu is null order by ? "
+                + "limit ? offset ?";
     }
 
     private Alue(final boolean tuore, final int tunnus, final String nimi,
@@ -130,6 +136,11 @@ public final class Alue extends Yksilotyyppi {
         return nimet;
     }
 
+    /**
+     * Kuinka monta aluetta on talletettu tietokantaan.
+     *
+     * @return Alueiden lukumäärä.
+     */
     public static int lukumaara() {
         // Jälleen tätä toistoa kun pitää olla staattinen metodi...
         Connection yhteys           = null;
@@ -150,26 +161,41 @@ public final class Alue extends Yksilotyyppi {
         return lukumaara;
     }
 
-    public List<Ketju> annaKetjut(final int sivunPituus, final int siirto)
-            throws SQLException {
-        final List<Ketju> paluuarvo = new LinkedList<>();
-        final Connection yhteys = TietokantaDAO.annaKertayhteys();
-        final PreparedStatement kysely = yhteys.prepareStatement("select "
-                + "ketju.tunnus, aihe, muutettu, siirretty, moderoitu, "
-                + "ketju.lukittu, ketju.poistettu from alueet inner join "
-                + "ketjujen_sijainnit on alue.tunnus = alue_id inner join "
-                + "ketjut on ketju_id = ketju.tunnus where alue.tunnus = ? "
-                + "order by ? limit ? offset ?");
-        kysely.setInt(1, tunnus);
-        kysely.setString(2, "muutettu");
-        kysely.setInt(3, sivunPituus);
-        kysely.setInt(4, siirto);
-        final ResultSet vastaus = kysely.executeQuery();
-        while (vastaus.next()) {
-            paluuarvo.add(Ketju.luo(vastaus));
+    /**
+     * Listaa kaikki annetun alueen ketjut. Tämä metodi on staattinen jottei
+     * tarvitsisi turhaan hakea aluetta tietokannasta mikäli sen tunnus on jo
+     * tiedossa.
+     *
+     * @param sivunPituus   Luotavan listan pituus.
+     * @param siirto
+     * @param alueenTunnus
+     * @return
+     */
+    public static Ketju[] annaKetjut(final int sivunPituus, final int siirto,
+            final int alueenTunnus) {
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        Ketju[] ketjut              = null;
+        try {
+            yhteys = TietokantaDAO.annaKertayhteys();
+            kysely = yhteys.prepareStatement(KETJUHAKU);
+            kysely.setInt(1, alueenTunnus);
+            kysely.setString(2, "muutettu");
+            kysely.setInt(3, sivunPituus);
+            kysely.setInt(4, siirto);
+            vastaus = kysely.executeQuery();
+            ketjut = new Ketju[sivunPituus];
+            // Aika hassun näköinen looppi:
+            for (int i = 0; vastaus.next(); i++) {
+                ketjut[i] = Ketju.luo(vastaus);
+            }
+        } catch (SQLException e) {
+            Logger.getLogger(Alue.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
-        TietokantaDAO.sulje(yhteys, kysely, vastaus);
-        return paluuarvo;
+        return ketjut;
     }
 
     @Override

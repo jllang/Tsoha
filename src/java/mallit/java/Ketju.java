@@ -2,10 +2,10 @@
 package mallit.java;
 
 import java.sql.Connection;
-import java.sql.Timestamp;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -63,7 +63,8 @@ public final class Ketju extends Yksilotyyppi {
                 + " join viestit on ketjut.tunnus = ketju_id  join jasenet on "
                 + "kirjoittaja = jasenet.numero where ketjut.tunnus = ? order "
                 + "by viestit.numero asc limit ? offset ?";
-        LUKUMAARALAUSE  = "select count(tunnus) from ketjut";
+        LUKUMAARALAUSE  = "select count(tunnus) from ketjut where poistettu is "
+                + "null";
     }
 
     private Ketju(final boolean tuore, final int tunnus, final String aihe,

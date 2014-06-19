@@ -1,12 +1,6 @@
 package kontrollerit;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;

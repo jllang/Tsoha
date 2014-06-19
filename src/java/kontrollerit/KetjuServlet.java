@@ -1,10 +1,7 @@
 package kontrollerit;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -43,8 +40,10 @@ public final class KetjuServlet extends HttpServlet {
                 Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
                 return;
             }
-            if (ketju == null) {
+            if (ketju == null || ketju.annaPoistettu() != null) {
+                // Ketjun poistamisesta voisi ehkä ilmottaa erikseenkin.
                 Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+                return;
             }
             final List<Viesti> viestit = ketju.annaViestit(10, (sivu - 1) * 10);
             final List<Jasen> kirjoittajat = ketju.annaKirjoittajat(10,

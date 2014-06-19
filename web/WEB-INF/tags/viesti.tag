@@ -35,19 +35,24 @@
                                 Muokkaa
                             </a>
                             </c:if>
-                            <c:if test="<%= Kayttajataso.vahintaan(katselija
-                                    .annaTaso(), Kayttajataso.MODERAATTORI)
+                            <c:if test="<%= katselija.annaTaso().onModeraattori()
+                                    && katselija.annaTaso()
+                                            .samaTaiKorkeampiKuin(kirjoittaja.annaTaso())
                                     && !omaViesti %>">
                             | <a href="muokkaus?ketju=${viesti.annaKetjunTunnus()}&viesti=${viesti.annaNumero()}">
                                 Moderoi
                             </a>
                             | <a href="poisto?ketju=${viesti.annaKetjunTunnus()}&viesti=${viesti.annaNumero()}">
-                                Poista
+                                Poista <c:if test="${viesti.annaNumero() == 1}">
+                                    ketju
+                                </c:if>
                             </a>
                             </c:if>
                             <c:if test="${omaViesti}">
                             | <a href="poisto?ketju=${viesti.annaKetjunTunnus()}&viesti=${viesti.annaNumero()}">
-                                Poista
+                                Poista<c:if test="${viesti.annaNumero() == 1}">
+                                    ketju
+                                </c:if>
                             </a>
                             </c:if>
                         </th>

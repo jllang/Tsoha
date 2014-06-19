@@ -15,7 +15,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import kontrollerit.IstuntoServlet;
 import mallit.java.Jasen;
 
@@ -85,7 +84,7 @@ public final class Valvoja extends Thread {
      * @param toiminto Metodia kutsuneen servletin kuuntelema URL (ilman
      * kauttaviivaa). Istunnon aloittamisesta vastaava servlet ohjaa käyttäjän
      * tähän osoitteeseen kun kirjautuminen on suoritettu.
-     * @return Liittyykö pyyntöön istunto.
+     * @return Liittyikö pyyntöön istunto.
      * @throws javax.servlet.ServletException
      * @throws java.io.IOException
      */

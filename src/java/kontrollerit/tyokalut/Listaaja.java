@@ -1,7 +1,5 @@
 package kontrollerit.tyokalut;
 
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import kontrollerit.tyypit.ListaAlkio;
@@ -30,33 +28,27 @@ public final class Listaaja {
         KETJUOTSIKOT        = new String[]{"Aihe", "Aloittaja", "Aktiivinen"};
     }
 
-    public static List<ListaAlkio> listaa(final String kohde) {
-        final List<ListaAlkio> lista = kasitteleParametrit(kohde);
-        if (lista == null) {
-            return VIRHEELLINEN_HAKU;
-        }
-        if (lista.isEmpty()) {
-            return TYHJA_HAKUTULOS;
-        }
-        return lista;
+    public static List<ListaAlkio> listaaAlueet() {
+        return tarkastaLista(haeAlueet());
     }
 
-    private static List<ListaAlkio> kasitteleParametrit(final String kohde) {
-        final List<ListaAlkio> lista;
-        switch (kohde) {
-            case "tuoreet":
-                lista = haeTuoreet();
-                break;
-//            case "ketjut":
-//            case "jasenet":
-//            case "porttikiellot":
-//                lista = null;
-//                break;
-            case "alueet":
-            default:
-                lista = haeAlueet();
+    public static List<ListaAlkio> listaaKetjut(final int sivunPituus,
+            final int siirto, final int alueenTunnus) {
+        return tarkastaLista(haeKetjut(sivunPituus, siirto, alueenTunnus));
+    }
+
+    public static List<ListaAlkio> listaaTuoreet() {
+        return tarkastaLista(haeTuoreet());
+    }
+
+    private static List<ListaAlkio> tarkastaLista(final List<ListaAlkio> alueet) {
+        if (alueet == null) {
+            return VIRHEELLINEN_HAKU;
         }
-        return lista;
+        if (alueet.isEmpty()) {
+            return TYHJA_HAKUTULOS;
+        }
+        return alueet;
     }
 
     private static List<ListaAlkio> haeTuoreet() {
@@ -73,35 +65,29 @@ public final class Listaaja {
                 // Poistetut ketjut yksinkertaisesti jätetään listaamatta.
                 continue;
             }
-            lista.add(new ListaAlkio(naytettyja,
-                    "ketju?tunnus=" + ketju.annaTunnus() + "&sivu=1",
-                    ketju.listausnimi(), new String[]{
-                        "<a class=\"" + ketju.annaAloittajanTaso().toString()
-                                .toLowerCase() + "\" href=\"profiili?tunnus="
-                                + ketju.annaAloittajaNumero() + "\">"
-                                + ketju.annaAloittajanListausnimi() + "</a>",
-                        DateFormat.getInstance().format(
-                                new Date(ketju.annaMuutettu().getTime()))
-                    }));
+            lista.add(ListaAlkio.luo(naytettyja, ketju));
             naytettyja++;
         }
         return lista;
     }
 
-//    private static List<ListaAlkio> haeKetjut() {
-//        Yksilotyyppi[] alueet = TietokantaDAO.tuoSivu(Ketju.class, "aihe",
-//                10, 0);
-//        List<ListaAlkio> lista = new LinkedList<>();
-//        for (int i = 0; i < alueet.length; i++) {
-//            final Yksilotyyppi ketju = alueet[i];
-//            if (ketju == null) {
-//                break;
-//            }
-//            lista.add(new ListaAlkio(i, "/ketju?tunnus=0", ketju.listausnimi(),
-//                    new String[]{}));
-//        }
-//        return lista;
-//    }
+    private static List<ListaAlkio> haeKetjut(final int sivunPituus,
+            final int siirto, final int alueenTunnus) {
+        final Ketju[] ketjut = Alue.annaKetjut(sivunPituus, siirto, alueenTunnus);
+        final List<ListaAlkio> lista = new LinkedList<>();
+        int naytettyja = 0;
+        for (final Ketju ketju : ketjut) {
+            if (ketju == null) {
+                break;
+            }
+            if (ketju.annaPoistettu() != null) {
+                continue;
+            }
+            lista.add(ListaAlkio.luo(naytettyja, ketju));
+            naytettyja++;
+        }
+        return lista;
+    }
 
     private static List<ListaAlkio> haeAlueet() {
         Yksilotyyppi[] alueet = TietokantaDAO.tuoSivu(Alue.class, "nimi", false,
@@ -116,8 +102,8 @@ public final class Listaaja {
             if (alue.annaPoistettu() != null) {
                 continue;
             }
-            lista.add(new ListaAlkio(naytettyja, "/alue?tunnus="
-                    + alue.annaTunnus(), alue.annaNimi(),
+            lista.add(new ListaAlkio(naytettyja, "alue?tunnus="
+                    + alue.annaTunnus() + "&sivu=1", alue.annaNimi(),
                     new String[] {alue.annaKuvaus()}));
             naytettyja++;
         }
