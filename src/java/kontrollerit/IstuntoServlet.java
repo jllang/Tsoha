@@ -74,7 +74,7 @@ public final class IstuntoServlet extends HttpServlet {
         final String kayttajatunnus = req.getParameter("kayttajatunnus"),
                 salasana = req.getParameter("salasana");
         if (puutteita(kayttajatunnus, salasana, req)) {
-            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp"
+            Uudelleenohjaaja.siirra(req, resp, "jsp/kirjautumislomake.jsp"
                     + (req.getQueryString() == null ? ""
                             : "?" + req.getQueryString()));
             return;
@@ -86,7 +86,7 @@ public final class IstuntoServlet extends HttpServlet {
             req.setAttribute("virhekoodi", AUTENTIKOINTIVIRHE);
             req.setAttribute("kayttajatunnus", kayttajatunnus);
             req.setAttribute("salasana", salasana);
-            Uudelleenohjaaja.siirra(req, resp, "jsp/sisaankirjaus.jsp"
+            Uudelleenohjaaja.siirra(req, resp, "jsp/kirjautumislomake.jsp"
                     + (req.getQueryString() == null ? ""
                             : "?" + req.getQueryString()));
         } else {

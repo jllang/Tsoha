@@ -63,6 +63,19 @@ public enum Kayttajataso {
     }
 
     /**
+     * Onko tämä käyttäjätaso vähintään moderaattori.
+     *
+     * @return <tt>true</tt> joss käyttäjätaso on moderaattori tai ylläpitäjä.
+     */
+    public boolean onModeraattori() {
+        return vertailuluku >= 2;
+    }
+
+    public boolean samaTaiKorkeampiKuin(final Kayttajataso verrattava) {
+        return vertailuluku >= verrattava.vertailuluku;
+    }
+
+    /**
      * Metodi mallintaa kaksipaikkaista totaalista järjestysrelaatiota.
      * Paluuarvo on <tt>true</tt> joss käyttäjätaso a on suurempi tai yhtä kuin
      * käyttäjätaso b. Ilmaisu siis viittaa käyttäjätasojen totaaliseen

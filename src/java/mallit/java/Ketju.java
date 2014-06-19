@@ -19,8 +19,8 @@ import java.util.logging.Logger;
 public final class Ketju extends Yksilotyyppi {
 
     private static final String LISAYSLAUSE, PAIVITYSLAUSE, TUNNUSHAKU,
-            AIHEHAKU, VIESTIHAKU, VIESTINUMERON_HAKU, ALUEHAKU, ALOITTAJAHAKU,
-            KIRJOITTAJAHAKU, LUKUMAARALAUSE;
+            AIHEHAKU, VIESTIHAKU, VIESTIMAARAN_HAKU, VIESTINUMERON_HAKU,
+            ALUEHAKU, ALOITTAJAHAKU, KIRJOITTAJAHAKU, LUKUMAARALAUSE;
 
     private final int       tunnus;
     private String          aihe;
@@ -41,8 +41,11 @@ public final class Ketju extends Yksilotyyppi {
                 + "where tunnus = ?";
         TUNNUSHAKU      = "select * from ketjut where tunnus = ?";
         AIHEHAKU        = "select * from ketjut where aihe = ?";
-        VIESTIHAKU      = "select * from viestit where ketju_id = ? order by "
-                + "numero asc limit ? offset ?";
+        VIESTIHAKU      = "select * from viestit where ketju_id = ? and "
+                + "viestit.poistettu is null order by numero asc limit ? "
+                + "offset ?";
+        VIESTIMAARAN_HAKU = "select count(*) from viestit where ketju_id = ? "
+                + "and viestit.poistettu is null";
         VIESTINUMERON_HAKU = "select max(numero) from viestit where ketju_id = "
                 + "?";
         ALUEHAKU        = "select alueet.tunnus, alueet.nimi, alueet.kuvaus, "
@@ -228,6 +231,14 @@ public final class Ketju extends Yksilotyyppi {
         return alueet;
     }
 
+    /**
+     * Palauttaa listan niistä ketjun viesteistä, joita ei ole merkitty
+     * poistetuiksi.
+     *
+     * @param pituus
+     * @param siirto
+     * @return
+     */
     public List<Viesti> annaViestit(final int pituus, final int siirto) {
         List<Viesti> viestit        = null;
         Connection yhteys           = null;
@@ -250,6 +261,32 @@ public final class Ketju extends Yksilotyyppi {
             TietokantaDAO.sulje(yhteys, kysely, vastaus);
         }
         return viestit;
+    }
+
+    /**
+     * Palauttaa ketjun viestien määrän. Määrään ei lasketa mukaan poistetuksi
+     * merkittyjä viestejä.
+     *
+     * @return Ketjun viestien määrä tai -1 virhetilanteissa.
+     */
+    public int annaViestienMaara() {
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        ResultSet vastaus           = null;
+        int viesteja                = -1;
+        try {
+            yhteys  = TietokantaDAO.annaKertayhteys();
+            kysely  = yhteys.prepareStatement(VIESTIMAARAN_HAKU);
+            kysely.setInt(1, tunnus);
+            vastaus = kysely.executeQuery();
+            vastaus.next();
+            viesteja = vastaus.getInt(1);
+        } catch (SQLException e) {
+            Logger.getLogger(Ketju.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            TietokantaDAO.sulje(yhteys, kysely, vastaus);
+        }
+        return viesteja;
     }
 
     public List<Jasen> annaKirjoittajat(final int pituus, final int siirto) {

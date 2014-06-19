@@ -63,6 +63,7 @@ public final class Listaaja {
         Yksilotyyppi[] ketjut = TietokantaDAO.tuoSivu(Ketju.class, "muutettu",
                 true, 10, 0);
         List<ListaAlkio> lista = new LinkedList<>();
+        int naytettyja = 0;
         for (int i = 0; i < ketjut.length; i++) {
             final Ketju ketju = (Ketju) ketjut[i];
             if (ketju == null) {
@@ -72,7 +73,7 @@ public final class Listaaja {
                 // Poistetut ketjut yksinkertaisesti jätetään listaamatta.
                 continue;
             }
-            lista.add(new ListaAlkio(i,
+            lista.add(new ListaAlkio(naytettyja,
                     "ketju?tunnus=" + ketju.annaTunnus() + "&sivu=1",
                     ketju.listausnimi(), new String[]{
                         "<a class=\"" + ketju.annaAloittajanTaso().toString()
@@ -82,6 +83,7 @@ public final class Listaaja {
                         DateFormat.getInstance().format(
                                 new Date(ketju.annaMuutettu().getTime()))
                     }));
+            naytettyja++;
         }
         return lista;
     }
@@ -105,6 +107,7 @@ public final class Listaaja {
         Yksilotyyppi[] alueet = TietokantaDAO.tuoSivu(Alue.class, "nimi", false,
                 10, 0);
         List<ListaAlkio> lista = new LinkedList<>();
+        int naytettyja = 0;
         for (int i = 0; i < alueet.length; i++) {
             final Alue alue = (Alue) alueet[i];
             if (alue == null) {
@@ -113,8 +116,10 @@ public final class Listaaja {
             if (alue.annaPoistettu() != null) {
                 continue;
             }
-            lista.add(new ListaAlkio(i, "/alue?tunnus=" + alue.annaTunnus(),
-                    alue.annaNimi(), new String[] {alue.annaKuvaus()}));
+            lista.add(new ListaAlkio(naytettyja, "/alue?tunnus="
+                    + alue.annaTunnus(), alue.annaNimi(),
+                    new String[] {alue.annaKuvaus()}));
+            naytettyja++;
         }
         return lista;
     }

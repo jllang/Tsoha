@@ -38,7 +38,7 @@ public class KayttajatasoTest {
 //    }
 
     @Test
-    public void testSyk() {
+    public void testVahintaan() {
         Kayttajataso a = Kayttajataso.VIERAILIJA;
         Kayttajataso b = Kayttajataso.VIERAILIJA;
         assertTrue(Kayttajataso.vahintaan(a, b));

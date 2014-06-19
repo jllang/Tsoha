@@ -37,8 +37,15 @@
                             <select multiple="multiple" name="alueet" ${muokattavuus}>
                                 <%-- TODO: muista valitut alueet jollain
                                 fiksulla tavalla. --%>
-                                <c:forEach items="${aluelista}" var="alue">
-                                    <option>${alue}</option>
+                                <c:if test="${aluetaulu == null}">
+                                    <option>null</option>
+                                </c:if>
+                                <c:forEach items="${aluetaulu}" var="alue"
+                                           varStatus="tila">
+                                    <option
+                                        <c:if test="${valintataulu[tila.getIndex()]}">
+                                            selected="selected"
+                                        </c:if>>${alue}</option>
                                 </c:forEach>
                             </select>
                         </td>

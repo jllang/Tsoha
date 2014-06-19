@@ -56,15 +56,17 @@ public final class Valvoja extends Thread {
             try {
                 sleep(900000L); // Suoritetaan putsaus vartin välein.
                 final long tarkastushetki = System.currentTimeMillis();
-                KIRJAUTUNEET.keySet().forEach(jasen -> {
-                    final HttpSession istunto = KIRJAUTUNEET.get(jasen);
-                    if (tarkastushetki - istunto.getLastAccessedTime()
+                KIRJAUTUNEET.keySet().forEach(
+                        jasen -> {
+                            final HttpSession istunto = KIRJAUTUNEET.get(jasen);
+                            if (tarkastushetki - istunto.getLastAccessedTime()
                             >= 3600000L) {
-                        istunto.setAttribute("jasen", null);
-                        istunto.invalidate();
-                        KIRJAUTUNEET.remove(jasen);
-                    }
-                });
+                                istunto.setAttribute("jasen", null);
+                                istunto.invalidate();
+                                KIRJAUTUNEET.remove(jasen);
+                            }
+                        }
+                );
             } catch (InterruptedException e) {
                 // Keskeytys tarkoittaa että palvelinta ollaan sulkemassa.
                 return;
@@ -137,9 +139,9 @@ public final class Valvoja extends Thread {
      */
     // ...Näin ainakin luulisin.
     public static void suljeIstunto(final Jasen kohde) {
-        if (kohde == null) {
-            return;
-        }
+//        if (kohde == null) {
+//            return;
+//        }
         // Pitäisi tutkiskella joskus voisiko porttikiellon jotenkin helposti
         // saada aiheuttamaan välitön uudelleenohjaus esimerkiksi virhesivulle.
         final HttpSession istunto = KIRJAUTUNEET.get(kohde);

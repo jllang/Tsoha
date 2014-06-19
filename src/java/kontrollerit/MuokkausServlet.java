@@ -20,12 +20,16 @@ import mallit.java.Viesti;
 
 /**
  * Tämä servlet käsittelee viestien lisäämiseen, muokkaamiseen ja poistoon
- * liittyvää logiikkaa.
+ * liittyvää logiikkaa. Lisäksi servletin vastuulla on myös ketjujen luonti ja
+ * poisto ketjujen ja viestien läheisten käsitteellisten yhteyksien vuoksi.
  *
  * @author John Lång (jllang@cs.helsinki.fi)
  */
 @WebServlet(name = "ViestiServlet", urlPatterns = {"/muokkaus", "/poisto"})
-public final class ViestiServlet extends HttpServlet {
+public final class MuokkausServlet extends HttpServlet {
+
+    // Taisi mennä aika karsean näköiseksi sotkuksi tämä luokka. Pahoittelut
+    // siitä, mutta aikaa ei ole enää refaktorointiin.
 
     // Virhekoodit ovat:
     // 0 - Ei virhettä
@@ -86,9 +90,13 @@ public final class ViestiServlet extends HttpServlet {
                     ketjunPoisto(req, resp, ketjunTunnus);
                 } else {
                     try {
-                        final int viestinTunnus = Integer.parseInt(req.getParameter(
-                                "viesti"));
-                        viestinPoisto(req, resp, ketjunTunnus, viestinTunnus);
+                        final int viestinTunnus = Integer.parseInt(
+                                req.getParameter("viesti"));
+                        if (viestinTunnus != 1) {
+                            viestinPoisto(req, resp, ketjunTunnus, viestinTunnus);
+                        } else {
+                            ketjunPoisto(req, resp, ketjunTunnus);
+                        }
                     } catch (NumberFormatException e) {
                         Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
                     }
@@ -104,7 +112,7 @@ public final class ViestiServlet extends HttpServlet {
             final String[] alueet, final String sisalto, final int virhekoodi)
             throws IOException, ServletException {
         req.setAttribute("aihe", aihe);
-        req.setAttribute("aluelista", alueet);
+//        req.setAttribute("aluetaulu", alueet);
         req.setAttribute("sisalto", sisalto);
         req.setAttribute("virhekoodi", virhekoodi);
         Uudelleenohjaaja.siirra(req, resp, "/jsp/viestilomake.jsp?"
@@ -115,12 +123,12 @@ public final class ViestiServlet extends HttpServlet {
             final HttpServletResponse resp) throws ServletException,
             IOException {
         Otsikoija.asetaOtsikko(req, "Uusi ketju");
-        if (req.getAttribute("aluelista") == null) {
-            req.setAttribute("aluelista", Alue.annaNimet());
+        if (req.getAttribute("aluetaulu") == null) {
+            req.setAttribute("aluetaulu", Alue.annaNimet());
         }
         // Kyllä, tarkastetaan kahteen kertaan koska tietokantahaussa voi tulla
         // virhe:
-        if (req.getAttribute("aluelista") == null) {
+        if (req.getAttribute("aluetaulu") == null) {
             Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
             return;
         }
@@ -150,6 +158,7 @@ public final class ViestiServlet extends HttpServlet {
                             ? PUUTTUVIA_KENTTIA : EI_VIRHETTA);
         }
     }
+
     private static void ketjunTaydennys(final HttpServletRequest req,
             final HttpServletResponse resp, final int ketjunTunnus)
             throws ServletException, IOException {
@@ -216,10 +225,9 @@ public final class ViestiServlet extends HttpServlet {
         final Jasen kirjoittaja = (Jasen) TietokantaDAO.tuo(Jasen.class,
                 viesti.annaKirjoittaja()),
                 muokkaaja = (Jasen) req.getSession().getAttribute("jasen");
-        if (muokkaaja.annaKayttajanumero() != kirjoittaja.annaKayttajanumero()
-                && !Kayttajataso.vahintaan(muokkaaja.annaTaso(),
-                        Kayttajataso.MODERAATTORI)) {
-            // Jos muokkaaja ei ole sama kuin alkuperäinen kirjoittaja ja jos
+        if (!muokkaaja.equals(kirjoittaja)
+                && !muokkaaja.annaTaso().onModeraattori()) {
+            // Jos muokkaaja ei ole sama kuin alkuperäinen kirjoittaja, ja jos
             // muokkaaja ei ole moderaattori, tulee pääsy muokkauslomakkeeseen
             // estää:
             Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
@@ -242,8 +250,7 @@ public final class ViestiServlet extends HttpServlet {
         }
         final Timestamp aikaleima = new Timestamp(System.currentTimeMillis());
         viesti.asetaSisalto(sisalto);
-        if (Kayttajataso.vahintaan(muokkaaja.annaTaso(),
-                Kayttajataso.MODERAATTORI)) {
+        if (muokkaaja.annaTaso().onModeraattori()) {
             viesti.asetaModeroitu(aikaleima);
         } else {
             viesti.asetaMuokattu(aikaleima);
@@ -266,12 +273,51 @@ public final class ViestiServlet extends HttpServlet {
     private static void ketjunPoisto(final HttpServletRequest req,
             final HttpServletResponse resp, final int ketjunTunnus)
             throws ServletException, IOException {
-
+        final Ketju ketju = (Ketju) TietokantaDAO.tuo(Ketju.class, ketjunTunnus);
+        // Entä jos ketju == null?
+        final Jasen poistaja = (Jasen) req.getSession().getAttribute("jasen");
+        if (!poistaja.annaTaso().onModeraattori()
+                && (poistaja.annaKayttajanumero() != ketju.annaAloittajaNumero()
+                || ketju.annaViestienMaara() > 1)) {
+            // Ketjun voi poistaa yleisessä tapauksessa vain moderaattori. Jos
+            // ketjussa on vain yksi viesti, sen voi poistaa myös ketjun
+            // aloittaja.
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+            return;
+        }
+        if (req.getParameter("vahvistettu") == null) {
+            req.setAttribute("toiminnonKuvaus", "poistaa valitun ketjun");
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/vahvistus.jsp?toiminto="
+                    + "poisto&ketju=" + ketjunTunnus + "&viesti=" + 1);
+            return;
+        }
+        ketju.asetaPoistettu(new Timestamp(System.currentTimeMillis()));
+        TietokantaDAO.vie(ketju);
+        // Uudelleenohjaus
     }
 
     private static void viestinPoisto(final HttpServletRequest req,
-        final HttpServletResponse resp, final int ketjunTunnus,
-        final int viestinTunnus) throws ServletException, IOException {
-
+            final HttpServletResponse resp, final int ketjunTunnus,
+            final int viestinTunnus) throws ServletException, IOException {
+        final Viesti viesti = (Viesti) TietokantaDAO.tuo(
+                Viesti.class, ketjunTunnus, viestinTunnus);
+        final Jasen poistaja = (Jasen) req.getSession().getAttribute("jasen");
+        if (!poistaja.annaTaso().onModeraattori()
+                && poistaja.annaKayttajanumero() != viesti.annaKirjoittaja()) {
+            // Muiden viestejä voivat poistaa vain operaattorit.
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+            return;
+        }
+        if (req.getParameter("vahvistettu") == null) {
+            req.setAttribute("toiminnonKuvaus", "poistaa valitun viestin");
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/vahvistus.jsp?toiminto="
+                    + "poisto&ketju=" + ketjunTunnus + "&viesti="
+                    + viestinTunnus);
+            return;
+        }
+        viesti.asetaPoistettu(new Timestamp(System.currentTimeMillis()));
+        TietokantaDAO.vie(viesti);
+        Uudelleenohjaaja.uudelleenohjaa(req, resp, "ketju?tunnus="
+                    + ketjunTunnus + "&sivu=1");
     }
 }
