@@ -98,6 +98,50 @@ public final class TietokantaDAO {
     }
 
     /**
+     * Onko annettua avainta vastaava monikko olemassa tietokantataulussa.
+     *
+     * @param luokka
+     * @param avain
+     * @return Viite arvoon <tt>true</tt> joss tietokannassa on annetun avaimen
+     * yksilöimä monikko. Virhetilanteissa palautetaan <tt>null</tt>.
+     */
+    public static Boolean onOlemassa(final Class luokka, final String avain) {
+        // Tämän metodin pitää palauttaa Boolean, sillä virheitä ei voida
+        // heitellä ulos kesken kaiken. Virheen heittäminen jättäisi nimittäin
+        // yhteyden auki.
+        ResultSet vastaus           = null;
+        Connection yhteys           = null;
+        PreparedStatement kysely    = null;
+        Boolean onOlemassa          = null;
+        try {
+            switch (luokka.getSimpleName()) {
+//                case "Alue":
+                case "Jasen":
+                    yhteys = annaKertayhteys();
+                    kysely = Jasen.olemassaolokysely(yhteys, avain);
+                    vastaus = kysely.executeQuery();
+                    vastaus.next();
+                    onOlemassa = vastaus.getBoolean(1);
+                    break;
+//                case "Ketju":
+//                case "Viesti":
+                default:
+                    // Loogisesti ajatellen tässä pitäisi myös palauttaa false
+                    // jos pyydettyä luokkaa vastaavaa taulua ei ole, mutta
+                    // jotenkin se olisi hassua...
+//                    onOlemassa = false;
+                    throw new AssertionError();
+            }
+        } catch (SQLException | AssertionError e) {
+            Logger.getLogger(TietokantaDAO.class.getName())
+                    .log(Level.SEVERE, null, e);
+        } finally {
+            sulje(yhteys, kysely, vastaus);
+        }
+        return onOlemassa;
+    }
+
+    /**
      * Suorittaa annetun SQL select-kyselyn. Metodi ei sulje yhteyksiä.
      *
      * @param hakukysely
@@ -293,10 +337,11 @@ public final class TietokantaDAO {
                     olio = Ketju.luo(vastaus);
                     break;
                 case "Viesti":
-                    System.err.println("Viestillä ei ole toissijaista hakukyselyä.");
+                    System.err.println("Viestillä ei ole toissijaista "
+                            + "hakukyselyä.");
                 default:
-                    System.err.println("Tietokannasta yritettiin tuoda tuntematon "
-                            + "yksilötyyppi!");
+                    System.err.println("Tietokannasta yritettiin tuoda "
+                            + "tuntematon yksilötyyppi!");
                     throw new AssertionError();
             }
         } catch (SQLException | AssertionError e) {
@@ -388,6 +433,8 @@ public final class TietokantaDAO {
             PreparedStatement kysely, final String aihe,
             final Timestamp aikaleima) throws SQLException {
         final Ketju ketju = Ketju.luo(aihe, aikaleima);
+        // Mahdollinen IllegalArgumentExceptionkin pitäisi varmaan käsitellä
+        // jotenkin...
         kysely = yhteys.prepareStatement(ketju.paivityslause());
         ketju.valmistelePaivitys(kysely);
         return kysely.executeUpdate();

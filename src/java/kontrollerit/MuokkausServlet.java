@@ -296,8 +296,12 @@ public final class MuokkausServlet extends HttpServlet {
             return;
         }
         ketju.asetaPoistettu(new Timestamp(System.currentTimeMillis()));
-        TietokantaDAO.vie(ketju);
-        // Uudelleenohjaus
+        if (TietokantaDAO.vie(ketju)) {
+            // Pitäisiköhän ohjata etusivulle vai jollekin alueelle...
+            Uudelleenohjaaja.uudelleenohjaa(req, resp, "etusivu");
+        } else {
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+        }
     }
 
     private static void viestinPoisto(final HttpServletRequest req,
@@ -323,8 +327,11 @@ public final class MuokkausServlet extends HttpServlet {
             return;
         }
         viesti.asetaPoistettu(new Timestamp(System.currentTimeMillis()));
-        TietokantaDAO.vie(viesti);
-        Uudelleenohjaaja.uudelleenohjaa(req, resp, "ketju?tunnus="
+        if (TietokantaDAO.vie(viesti)) {
+            Uudelleenohjaaja.uudelleenohjaa(req, resp, "ketju?tunnus="
                     + ketjunTunnus + "&sivu=1");
+        } else {
+            Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
+        }
     }
 }

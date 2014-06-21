@@ -9,7 +9,7 @@
                 <input type="hidden" name="lahetetty" value="tosi">
                 <table class="sisalto pariton" style="width: auto">
                     <tr>
-                        <td class="virhe" colspan="2">
+                        <td colspan="2">
                             <c:if test="${virhekoodi == 1}">
                                 <t:virhe>Käyttäjätunnusta tai salasanaa ei annettu.</t:virhe>
                             </c:if>
@@ -23,12 +23,14 @@
                         <td><input title="Käyttäjätunnus" type="text"
                                    name="kayttajatunnus"
                                    value="${kayttajatunnus}"
-                                   autofocus="autofocus"></td>
+                                   autofocus="autofocus" maxlength="32"
+                                   required="required"></td>
                     </tr>
                     <tr>
                         <td>Salasana</td>
                         <td><input title="Salasana" type="password"
-                                   name="salasana" value="${salasana}"></td>
+                                   name="salasana" value="${salasana}"
+                                   required="required"></td>
                     </tr>
                     <tr>
                         <td colspan="2">
@@ -50,7 +52,7 @@
                 </ul>
                 </c:if>
                 <p>
-                    <a href="rekisterointi.jsp" >Rekisteröityminen</a>
+                    <a href="rekisterointi" >Rekisteröityminen</a>
                 </p>
             </form>
 </t:kehys>

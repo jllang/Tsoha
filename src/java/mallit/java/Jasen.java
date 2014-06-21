@@ -23,8 +23,9 @@ import java.util.regex.Pattern;
  */
 public final class Jasen extends Yksilotyyppi {
 
-    private static final String     LISAYSLAUSE, PAIVITYSLAUSE, HAKULAUSE1,
-            HAKULAUSE2, PORTTIKIELTOLAUSE, LUKUMAARALAUSE;
+    private static final String     LISAYSLAUSE, PAIVITYSLAUSE,
+            OLEMASSAOLOLAUSE, HAKULAUSE1, HAKULAUSE2, PORTTIKIELTOLAUSE,
+            LUKUMAARALAUSE;
     private static final Predicate<String> KELVOLLINEN_SP;
 
     private final int       kayttajanumero;
@@ -49,6 +50,8 @@ public final class Jasen extends Yksilotyyppi {
         PAIVITYSLAUSE   = "update jasenet set tiiviste = ?, suola = ?, sposti ="
                 + " ?, taso = ?::Kayttajataso, nimimerkki = ?, avatar = ?,"
                 + "kuvaus = ?, viesteja = ? where numero = ?";
+        OLEMASSAOLOLAUSE = "select exists(select rekisteroity from jasenet "
+                + "where tunnus=?)";
         HAKULAUSE1      = "select * from jasenet where numero = ?";
         HAKULAUSE2      = "select * from jasenet where tunnus = ?";
         PORTTIKIELTOLAUSE = "select asetettu, kesto from porttikiellot where "
@@ -133,6 +136,13 @@ public final class Jasen extends Yksilotyyppi {
             Logger.getLogger(Jasen.class.getName()).log(Level.SEVERE, null, e);
             return null;
         }
+    }
+
+    static PreparedStatement olemassaolokysely(final Connection yhteys,
+            final String avain) throws SQLException {
+        final PreparedStatement kysely = yhteys.prepareStatement(OLEMASSAOLOLAUSE);
+        kysely.setString(1, avain);
+        return kysely;
     }
 
     static PreparedStatement hakukysely(final Connection yhteys,
