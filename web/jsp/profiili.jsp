@@ -14,7 +14,8 @@
                     <td class="peruskentta"><em>Nimimerkki</em></td>
                     <td class="peruskentta">${nimimerkki}</td>
                     <td class="avatar" rowspan="4">
-                        <img src="data/paikanpitaja.png" alt="Avatar">
+                        <%-- Missäköhän vaiheessa kuvat hajosivat... --%>
+                        <img src="data/staattinen/oletusavatar.png" alt="Avatar">
                     </td>
                 </tr>
                 <tr>

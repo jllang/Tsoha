@@ -13,15 +13,15 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@tag description="Viestipohja dynaamisella sisällöllä." pageEncoding="UTF-8"
        trimDirectiveWhitespaces="true" %>
-<%@attribute name="listausnumero" type="Integer" %>
-<%@attribute name="kirjoittaja" type="Jasen" %>
-<%@attribute name="katselija" type="Jasen" %>
-<%@attribute name="omaViesti" type="Boolean" %>
-<%@attribute name="viesti" type="Viesti" %>
+<%@attribute name="listausnumero" type="Integer" required="true"%>
+<%@attribute name="kirjoittaja" type="Jasen" required="true"%>
+<%@attribute name="katselija" type="Jasen" required="true"%>
+<%@attribute name="omaViesti" type="Boolean" required="true"%>
+<%@attribute name="viesti" type="Viesti" required="true"%>
                 <table
                     class="${listausnumero % 2 == 0 ? "parillinen" : "pariton"}">
                     <tr>
-                        <th><a href="/profiili?tunnus=${
+                        <th><a href="profiili?tunnus=${
                         kirjoittaja.annaKayttajanumero()}"
                                class="${kirjoittaja.annaTaso().toString()
                                         .toLowerCase()}">
@@ -37,7 +37,7 @@
                             </c:if>
                             <c:if test="<%= katselija.annaTaso().onModeraattori()
                                     && katselija.annaTaso()
-                                            .samaTaiKorkeampiKuin(kirjoittaja.annaTaso())
+                                            .vahintaanSamaKuin(kirjoittaja.annaTaso())
                                     && !omaViesti %>">
                             | <a href="muokkaus?ketju=${viesti.annaKetjunTunnus()}&viesti=${viesti.annaNumero()}">
                                 Moderoi
@@ -59,8 +59,8 @@
                     </tr>
                     <tr>
                         <td class="avatar">
-                            <img src="data/paikanpitaja.png" alt="Käyttäjän
-                                 <c:out value="${kirjoittaja.listausnimi()}"
+                            <img src="data/staattinen/oletusavatar.png"
+                                 alt="Käyttäjän<c:out value="${kirjoittaja.listausnimi()}"
                                         escapeXml="true" />
                                  avatar">
                         </td>

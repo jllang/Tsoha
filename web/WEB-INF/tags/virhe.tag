@@ -6,5 +6,4 @@
 
 <%@tag description="Virheilmoitus dynaamisella sisällöllä." pageEncoding="UTF-8"
        trimDirectiveWhitespaces="true" %>
-<%@attribute name="viesti"%>
 <div class="virhe"><jsp:doBody /></div>

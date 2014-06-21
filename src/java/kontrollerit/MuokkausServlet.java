@@ -231,7 +231,7 @@ public final class MuokkausServlet extends HttpServlet {
                 muokkaaja = (Jasen) req.getSession().getAttribute("jasen");
         if (!muokkaaja.equals(kirjoittaja)
                 && !(muokkaaja.annaTaso().onModeraattori()
-                && muokkaaja.annaTaso().samaTaiKorkeampiKuin(
+                && muokkaaja.annaTaso().vahintaanSamaKuin(
                         kirjoittaja.annaTaso()))
                 ) {
             // Jos muokkaaja ei ole sama kuin alkuperäinen kirjoittaja, ja jos
@@ -295,6 +295,8 @@ public final class MuokkausServlet extends HttpServlet {
                     + "poisto&ketju=" + ketjunTunnus + "&viesti=" + 1);
             return;
         }
+        // TUNNETTU BUGI, JOTA EN EHDI KORJATA: Koko ketjun poistamisen
+        // yhteydessä viestien kirjoittajien viestisaldoa ei päivitetä.
         ketju.asetaPoistettu(new Timestamp(System.currentTimeMillis()));
         if (TietokantaDAO.vie(ketju)) {
             // Pitäisiköhän ohjata etusivulle vai jollekin alueelle...
@@ -309,12 +311,12 @@ public final class MuokkausServlet extends HttpServlet {
             final int viestinTunnus) throws ServletException, IOException {
         final Viesti viesti = (Viesti) TietokantaDAO.tuo(
                 Viesti.class, ketjunTunnus, viestinTunnus);
-        final Jasen poistaja = (Jasen) req.getSession().getAttribute("jasen");
-        // Huom. Tässä pitäisi myös tarkastaa ettei moderaattori yritä poistaa
-        // ylläpitäjän viestiä. Linkkiähän tämä ei näe mutta URL on helposti
-        // arvattavissa. (Sama koskee tietysti myös moderointia.)
-        if (!poistaja.annaTaso().onModeraattori()
-                && poistaja.annaKayttajanumero() != viesti.annaKirjoittaja()) {
+        final Jasen kirjoittaja = (Jasen) TietokantaDAO.tuo(
+                Jasen.class, viesti.annaKirjoittaja()),
+                poistaja = (Jasen) req.getSession().getAttribute("jasen");
+        if (!(poistaja.annaTaso().onModeraattori()
+                && poistaja.annaTaso().vahintaanSamaKuin(kirjoittaja.annaTaso()))
+                && !poistaja.equals(kirjoittaja)) {
             // Muiden viestejä voivat poistaa vain operaattorit.
             Uudelleenohjaaja.siirra(req, resp, "/jsp/virhesivu.jsp");
             return;
@@ -326,8 +328,9 @@ public final class MuokkausServlet extends HttpServlet {
                     + viestinTunnus);
             return;
         }
+        kirjoittaja.vahennaViesteja();
         viesti.asetaPoistettu(new Timestamp(System.currentTimeMillis()));
-        if (TietokantaDAO.vie(viesti)) {
+        if (TietokantaDAO.vie(kirjoittaja, viesti)) {
             Uudelleenohjaaja.uudelleenohjaa(req, resp, "ketju?tunnus="
                     + ketjunTunnus + "&sivu=1");
         } else {

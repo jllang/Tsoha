@@ -4,8 +4,8 @@
 <%@tag import="mallit.java.Kayttajataso"%>
 <%@tag description="Sivupohja dynaamisella sisällöllä." pageEncoding="UTF-8"
        trimDirectiveWhitespaces="true" %>
-<%@attribute name="otsikko" %>
-<%@attribute name="fooruminNimi" %>
+<%@attribute name="otsikko" required="true"%>
+<%@attribute name="fooruminNimi" required="true"%>
 <!DOCTYPE html>
 <html>
     <!-- Tämä lähdekoodi on suunniteltu katseltavaksi 80 merkin rivin leveydellä

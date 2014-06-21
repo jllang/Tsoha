@@ -71,7 +71,16 @@ public enum Kayttajataso {
         return vertailuluku >= 2;
     }
 
-    public boolean samaTaiKorkeampiKuin(final Kayttajataso verrattava) {
+    /**
+     * Instanssimetodi, joka toimii käytännössä samoin kuin staattinen metodi
+     * <tt>vahintaan</tt> (missä käyttäjätason a tilalle on vaihdettu
+     * <em>tämä</em> olio).
+     *
+     * @param verrattava Verrattava käyttäjätaso.
+     * @return           Päteekö stk(this, verrattava).
+     * @see Kayttajataso#vahintaan(mallit.java.Kayttajataso, mallit.java.Kayttajataso)
+     */
+    public boolean vahintaanSamaKuin(final Kayttajataso verrattava) {
         return vertailuluku >= verrattava.vertailuluku;
     }
 
@@ -84,6 +93,8 @@ public enum Kayttajataso {
      * @param a Ensimmäinen verrattava käyttäjätaso.
      * @param b Toinen verrattava käyttäjätaso.
      * @return  Onko pari (a,b) relaatiossa "stk".
+     * @deprecated Kannattaa käyttää mieluummin metodia vahintaanSamaKuin.
+     * @see Kayttajataso#vahintaanSamaKuin(mallit.java.Kayttajataso)
      */
     public static boolean vahintaan(final Kayttajataso a, final Kayttajataso b) {
         // Tästä voisi ehkä tehdä myös instanssimetodin...

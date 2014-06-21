@@ -355,4 +355,8 @@ public final class Jasen extends Yksilotyyppi {
         viesteja++;
     }
 
+    public void vahennaViesteja() {
+        viesteja--;
+    }
+
 }

@@ -11,11 +11,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.print.attribute.standard.MediaSize;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import kontrollerit.tyokalut.Otsikoija;
 import kontrollerit.tyokalut.PasswordHash;
 import kontrollerit.tyokalut.Uudelleenohjaaja;
 import mallit.java.Jasen;
@@ -64,6 +66,7 @@ public final class RekisterointiServlet extends HttpServlet {
         resp.setContentType("text/html;charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
         req.setCharacterEncoding("UTF-8");
+        Otsikoija.asetaOtsikko(req, "Rekisteröityminen");
         if (req.getSession().getAttribute("jasen") != null) {
             // Jo rekisteröityneet eivät saa rekisteröidä uutta tunnusta
             // (ainakaan jos ovat jo kirjautuneet sisään).

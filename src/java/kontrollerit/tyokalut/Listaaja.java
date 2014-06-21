@@ -28,6 +28,11 @@ public final class Listaaja {
         KETJUOTSIKOT        = new String[]{"Aihe", "Aloittaja", "Aktiivinen"};
     }
 
+    public static List<ListaAlkio> tyhjaLista() {
+        // Tämä metodi on testausta varten
+        return TYHJA_HAKUTULOS;
+    }
+
     public static List<ListaAlkio> listaaAlueet() {
         return tarkastaLista(haeAlueet());
     }
@@ -41,14 +46,18 @@ public final class Listaaja {
         return tarkastaLista(haeTuoreet());
     }
 
-    private static List<ListaAlkio> tarkastaLista(final List<ListaAlkio> alueet) {
-        if (alueet == null) {
+//    public static List<ListaAlkio> listaaPorttikiellot() {
+//        return tarkastaLista(haePorttikiellot());
+//    }
+
+    private static List<ListaAlkio> tarkastaLista(final List<ListaAlkio> lista) {
+        if (lista == null) {
             return VIRHEELLINEN_HAKU;
         }
-        if (alueet.isEmpty()) {
+        if (lista.isEmpty()) {
             return TYHJA_HAKUTULOS;
         }
-        return alueet;
+        return lista;
     }
 
     private static List<ListaAlkio> haeTuoreet() {
@@ -109,4 +118,8 @@ public final class Listaaja {
         }
         return lista;
     }
+
+//    private static List<ListaAlkio> haePorttikiellot() {
+//
+//    }
 }

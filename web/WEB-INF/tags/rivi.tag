@@ -7,8 +7,8 @@
 <%@tag description="Listauksen rivi dynaamisella sisällöllä."
        pageEncoding="UTF-8" trimDirectiveWhitespaces="true" %>
 <%@tag import="kontrollerit.tyypit.ListaAlkio"%>
-<%@attribute name="lisakenttia" type="Integer"%>
-<%@attribute name="alkio" type="ListaAlkio"%>
+<%@attribute name="lisakenttia" type="Integer" required="true"%>
+<%@attribute name="alkio" type="ListaAlkio" required="true"%>
 <%
     out.println("<tr class=\"" + alkio.parillisuus + "\">");
     out.print("                        <td class=\"peruskentta\">");

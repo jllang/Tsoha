@@ -10,5 +10,6 @@
 <t:kehys otsikko="${otsikko}" fooruminNimi="Esimerkkifoorumi">
     <t:listaus listanNimi="${listanNimi}" listanKuvaus="${listanKuvaus}"
                lista="${ketjulista}" lisakenttia="2"
-               otsikot="${ketjulistanOtsikot}" sivu="${sivu}" />
+               otsikot="${ketjulistanOtsikot}" sivu="${sivu}" hakupalkki="false"
+               />
 </t:kehys>
