@@ -45,6 +45,7 @@ public class PasswordHash
     public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
     // The following constants may be changed without breaking existing hashes.
+    // (Alkuperäiset arvot: 24, 24, 1000:)
     public static final int SALT_BYTE_SIZE = 64;
     public static final int HASH_BYTE_SIZE = 64;
     public static final int PBKDF2_ITERATIONS = 100;

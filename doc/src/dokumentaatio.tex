@@ -1,62 +1,73 @@
-\documentclass[11pt]{article}
+ \documentclass[11pt]{article}
 \usepackage[finnish]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{epstopdf}
 \usepackage{tikz}
+\usepackage[nottoc]{tocbibind}
 \definecolor{sininen}{HTML}{CCE6FF}
 \definecolor{vihrea}{HTML}{CCFFCC}
 \definecolor{keltainen}{HTML}{FFEFCC}
 \definecolor{punainen}{HTML}{FFC0CB}
-\definecolor{valkoinen}{HTML}{FFFFFF}
-\definecolor{harmaa1}{rgb}{0.9, 0.9, 0.9}
-\definecolor{harmaa2}{rgb}{0.8, 0.8, 0.8}
-\definecolor{harmaa3}{rgb}{0.7, 0.7, 0.7}
+\definecolor{purppura}{rgb}{0.90, 0.80, 1.00}
+\definecolor{turkoosi}{rgb}{0.80, 1.00, 0.90}
+\definecolor{limetti}{rgb}{0.90, 1.00, 0.80}
+\definecolor{persikka}{rgb}{1.00, 0.90, 0.80}
 \renewcommand*{\familydefault}{\sfdefault}
 \title{\textbf{Keskustelufoorumi}\\ \small{dokumentaatio}}
-\author{John Lång}
-\date{15.6.2014}
+\author{John Lång\\ \small{jllang@cs.helsinki.fi}}
+\date{22.6.2014}
 \begin{document}
 
+\pagestyle{empty}
 \maketitle
-
 \thispagestyle{empty}
-%Tehty \LaTeX:lla.
 
 \newpage
-%Pystyyköhän tälle jotenkin antamaan oman suomenkielisen otsikon?
 \tableofcontents
-\thispagestyle{empty}
 
 \newpage
+\thispagestyle{plain}
 
 \section{Johdanto}
 	Tämän projektin tarkoituksena on toteuttaa perinteinen web-pohjainen keskus-telufoorumi. Ohjelmiston
-	avulla internetin käyttäjät voivat perustaa omia (yleen-sä tiettyyn aihepiiriin keskittyviä) yhteisöjään
-	joihin jokainen rekisteröity jäsen voi tuottaa omaa sisältöään (yhteisön sääntöjen mukaisesti). Lisäksi
-	projektin tavoitteena on luonnollisesti tarjota mahdollisimman tehokkaat ja käyttäjäystä-välliset työkalut 
+	avulla internetin käyttäjät voivat perustaa omia (yleen-sä tiettyyn aihepiiriin keskittyviä) yhteisöjään,
+	joihin jokainen rekisteröity jäsen voi tuottaa omaa, ensisijaisesti tekstuaalista, sisältöään. Lisäksi
+	projektin tavoitteena on luonnollisesti tarjota mahdollisimman tehokkaat ja käyttäjäystävälliset työkalut
 	foorumin ylläpidosta sekä moderoinnista vastaaville yhteisön jäsenille, jotta he voisivat suorittaa
-	tehtäväänsä	tarkoituksenmukaisesti.
+	tehtäväänsä tarkoituksenmukaisesti.
 		
-	Aion toteuttaa projektin käyttämällä java-ohjelmointikieltä Netbeans IDE:llä sekä (Tietojenkäsittelytieteen laitoksen
-	palvelimille asennettuja) PostgreSQL-tietokantaa ja Apache Tomcat -http-palvelinta. Loppukäyttäjälle
-	näkyvän sivuston ulkoasun aion toteuttaa HTML 5- sekä mahdollisesti CSS-kielten avulla. Tavoitteenani
-	on myös salata mahdollisimman suuri osa foorumin tietoliikenteestä HTTPS-protokollan avulla.
+	Aion toteuttaa projektin käyttämällä Java-ohjelmointikieltä Netbeans IDE:llä sekä  PostgreSQL-tietokantaa 
+	ja Apache Tomcat -http-palvelinta. Loppukäyttä-jälle näkyvän sivuston ulkoasun aion toteuttaa HTML 5- sekä
+	mahdollisesti CSS-kielten avulla. HTML-koodin generoimiseen käytän JSP-, Unified EL-, ja JSTL- tekniikoita.
+	Versionhallintaan käytän Git:iä sekä GitHub-palvelua.
+	%Tavoitteenani on myös salata mahdollisimman suuri osa foorumin tietoliikenteestä HTTPS-protokollan avulla.
+	%Foorumin yleiset asetukset tallennetaan XML-tiedostoihin.
 	
 	Itse tämän dokumentin laatimisessa olen käyttänyt hyväkseni avoimen lähde-koodin ohjelmistoja.
-	Gummi:lla olen tehnyt itse pdf-tiedoston, Dialla (UML-)\\ kaaviot, LibreOffice Calc:lla käyttötapausmallin
-	taulukot, sekä Inkscapella muuttanut nämä kuvat eps-formaattiin pdf-tiedostoon liittämistä varten.
+	Gummi:lla olen tehnyt itse PDF-tiedoston (käyttäen tekstin latomiseen maineikasta \LaTeX-jäjrestelmää),
+	Dialla kaaviot, LibreOffice Calc:lla käyttötapausmallin sekä tietokohteiden taulukot, sekä Inkscapella
+	muuttanut nämä kuvat EPS-formaattiin PDF-tiedostoon liittämistä varten. Lisäksi eräiden kuvien käsittelyssä
+	olen käyttänyt GIMP-ohjelmaa.
 	
 	Pyrkimyksenäni on pitää järjestelmän vaatima asennustyö minimissä enkä siksi aio käyttää muita kun kielten
-	standardikirjastoja sekä mainitsemiani palvelin-ohjelmistoja. Lisäksi aion tehdä ohjelmistostani mahdollisimman näkymättömän loppukäyttäjälle
-	siten, ettei foorumin käyttäminen edellytä mitään selainliitän-näisiä tai javascriptin käyttöä. Luultavasti
-	joudun kuitenkin (valitettavasti) käyt-tämään evästeitä esimerkiksi käyttäjäkohtaisten istunto- ja
-	asetustietojen tallentamiseen.
+	standardikirjastoja sekä mainitsemiani palve-linohjelmistoja. Poikkeuksia äskeiseen olen tehnyt 
+	kryptografisen tiivistefunktion osalta, jota käytän salasanojen suojaamiseen, sekä CSS-väriliukujen osal-ta.
+	Tiivisteen laskemista en ole keksinyt itse, vaan käytän siihen \emph{PBKDF2}-nimistä menetelmää \cite{a}.
+	Värilukujen tuottamiseen puolestaan olen käyttänyt internetissä olevaa generaattoria \cite{b}.	Lisäksi
+	aion tehdä ohjelmistostani	mahdollisimman näkymättömän loppukäyttäjälle siten, ettei foorumin käyttäminen
+	edellytä mitään selainliitännäisiä tai Javascriptin käyttöä. Luultavasti joudun kuitenkin (valitettavasti) 
+	käyttämään evästeitä esimerkiksi käyttäjäkohtaisten istunto- ja	asetustietojen tallentamiseen.
 	
 	Olen valinnut projektilleni MIT-lisenssin, joka löytyy juurihakemiston tiedostosta LICENCE.
 	% Tämän voisi varmaan mainita myös README.md:ssä
+	
+%	Haluan vielä esittää pahoitteluni kirjainten huonosta ladonnasta LibreOfficella tehdyissä taulukoissa.
+%	(Jostain syystä kirjaimet eivät mene PDF:ksi muuntaessa oikein paikoileen, toisin kuin tulostaessa.)
+%	Myös kaavioeditori näyttää hieman bugittaneen ER-kaavion parin viivan kanssa.
 \newpage
+\thispagestyle{plain}
 
 \section{Yleiskuva}
 	\subsection{Keskustelufoorumi}
@@ -91,6 +102,7 @@
 		\end{figure}
 	
 	\newpage
+	\thispagestyle{plain}
 	\subsection{Rakenne ja toiminnot}
 		Foorumin toiminnallisuuden ytimessä ovat käyttäjien tuottamaa sisältöä säilövät
 		\emph{ketjut}\footnote{Käytän ketjusta myös synonyymiä \emph{viestiketju}.}, jotka
@@ -105,10 +117,10 @@
 		\begin{figure}[H]
 			\centering
 			\begin{tikzpicture}
-				\draw[fill=harmaa3] (0,1.5) circle(3.25);
-				\draw[fill=harmaa2] (0,1) circle(2.5);
-				\draw[fill=harmaa1] (0,0.5) circle(1.75);
-				\draw[fill=valkoinen] circle(1);
+				\draw[fill=purppura] (0,1.5) circle(3.25);
+				\draw[fill=turkoosi] (0,1) circle(2.5);
+				\draw[fill=limetti] (0,0.5) circle(1.75);
+				\draw[fill=persikka] circle(1);
 				\node at (0,0) {viesti};
 				\node at (0,1.5) {ketju};
 				\node at (0,2.75) {keskustelualue};
@@ -129,6 +141,9 @@
 		ominaisuuksia, kuten esimerkiksi ketjun määrittäminen \emph{tiedotteeksi} (joka saisi ketjun näkymään
 		keskustelualueen listauksessa ennen tavallisia ketjuja).}
 		Näistä toiminnoista käytän nimitystä \emph{moderointi}.
+		\newpage
+		\thispagestyle{plain}
+		\noindent
 		Moderaattorien toimenkuvana on pitää huolta siitä että ketjujen ja viestien sisäl-tö vastaa foorumin
 		tarkoitusta.\footnote{Foorumin tarkoitutksesta päättää ylläpitäjä ja siten asia on projektini
 		aihealueen ulkopuolella.}
@@ -148,23 +163,22 @@
 			\caption{Käyttötapauskaavio}
 		\end{figure}
 	
-		Luettelen seuraavaksi maineikasta Alistair Cockburnin käyttötapausmallia\footnote{
-		[Linkki tulossa...]}
+		Luettelen sivuilla 9-17 maineikasta Alistair Cockburnin käyttötapausmallia \cite{c}
 		vapaasti mukaillen ohjelmistoni tärkeimmät käyttötapaukset.
 	
-		Seuraavat yhdeksän sivua sisältävät siis projektin käyttötapausmallit tauluk-komuotoisessa esityksessä.
-	
+		\newpage
+		\thispagestyle{plain}
+		\noindent
 		Selkeyden vuoksi olen käyttänyt taulukoissa samaa värikoodauta kuin käyttö-tapauskaavioissa erottamaan
 		eri käyttäjätasojen käyttötapaukset. Olen myös merkinnyt tähdellä (*) ne käyttötapausten vaiheet,
 		jotka ovat valinnaisia. Valinnaisen vaiheen voi jättää kokonaan tekemättä. Jos valinnainen vaihe
 		sisältää syötteen antamista, niin käyttäjä voi antaa tyhjän syötteen. Jos valinnainen vaihe ohitetaan,
 		ei siltä osin muuteta tietokannassa olemassaolevia tietoja. (Toi-saalta tyhjä syöte tyhjentää jonkin
 		kentän arvon sitä vastaavassa tietokannan monikon attribuutissa ja merkitsee siten eri asiaa kuin
-		vaiheen ohittaminen).\footnote{Lisäksi käyttötapauksessa 3 on syytä huomata, että käyttäjätunnuksen
-		kirjautumisnimi määräytyy käyttäjätunnusta rekisteröitäessä eikä sitä voi jälkikäteen vaihtaa.}
+		vaiheen ohittaminen).\footnote{Lisähuomioina mainittakoon, että käyttötapaus 2 on suunnittelun
+		myöhemmässä vaiheessa siirretty vierailijalta jäsenelle.}
 	
 		\newpage
-		\pagestyle{empty}
 		\includegraphics[trim = 27mm 0mm 0mm 25mm]{kayttotapausmalli-sivu-1.eps}\\
 		\includegraphics[trim = 21mm 0mm 0mm 25mm]{kayttotapausmalli-sivu-2.eps}\\
 		\includegraphics[trim = 21mm 0mm 0mm 25mm]{kayttotapausmalli-sivu-3.eps}\\
@@ -185,9 +199,10 @@
 \section{Tietosisältö}
 	\subsection{Tietovaatimukset}
 		Edellisessä kappaleessa esittämäni foorumin yleiskuvan perusteella olen päätynyt siihen tulokseen,
-		että järjestelmässä on neljä varsinaista yksilötyyppiä. Yksilötyy-pit ovat \emph{jäsen, viesti, ketju}
-		ja \emph{keskustelualue}. Vierailijoille ei tarvita mitään tauluja tietokannassa sillä nämä eivät
-		voi tuottaa sisältöä foorumille (vaikka voivatkin esimerkiksi lukea viestitauluja).		
+		että järjestelmässä on neljä tietokohdetta tai \emph{yksilötyyppiä}. Yksilötyypit ovat
+		\emph{jäsen, viesti, ketju} ja \emph{keskustelualue}. Vierailijoille ei tarvita mitään tauluja
+		tietokannassa sillä nämä eivät voi tuottaa sisältöä foorumille (vaikka voivatkin esimerkiksi lukea
+		rajoitetusti joitakin tauluja).		
 		
 	\subsection{Käsitekaavio} Alla on käsitekaavio keskeisimmistä tietokohteista:
 		\begin{figure}[H]		
@@ -210,18 +225,24 @@
 \newpage
 \thispagestyle{plain}		
 	\section{Relaatiotietokantakaaviot}
-		\subsection{ER-kaavio} Seuraavalla sivulla on tietokannan riippuvuuksia korkealla tasolla kuvaava
-		ER-kaavio. Olen esittänyt siinä kohteiden tyypit väreillä, mikä ilmenee kuvassa ole-vasta selityksestä.
-		Lisäksi selvennettäköön, että olen tilan säästämiseksi niputtanut osan samankaltaisista attribuuteista
-		yhteen moniarvoisiksi attribuuteiksi sekä viitannut porttikiellon asettamiseen potkimisena. Kaikki
-		järjestelmän todelliset tietokantataulut ovat vähintään kolmannessa normaalimuodossa, joten moniarvoisia
-		attribuutteja ei tietokannassani esiinny.
+		\subsection{ER-kaavio}
+			Seuraavalla sivulla on tietokannan riippuvuuksia korkealla tasolla kuvaava ER-kaavio. Olen
+			esittänyt siinä kohteiden tyypit väreillä, mikä ilmenee kuvassa ole-vasta selityksestä. Lisäksi
+			selvennettäköön, että olen tilan säästämiseksi niputtanut osan samankaltaisista attribuuteista 
+			yhteen moniarvoisiksi attribuuteiksi (esimerkiksi salasana koostuu tiivisteestä ja suolasta,) sekä
+			viitannut porttikiellon asettamiseen potkimisena. Kaikki järjestelmän todelliset tietokantataulut
+			ovat vähintään kolmannessa normaalimuodossa, joten moniarvoisia attribuutteja ei tietokannassani
+			esiinny.\footnote{Jostain syystä kaavioeditori on tuottanut \emph{Keskustelualueen}
+			attribuuteille ylimääräisiä viivoja. Luultavasti kyseessä on bugi, joten pyydän anteeksi tätä
+			esitysteknistä seikkaa (kuten myös kaamean näköistä kirjainten ladontaa joissakin taulukoissa).}
 		
-		\subsection{UML-kaavio} Olen myös laatinut tarkemman kaavion, josta ilmenee kaikki varsinaiseen
-		tie-tokantaan luotavat taulut attribuutteineen ja avaimineen. UML-kaavio on sivulla 21. Olen merkinnyt
-		ensisijaiset ja vierasavaimet stereotyypein $<<$PK$>>$ ja $<<$FK$>>$. Lisäksi olen värittänyt
-		kaavioon varsinaisia yksilötyyppejä vastaavat taulut sinisellä, heikkoja yksilötyyppejä vastaavat
-		taulut punaisella sekä muut taulut vihreällä taustavärillä.
+		\subsection{UML-kaavio}
+			Olen myös laatinut tarkemman UML-tyylisen tietokantakaavion, josta ilmenee kaikki
+			varsinaiseen tietokantaan luotavat taulut attribuutteineen ja avaimineen. Mainittu kaavio löytyy
+			sivulta 21. Olen merkinnyt ensisijaiset ja vierasavaimet stereotyypein \flqq PK\frqq \ ja \flqq 
+			FK\frqq. Lisäksi olen värittänyt taulut vaaleilla mustikan, vadelman ja banaanin väreillä siten,
+			että värit korostavat lausutussa järjestyksessä varsinaisia ja epäitsenäisiä yksilötyyppejä sekä
+			aputauluja.
 		
 		\newpage
 		\thispagestyle{plain}
@@ -245,12 +266,12 @@
 			Projektin tärkein sisältö sijaitsee juurihakemiston alikansioissa \emph{doc}, \emph{src} ja
 			\emph{web}.
 	
-		\subsection{/doc}
-			Tämä hakemisto sisältää projektin dokumentaation, kuten muunmuassa tämän asiakirjan. Hakemistossa
-			\emph{/doc/src} sijaitsee dokumentaation latex-lähdekoodi sekä kaaviot ja kuvat.
+		\subsection{Dokumentaatio}
+			Hakemisto \emph{/doc} sisältää projektin dokumentaation, kuten muunmuassa tämän asiakirjan.
+			\emph{/doc/src} puolestaan sisältää dokumentaation latex-lähdekoodin sekä kaaviot ja kuvat.
 			
-		\subsection{/src/java}
-			Tämä hakemisto sisältää projektin MVC-mallin mukaiset kontrollerit ja mallit omissa
+		\subsection{Kontrollerit}
+			Hakemisto \emph{/src/java} sisältää projektin MVC-mallin mukaiset kontrollerit ja mallit omissa
 			alihakemistoissaan. Lisäksi hakemisto sisältää foorumin käyttöönoton kannalta tarpeellisen
 			konfiguraatiotiedoston omassa alihakemistossaan.
 			
@@ -280,8 +301,8 @@
 			
 		\newpage
 		\thispagestyle{plain}
-		\subsection{/web}
-			Hakemisto sisältää MVC-mallin mukaiset näkymätiedostot.
+		\subsection{Näkymät}
+			Hakemisto \emph{/web} sisältää MVC-mallin mukaiset näkymätiedostot.
 			
 			\emph{/web/META-INF} on foorumin käyttöönoton kannalta tärkeä hakemisto, jossa sijaitseva 
 			tiedosto \emph{content.xml} sisältää tietokantayhteyden muodostamiseen tarvittavat tiedot.
@@ -322,101 +343,206 @@
 			Sanotusta huolimatta tahdon huomauttaa että jos projektin 
 			kääntää NetBeans IDE:llä, niin .war-arkisto ilmestyy kansioon /dist. Tämä arkisto voidaan
 			sijoittaa \emph{Tomcat}-palvelimen \emph{webapps}-hakemistoon.
+			
+		\newpage
+		\thispagestyle{plain}
+		\subsection{Istunto}
+			Käyttäjät, joilla on käyttäjätunnus järjestelmässä, voivat kirjautua sisään erillisen lomakkeen
+			kautta. Aktiivisten istuntojen hallinnoimisesta ja pääsyoikeuksien valvonnasta vastaa Java-luokka
+			\emph{Valvoja}. Kirjautumisen yhteydessä käyttäjän käyttäjätunnukseen liitetään istunto lisäämällä
+			näiden viitteet hajautustauluun. Vastaavasti uloskirjautumisen tai muun istunnon sulkemisen
+			yhteydessä tämä avain-arvopari poistetaan hajautustaulusta. Valvoja myös tarkastaa varttitunnin
+			välein onko järjestelmässä avoimia istuntoja, joissa edellisestä sivunlatauksesta on kulunut
+			vähintään tunti. Kaikki tällaiset istunnot merkitään vanhentuneiksi ja poistetaan.
+			
+			Hajautustauluun perustuva ratkaisu tarjoaa muunmuassa seuraavat mahdollisuudet: Ensinnäkin
+			järjestelmään parhaillaan sisään kirjautuneet käyttäjätun-nukset voidaan helposti listata ja laskea.
+			Toisaalta myös hajautustaulun luonteesta seuraa, ettei samalla käyttäjätunnuksella voi olla useata
+			samanaikaista istuntoa aktiivisena.
+			
+			Toisaalta on syytä pitää mielessä, ettei tämä istuntoihin liittyvä kirjanpito tapahdu tietokannan
+			tasolla. Periaatteessa on mahdollista, että jos jokin taho saa tietoonsa tietokantayhteyden 
+			muodostamiseen tarvittavat tiedot, voi tämä pystyttää toisen ohjelmistoani käyttävän
+			foorumikäyttöliitymän ja hyödyntää tätä erilaisiin vilpillisiin tarkoituksiin. Tämän vuoksi
+			on syytä pitää mielessä, ettei foorumin istuntojärjestelmä korvaa yhteyden salausta ja sertifikaatin
+			käyttöä (eikä etenkään tietokannan tietojen salassapitoa).
 	
 \newpage
 \thispagestyle{plain}
 	\section{Käyttöliittymä}
-		\subsection{Käyttöliittymäkaavio} Seuraavalla sivulla näkyvä kaavio antaa yleiskuvan käyttöliittymän
-		komponenteista ja niiden välisistä suhteista.\footnote{Minun on pakko myöntää, että kaavio on hieman
-		ikävän näköinen kun se on suunnattu poikittain, mutta kaikkien näkymien välisten yhteyksin esittäminen
-		olisi ollut mahdotonta muulla tavoin. (Käytin yli tunnin aikaa pelkästään komponenttien sijoitteluun 
-		välttääkseni kaavion nuolten menemisen päällekkäin.)} (Päivitän komponenttien lopulliset tiedostonimet
-		näkyviin myöhemmin.) Esityksen selkeyttämiseksi olen värikoodannut komponentit niiden käyttöön
-		tarvittavaa pienintä käyttäjätasoa vastaavalla väril-lä aiempaa käytäntöäni vastaavasti. (Toisin sanoen
-		kaikkien käytettävissä olevat komponentit ovat sinisiä, jäsenten käytettävissä olevat vihreitä,
-		moderaattoreiden keltaisia sekä ylläpitäjän punaisia.) Lisäksi on syytä huomata että joihinkin
-		komponentteihin liittyy	lisätoiminnallisuutta korkeammilla käyttäjätasoilla. Esi-merkiksi komponentti
-		"Käyttäjätunnus" tarjoaa ylläpitäjälle palvelun, joka mahdollistaa kohteena olevan käyttäjätunnuksen
-		käyttäjätason muuttamisen.
+		\subsection{Käyttöliittymäkaavio}
+			Seuraavalla sivulla näkyvä kaavio antaa yleiskuvan käyttöliittymän komponenteista ja niiden
+			välisistä suhteista. Esityksen selkeyttämiseksi olen värikoodannut komponentit niiden käyttöön
+			tarvittavaa pienintä käyttäjätasoa vastaavalla väril-lä aiempaa käytäntöäni vastaavasti.
+			(Toisin sanoen kaikkien käytettävissä olevat komponentit ovat sinisiä, jäsenten käytettävissä
+			olevat vihreitä, moderaattoreiden keltaisia sekä ylläpitäjän punaisia.) Lisäksi on syytä pitää
+			mielessä että mo-niin komponentteihin liittyy lisätoiminnallisuutta korkeammilla käyttäjätasoilla. 
+			Esimerkiksi komponentti "Käyttäjätunnus" tarjoaa ylläpitäjälle palvelun, joka mahdollistaa kohteena 
+			olevan käyttäjätunnuksen käyttäjätason muuttamisen.
 		
-		\subsection{Komponentit} Luettelen seuraavaksi ne kaaviossa näkyvät komponentit (tai ehkä pikemminkin
-		toiminnot), jotka olen tähän mennessä ehtinyt toteuttaa.
+		\subsection{Komponentit}
+			Olen merkinnyt osaan komponenteista tiedostonimen. Nimetyssä tiedostossa on enemmän tai vähemmän
+			toteutettu kyseisen komponentin toiminnallisuus.
 		
-		\emph{Navigointi} on foorumin keskeisimpiä ominaisuuksia ja siihen liittyvät toiminnot ovat läsnä
-		jokaisella sivulla. Tämän vuoksi navigaatioon liittyvä koodi sijaitsee tagitiedostossa nimeltä
-		\emph{kehys.tag} ja se sisällytetään jokaiseen näkymätiedos-toon.
+			Lienee paikallaan myös hieman selventää itse komponenttien nimien merkitystä. 
+			\emph{Navigointi}-komponentti muodostaa sivun kehyksen ja kaikki muut komponentit liimataan siihen
+			näkymätiedostoissa. Sen avulla käyttäjä voi helposti siirtyä käyttämään tärkeimpiä toimintoja.
+			\emph{Listaus} puolestaan hyödynnetään muiden komponenttien osana kirjaston tapaan. Ketjujen ja
+			viestien käsittelyyn liittyvät toimenpiteet puolestaan on koottu komponenttiin \emph{Muokkaus}.
+			Nämä yksilötyypit liittyvät niin läheisesti toisiinsa, että olen katsonut parhaaksi käsitellä niitä
+			saman komponentin eri palvelujen kautta. \emph{Profiili} listaa joitakin rekisteröityyn
+			käyttäjätunnukseen liittyviä tietoja ja sen kautta myös näiden tietojen muokkaus voitaisiin
+			toteuttaa. Salasanan ja sähköpostiosoitteen vaihto sekä käyttäjätun-nuksen sulkeminen ovat niin
+			merkittäviä toimenpiteitä, että niiden toteutus olisi tarkoituksenmukaisinta siirtää erilliseen
+			komponenttiin \emph{Käyttäjätunnus}. Näiden, sekä ylläpitotoimenpiteiden, valtuuttaminen vaatii
+			salasanan uudelleen syöttä-mistä, mistä huolehtii \emph{Vahvistus}. Sen vastuulla on myös pyytää
+			heikompi tavallinen vahvistus eräille toimenpiteille.
 		
-		\emph{Etusivusta} vastaa kontrolleri \emph{IndexServlet.java}, joka listaa foorumin keskuste-lualueet,
-		viimeisimmät viestit sekä joitain tilastotietoja.
-		
-		\emph{Listaus} on toiminto, joka on toteutettu työkaluluokassa \emph{Listaaja.java}. Sen tehtävänä
-		on tulostaa taulukkomuodossa tietokannan tilaa kuvastavia näkymiä.
-		
-		\emph{Kirjautuminen} on toteutettu luokassa \emph{IstuntoServlet.java} ja se kommunikoi mm.
-		työkaluluokan \emph{Valvoja} kanssa.
-		
-		\emph{Viestien muokkaus} on kontrollerin \emph{ViestiServlet.java} vastuulla. Se kuuntelee kahta eri
-		URL-kuviota (engl. URL pattern) ja ohjaa selaimen oikealle näkymäsi-vulle.
-		
-		\emph{Ketjujen lukeminen} suoritetaan kontrollerin \emph{KetjuServlet.java} kautta ja jäsen-ten
-		\emph{profiilin} esittäminen kuuluu kontrollerille \emph{ProfiiliServlet.java}.
+			Tarkempia tietoja toteutettujen komponenttien tehtävistä ja toiminnoista löytyy Javadoc:sta.
 		
 		\newpage
+		\thispagestyle{plain}
 		\begin{figure}[H]		
-			\includegraphics[trim = 0mm 0mm 23mm -7mm, scale = 1.5, angle = 90]{kayttoliittymakaavio.eps}
+			\includegraphics[trim = 12mm 0mm 0mm 0mm, scale = 1.5]{kayttoliittymakaavio.eps}
 			\caption{Käyttöliittymäkaavio}
 		\end{figure}
 		
 \newpage
 \thispagestyle{plain}
 	\section{Asentaminen}
-		\subsection{Esivalmistelut} Oletan, että ylläpitäjä on tätä ohjetta lukiessaan jo asentanut 
-		\emph{Apache Tomcat 7.0.53}\footnote{versio 7.0.28 ei ole yhteensopiva.} (tai omalla
-		vastuullaan uudemman) web-palvelimen sekä \emph{PostgreSQL}\\ -tietokannan hallintaohjelmiston
-		sekä luonut kaikki tarvittavat käyttäjätunnukset.
+		\subsection{Esivalmistelut}
+			Oletan, että ylläpitäjä on tätä ohjetta lukiessaan jo asentanut \emph{Apache Tomcat 7.0.53}
+			\footnote{versio 7.0.28 ei ole yhteensopiva.} (tai omalla vastuullaan uudemman) web-palvelimen
+			sekä \emph{PostgreSQL}\\ -tietokannan hallintaohjelmiston sekä luonut kaikki tarvittavat
+			käyttäjätunnukset.
 		
-		\subsection{Varsinaiset toimenpiteet} Ensiksi projektikansio tai war-arkisto tulee sijoittaa
-		palvelimen \emph{webapps}-hakemis-toon. Oletan seuraavaksi, että ylläpitäjä on siirtynyt
-		komentotulkissa projektikansion juureen.
+			Haluan myös painottaa TLS:n tärkeyttä. Vastuullisen ylläpitäjän tulee ehdottomasti huolehtia, että
+			palvelimella on validi sertifikaatti luotetulta myöntäjältä, jotta asiakkaat voivat käyttää foorumia
+			(ainoastaan) HTTPS:n kautta. \emph{Ohjelmistoni ei nimittäin tarjoa minkäänlaista suojaa
+			esimerkiksi salakuuntelua vastaan}, vaan olen olettanut että tuotantokäytössä liikenne asiakkaan ja
+			palvelimen välillä on salattua alemmalla tasolla.
 		
-		Kun hakemistorakenne on luotu, tulee suorittaa tietokantataulut määrittelevä SQL-tiedosto komennolla
-		\emph{psql src/java/mallit/sql/Alustus.sql}.\footnote{Tilanteesta riippuen saattaa olla
-		tarpeellista määrittää esimerkiksi käyttäjä, tietokannan nimi sekä salasana asianmukaisin lipuin,
-		joiden käyttöohjeet löytyvät psql:n manuaalista.}
+		\subsection{Käyttöönotto}
+			Ensiksi projektikansio tai war-arkisto tulee sijoittaa palvelimen \emph{webapps}-hakemis-toon.
+			Oletan seuraavaksi, että ylläpitäjä on siirtynyt komentotulkissa projektikansion juureen.
 		
-		Seuraavaksi tulee tietokantayhteyden muodostamiseen tarvittavat tiedot täyt-tää tiedostoon
-		\emph{web/META-inf/context.xml.dist} ja poistaa sen nimen perästä .dist-pääte. Kyseisessä tiedostossa
-		on mainittu kommentissa mitä tietoja tulee täydentää. 
+			Kun hakemistorakenne on luotu, tulee suorittaa tietokantataulut määrittelevä SQL-tiedosto komennolla
+			\emph{psql src/java/mallit/sql/Alustus.sql}.\footnote{Tilanteesta riippuen saattaa olla
+			tarpeellista määrittää esimerkiksi käyttäjä, tietokannan nimi sekä salasana asianmukaisin lipuin,
+			joiden käyttöohjeet löytyvät psql:n manuaalista.}
 		
-		(Tässä vaiheessa mainittakoon, että koska en kyennyt erinäisten teknisten vaikeuksien vuoksi täysin
-		noudattamaan aikataulua, jäivät käyttäjätunnusten ja keskustelualueiden lisäystoiminnot toteuttamatta.
-		Tällä hetkellä nämä toimenpiteet täytyy tehdä käsin tietokantakyselyillä, mikä on melko teknistä ja 
-		vaatii sovelluksen sisäisen logiikan ja tietokantataulujen rakenteen tuntemista.)
+			Seuraavaksi tulee tietokantayhteyden muodostamiseen tarvittavat tiedot täyt-tää tiedostoon
+			\emph{web/META-inf/context.xml.dist} ja poistaa sen nimen perästä .dist-pääte. Kyseisessä
+			tiedostossa on mainittu kommentissa mitä tietoja tulee täydentää. 
 		
-		Kun kaikki nämä toimenpiteet on onnistuneesti suoritettu, on foorumi valmis käytettäväksi ja sivun
-		voi avata yleisölle.
+			Tässä vaiheessa mainittakoon, että koska en kyennyt erinäisten vastoinkäy-misten vuoksi täysin
+			noudattamaan aikataulua, jäi muunmuassa keskustelualueiden muokkaustoiminnot toteuttamatta.
+			Tällä hetkellä keskustelualueet pitää lisätä käsin tietokantaan SQL-kyselyllä "\texttt{insert into
+			alueet (nimi, kuvaus)\\ values ('\flq nimi\frq', '\flq kuvaus\frq');}", missä \flq nimi\frq
+			\ tulee korvata lisättävän alueen nimellä ja \flq kuvaus\frq \ kuvauksella. Kysely voidaan
+			suorittaa interaktiivisessa komentotulkissa.
+		
+			Kun kaikki nämä toimenpiteet on onnistuneesti suoritettu, on foorumi valmis käytettäväksi ja sivun
+			voi avata yleisölle.
 		
 \newpage
 \thispagestyle{plain}
 	\section{Käyttöohje}
-		\subsection{Esimerkkidata} Foorumin toimintoja pääsee helposti testaamaan suorittamalla (vasta
-		alustetussa tietokannassa) psql-komentotulkilla kansiossa \emph{src/java/mallit/sql} sijaitseva
-		tiedosto \emph{Esimerkkidata.sql}. Kyseisen tiedoston sisältämät \emph{insert}-lauseet lisäävät
-		tietokantaan neljä keskustelualuetta sekä neljä käyttäjätunnusta.
+		\subsection{Esimerkkidata}
+			Foorumin toimintoja pääsee helposti testaamaan suorittamalla (vasta-alustetussa tietokannassa)
+			psql-komentotulkilla kansiossa \emph{src/java/mallit/sql} sijaitseva tiedosto
+			\emph{Esimerkkidata.sql}. Kyseisen tiedoston sisältämät \emph{insert}-lauseet lisäävät
+			tietokantaan neljä keskustelualuetta sekä neljä käyttäjätunnusta.
 		
-		Käyttäjätunnukset ovat \emph{maija} (ylläpitäjä) salasanalla \emph{salasana}, \emph{esmer}
-		(moderaattori) salasanalla \emph{1234}, \emph{mattimeik} salasanalla \emph{abcdef} sekä tRolli
-		(pysyvässä porttikiellossa) salasanalla \emph{lällispöö}.
+			Käyttäjätunnukset ovat \emph{maija} (ylläpitäjä) salasanalla \emph{salasana}, \emph{esmer}
+			(moderaattori) salasanalla \emph{1234}, \emph{mattimeik} salasanalla \emph{abcdef} sekä tRolli
+			(pysyvässä porttikiellossa) salasanalla \emph{lällispöö}.
 		
-		%\subsection{}
+		\subsection{Esimerkkipalvelin}
+			Yllämainitut käyttäjätunnukset toimivat myös esimerkkipalvelimellani, jonka osoi-te on
+			\emph{http://91.158.178.74:8080/tsoha/}.
+			
+		
+		\subsection{Ylläpito}
+			Vaikka foorumin ominaisuuksista onkin tällä hetkellä varmasti yli puolet toteuttamatta, on
+			kaikkein välttämättömin osa niistä toteutettu.
+			
+			Keskustelualueiden ja käyttäjätunnusten muokkaamiseen sen sijaan tarvitaan (onneksi melko
+			yksinkertaisia) SQL-kyselyjä, joita en kuitenkaan tässä ohjeessa käsittele.
+			
+			Joka tapauksessa haluan kuitenkin mainita, että foorumin saa tyhjennettyä viesteistä suorittamalla
+			SQL-tiedoston \emph{ViestienTuhoaminen.sql}. Kaikki tietokantataulut saa poistettua suorittamalla
+			tiedoston \emph{FooruminTuhoaminen.sql}. Nämä löytyvät samasta hakemistosta kuin aiemmin
+			asennusohjeessa mainitsemani Alustus.sql.			
+		
+\newpage
+\thispagestyle{plain}
+
+	\section{Tunnetut bugit, puutteet ja kehitysideat}
+		\subsection{Testauksesta}
+			En ohjelmoinut tällä kurssilla yksikkötestejä, vaan testasin ominaisuuksia jatkuvasti sitä mukaa
+			kun niitä toteutin. Lisäksi sain nauttia runsaasta debuggauksesta NetBeansilla ja Firefoxilla.
+			
+		\subsection{Tunnetut bugit}
+			Vaikka sainkin toteutettua ketjujen poistotoiminnon, en ehtinyt toteuttaa jäsen-ten kirjoittamien
+			viestien lukumäärien päivitystä samassa yhteydessä. Toisin sanoen kokonaisen ketjun poistaminen
+			aiheuttaa sen, että kaikilla siihen osal-listuneilla jäsenillä jää kirjatuksi todellista suurempi
+			viestien määrä. Lisäksi ketjun (tai alueen) poistaminen ei poista heti siihen mahdollisesti
+			etusivulla osoittavaa linkkiä, sillä etusivu päivitetään korkeintaan viiden minuutin välein. En
+			kuitenkaan pidä tätä bugina (vaikka olisi toki mahdollista toteuttaa tällaisia tilanteita varten
+			joku mekanismi etusivun päivityksen pakottamiseksi). Myös etusivun päivitysväliä voisi ehkä
+			tiivistää esimerkiksi minuuttiin.
+			
+		\subsection{Kehitettävää}
+			Puuttuvia ominaisuuksia suorastaan on vaikka millä mitalla, joten en ala niitä listaamaan tässä.
+			Sen sijaan haluan todeta, että johtuen tietokannan rakenteesta, erilaisten uusien ominaisuuksien
+			ja kyselyiden lisääminen on nähdäkseni melko helppo tehtävä. Redundanssia tauluissa ei paljoa
+			esiinny; mieleen tulevat lähinnä jäsenen ja viestin numerot, ketjun muutosaikaleima
+			sekä jäsenen viestien määrä.
 		
 \newpage
 \thispagestyle{plain}
 	\section{Omat kokemukset}
+		Opin tällä kurssilla, että (web-pohjaisen) tietokantasovelluksen tekemisessä\\ ainoa helppo asia itse
+		asiassa on varsinainen tietokannan käyttö, vaikkakin JDBC:n rajapinta oli mielestäni hieman...
+		erikoinen.
 	
-	% MUISTA LÄHTEET!
+		Lisäksi opin, että uusien työkalujen ja tekniikoiden opettelu vie aikansa, mikä on syytä huomioida
+		projektin aikataulutuksessa. Tunsin vasta neljännellä viikolla joten kuten päässeeni kiinni
+		JSP-maailmaan. Luulen tosin, että Tomcat:lla debuggaus on taito, jonka oppimiseksi täytyisi käydä
+		vähintään itse tämän kurssin laajuinen pohjustus. Jatkossa ehkä osaan hieman paremmin olla valitsematta
+		entuudestaan tuntemattomia välineitä ja noudattaa ohjeita kirjaimellisemmin.
+		
+		Huomasin myös, että olio-ohjelmoinnin ja relaatiotietokantojen risteyskoh-dissa esiintyy
+		mielenkiintoista ongelmanasettelua, johon en omassa sovelluksessani keksinyt kovin tyylikästä
+		ratkaisua. Käyttämäni DAO:hin ja tehdasmetodeihin perustuva mallinnustapa nimittäin tuottaa paljon
+		ikävää toisteisuutta mallien koodiin. Olio-relaatio-kuvauksiin olisi mukava hieman perehtyä jatkossa. 
+		
+		Kaiken kaikkiaan koen että kurssi tarjoaa melkoisen määrän pureskeltavaa ja olisin kovin kiinnostunut
+		näkemään oikeasti kuudessa viikossa yhden hengen toteuttaman foorumin. Tämän kurssin kävijät saavat
+		totisesti noppansa ansaita!
+\newpage
+\thispagestyle{plain}
+\listoffigures
 
-%\newpage
-%\section{Relaatiotietokantakaavio}
+\newpage
+\thispagestyle{plain}
+	\begin{thebibliography}{9}
+			
+		\bibitem{a}
+			Defuse Security,
+			\emph{Secure Salted Password Hashing}, 2014. Artikkeli ja alkuperäinen lähdekoodi: 
+			https://crackstation.net/hashing-security.htm
+			
+		\bibitem{b}
+			Alex Sirota,
+			\emph{Ultimate CSS Gradient Generator}, 2014. Web-sivu:\\  
+			http://www.colorzilla.com/gradient-editor/
+	
+		\bibitem{c}
+			Alistair Cockburn,
+			\emph{Basic Use Case Template}, 1998. Ladattu osoitteesta:\\ http://www.cs.helsinki.fi/u/mluukkai/ohmas10/usecase.pdf
+	
+	\end{thebibliography}
 	
 \end{document}

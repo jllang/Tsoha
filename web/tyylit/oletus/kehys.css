@@ -4,6 +4,9 @@
     Author     : John Lång (jllang@cs.helsinki.fi)
 */
 
+/* Käyttämäni liukuvärit on tuotettu Alex Sirotan kehittämällä osoitteesta
+http://www.colorzilla.com/gradient-editor/ löytyvällä generaattorilla. */
+
 body {
     margin:     0px;
     padding:    0px;
@@ -50,6 +53,7 @@ a:visited {
     background: linear-gradient(to bottom, #6649a9 0%,#7a5ec8 53%,#8c71e7 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6649a9', endColorstr='#8c71e7',GradientType=0 ); /* IE6-9 */
     z-index:    1;
+
     text-align: center;
     /*box-shadow: 0px 8px 4px #888888;*/
 }
